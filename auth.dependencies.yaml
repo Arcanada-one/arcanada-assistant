@@ -1,0 +1,32 @@
+# Auth Arcana Mandate § 6 — service declares its identity dependency on Auth Arcana.
+# CI gate: missing/invalid file fails build.
+# Reviewed quarterly via /dr-optimize.
+
+service:
+  name: arcanada-assistant
+  version: 0.1.0
+  repo: https://github.com/Arcanada-one/arcanada-assistant
+  owner: Pavel Valentov <pavel@aether-media.com>
+  domain: assistant.arcanada.one
+
+auth_arcana:
+  min_version: "1.0.0"
+  max_version: null
+  last_validated: "2026-05-03"
+
+# Scopes this service consumes (calls into other services with these scopes attached)
+scopes_consumed: []
+# Filled by ARCA-0007: mc:execute, scrutator:search, scrutator:store, ops:read
+
+# Scopes this service exposes (other services can request these to call us)
+scopes_provided: []
+# Filled by ARCA-0007: assistant:proactive:trigger, assistant:admin
+
+# OpenFGA ReBAC types (filled when this service introduces own resources beyond User)
+rebac_types: []
+
+# Notes
+notes: |
+  Phase 1 (ARCA-0006): scaffold only — JWKS validation infrastructure ready,
+  no actual scope checks yet. Real scope wiring lands в ARCA-0007 (Ops Bot
+  integration) и ARCA-0008 (Knowledge & Memory).
