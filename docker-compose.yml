@@ -1,0 +1,70 @@
+# Local-dev compose for Arcanada Assistant.
+# Production runs via the same Dockerfile, but Postgres+Redis live on arcana-db
+# (Tailscale-only); see Areas/Infrastructure/* and the deploy workflow.
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: assistant_app
+      POSTGRES_PASSWORD: dev_password_change_me
+      POSTGRES_DB: assistant
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U assistant_app -d assistant"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  assistant:
+    build:
+      context: .
+      dockerfile: apps/assistant/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      NODE_ENV: development
+      PORT: 3800
+      LOG_LEVEL: info
+      DATABASE_URL: postgresql://assistant_app:dev_password_change_me@postgres:5432/assistant?schema=public&sslmode=disable
+      REDIS_URL: redis://redis:6379/3
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-changeme}
+      TELEGRAM_WEBHOOK_SECRET: ${TELEGRAM_WEBHOOK_SECRET:-changemechangemechangemechangeme}
+      TELEGRAM_WEBHOOK_PATH: /webhook/telegram
+      AUTH_ARCANA_BASE_URL: https://auth.arcanada.one
+      AUTH_ARCANA_JWKS_URL: https://auth.arcanada.one/.well-known/jwks.json
+      AUTH_ARCANA_JWT_ISSUER: https://auth.arcanada.one
+      AUTH_ARCANA_JWT_AUDIENCE: arcanada-assistant
+      MODEL_CONNECTOR_BASE_URL: http://connector.arcanada.one:3900
+      MODEL_CONNECTOR_DEFAULT_MODEL: anthropic/claude-haiku-4-5
+      SCRUTATOR_BASE_URL: http://arcana-db:8310
+      SCRUTATOR_LTM_NAMESPACE: assistant-ltm-pavel
+      OPSBOT_BASE_URL: https://ops.arcanada.one
+      OPSBOT_API_KEY: ${OPSBOT_API_KEY:-changeme}
+      BRIEFING_TIMEZONE: Europe/Istanbul
+      BRIEFING_MORNING_TIME: "08:00"
+      BRIEFING_EVENING_TIME: "21:00"
+    ports:
+      - "3800:3800"
+
+volumes:
+  postgres-data:

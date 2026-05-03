@@ -1,0 +1,17 @@
+**/node_modules
+**/dist
+**/coverage
+**/.turbo
+**/.next
+.git
+.gitignore
+.github
+.vscode
+.idea
+.editorconfig
+.env
+.env.*
+!.env.example
+*.log
+.DS_Store
+README.md

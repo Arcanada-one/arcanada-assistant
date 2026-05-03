@@ -1,0 +1,24 @@
+// Arcanada Assistant — smoke schema for ARCA-0006 scaffold.
+// Full conversation/message/profile schema lands in ARCA-0008 (Memory).
+// Per CLAUDE.md feedback `prisma7_config_url` — datasource.url is configured via prisma.config.ts,
+// not embedded here.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  // url is configured via prisma.config.ts (Prisma 7+ pattern).
+}
+
+model User {
+  id          String   @id @default(uuid()) @db.Uuid
+  telegramId  BigInt   @unique @map("telegram_id")
+  username    String?  @db.VarChar(64)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("users")
+  @@index([telegramId])
+}
