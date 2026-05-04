@@ -80,8 +80,83 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm audit --prod --audit-level=high
 
-  deploy:
+  smoke:
     needs: [lint, test, audit]
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: assistant_app
+          POSTGRES_PASSWORD: ci_password
+          POSTGRES_DB: assistant
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U assistant_app -d assistant"
+          --health-interval 5s --health-timeout 3s --health-retries 10
+      redis:
+        image: redis:7-alpine
+        ports: ['6379:6379']
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s --health-timeout 3s --health-retries 10
+    env:
+      DATABASE_URL: postgresql://assistant_app:ci_password@localhost:5432/assistant?schema=public&sslmode=disable
+      REDIS_URL: redis://localhost:6379/1
+      PORT: '3800'
+      LOG_LEVEL: info
+      TELEGRAM_BOT_TOKEN: ci-stub-token
+      TELEGRAM_WEBHOOK_SECRET: ci-stub-secretci-stub-secretci-stub-secret
+      TELEGRAM_WEBHOOK_PATH: /webhook/telegram
+      AUTH_ARCANA_BASE_URL: https://auth.arcanada.one
+      AUTH_ARCANA_JWKS_URL: https://auth.arcanada.one/.well-known/jwks.json
+      AUTH_ARCANA_JWT_ISSUER: https://auth.arcanada.one
+      AUTH_ARCANA_JWT_AUDIENCE: arcanada-assistant
+      MODEL_CONNECTOR_BASE_URL: http://stub.invalid:9999
+      MODEL_CONNECTOR_DEFAULT_MODEL: anthropic/claude-haiku-4-5
+      SCRUTATOR_BASE_URL: http://stub.invalid:8310
+      SCRUTATOR_LTM_NAMESPACE: ci-stub-ns
+      OPSBOT_BASE_URL: https://stub.invalid
+      OPSBOT_API_KEY: ci-stub
+      BRIEFING_TIMEZONE: UTC
+      BRIEFING_MORNING_TIME: '08:00'
+      BRIEFING_EVENING_TIME: '21:00'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: cd apps/assistant && pnpm exec prisma generate
+      - run: pnpm --filter @arcanada/core build
+      - run: pnpm --filter assistant build
+      - name: Run prisma migrate deploy
+        run: cd apps/assistant && pnpm exec prisma migrate deploy
+      - name: Boot app + smoke /health
+        run: |
+          cd apps/assistant
+          node dist/main.js > /tmp/assistant.log 2>&1 &
+          APP_PID=$!
+          for i in $(seq 1 30); do
+            if curl -fsS http://localhost:3800/health >/dev/null; then
+              echo "smoke healthy after ${i}s"
+              kill $APP_PID || true
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "smoke failed: /health did not respond within 30s"
+          echo "--- assistant.log (tail 200) ---"
+          tail -200 /tmp/assistant.log || true
+          kill -9 $APP_PID || true
+          exit 1
+
+  deploy:
+    needs: [lint, test, audit, smoke]
     if: github.ref == 'refs/heads/main'
     runs-on: [self-hosted, linux, arcana-prod, docker]
     steps:
@@ -116,7 +191,7 @@ jobs:
           exit 1
 
   notify-on-fail:
-    needs: [lint, test, audit, deploy, verify]
+    needs: [lint, test, audit, smoke, deploy, verify]
     if: failure() && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
