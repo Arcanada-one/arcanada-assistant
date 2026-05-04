@@ -1,12 +1,16 @@
 import { Injectable, type OnModuleDestroy, type OnModuleInit } from '@nestjs/common';
 import prismaPkg from '@prisma/client';
+import adapterPkg from '@prisma/adapter-pg';
 
-// CJS interop: Prisma 7's @prisma/client is a CJS module exporting via
-// module.exports — under NodeNext ESM only the default import works.
+// CJS interop: Prisma 7's @prisma/client and @prisma/adapter-pg are both CJS.
+// Under NodeNext ESM only the default import works.
 const { PrismaClient } = prismaPkg as unknown as {
-  PrismaClient: new (opts?: { datasourceUrl?: string }) => PrismaClient;
+  PrismaClient: new (opts: { adapter: unknown }) => PrismaClient;
 };
 type PrismaClient = InstanceType<typeof prismaPkg.PrismaClient>;
+const { PrismaPg } = adapterPkg as unknown as {
+  PrismaPg: new (opts: { connectionString: string }) => unknown;
+};
 
 export interface ProbeResult {
   ok: boolean;
@@ -19,7 +23,9 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
   readonly client: PrismaClient;
 
   constructor() {
-    this.client = new PrismaClient({ datasourceUrl: process.env.DATABASE_URL });
+    const connectionString = process.env.DATABASE_URL ?? '';
+    const adapter = new PrismaPg({ connectionString });
+    this.client = new PrismaClient({ adapter });
   }
 
   /** Test-only: substitute a mock client. */
