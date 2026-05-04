@@ -3,7 +3,9 @@ import prismaPkg from '@prisma/client';
 
 // CJS interop: Prisma 7's @prisma/client is a CJS module exporting via
 // module.exports — under NodeNext ESM only the default import works.
-const { PrismaClient } = prismaPkg as unknown as { PrismaClient: new () => PrismaClient };
+const { PrismaClient } = prismaPkg as unknown as {
+  PrismaClient: new (opts?: { datasourceUrl?: string }) => PrismaClient;
+};
 type PrismaClient = InstanceType<typeof prismaPkg.PrismaClient>;
 
 export interface ProbeResult {
@@ -17,9 +19,7 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
   readonly client: PrismaClient;
 
   constructor() {
-    this.client = new PrismaClient({
-      datasourceUrl: process.env.DATABASE_URL,
-    } as never);
+    this.client = new PrismaClient({ datasourceUrl: process.env.DATABASE_URL });
   }
 
   /** Test-only: substitute a mock client. */
