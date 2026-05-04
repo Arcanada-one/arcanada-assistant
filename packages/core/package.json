@@ -35,7 +35,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "jose": "^5.10.0",
+    "jose": "^6.2.3",
     "zod": "^4.4.2"
   },
   "peerDependencies": {
