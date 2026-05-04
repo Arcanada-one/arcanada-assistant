@@ -11,8 +11,8 @@ export interface TelegramGateway {
 export class TelegrafGateway implements TelegramGateway {
   private readonly bot: Telegraf;
 
-  constructor(token: string = process.env.TELEGRAM_BOT_TOKEN ?? '') {
-    this.bot = new Telegraf(token);
+  constructor() {
+    this.bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN ?? '');
   }
 
   async sendMessage(chatId: number, text: string): Promise<void> {
