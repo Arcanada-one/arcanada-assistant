@@ -15,7 +15,7 @@ async function bootstrap(): Promise<void> {
   });
 
   const app = await NestFactory.create<NestFastifyApplication>(AppModule, adapter, {
-    bufferLogs: true,
+    bufferLogs: false,
   });
 
   app.useLogger(app.get(Logger));
@@ -51,4 +51,7 @@ async function bootstrap(): Promise<void> {
   await app.listen(port, '0.0.0.0');
 }
 
-void bootstrap();
+bootstrap().catch((err) => {
+  console.error('[bootstrap] fatal error before listen:', err);
+  process.exit(1);
+});
