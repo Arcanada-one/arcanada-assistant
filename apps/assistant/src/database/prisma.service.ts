@@ -17,7 +17,9 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
   readonly client: PrismaClient;
 
   constructor() {
-    this.client = new PrismaClient();
+    this.client = new PrismaClient({
+      datasourceUrl: process.env.DATABASE_URL,
+    } as never);
   }
 
   /** Test-only: substitute a mock client. */
