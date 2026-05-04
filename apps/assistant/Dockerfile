@@ -22,7 +22,7 @@ RUN pnpm --filter @arcanada/core build
 RUN cd apps/assistant && DATABASE_URL=postgresql://stub:stub@stub/stub pnpm exec prisma generate
 RUN pnpm --filter assistant build
 
-RUN pnpm --filter assistant deploy --prod /deploy/assistant
+RUN pnpm --filter assistant deploy --legacy --prod /deploy/assistant
 
 # ───────── Stage 2: runner ─────────
 FROM node:${NODE_VERSION} AS runner
