@@ -69,11 +69,21 @@ docker compose build       # production image
 
 ## Deployment
 
-- **CI/CD:** GitHub Actions (lint → test → audit → build → deploy → verify), self-hosted runner на PROD `arcana-prod`
+- **CI/CD:** GitHub Actions (lint → test → audit → **smoke** → deploy → verify), self-hosted runner на PROD `arcana-prod`
 - **Deploy path:** `/opt/arcanada-assistant/` (owner `ci-runner:ci-runner` recursive per INFRA-0040)
 - **TLS:** Cloudflare Origin Cert (15y) + nginx Full (strict)
 - **Health endpoint:** `https://assistant.arcanada.one/health`
 - **Failure notification:** POST `https://ops.arcanada.one/events` category `fatal`
+
+### Pre-deploy smoke gate (ARCA-0033)
+
+Job `smoke` (ubuntu-latest, ephemeral postgres+redis) собирает образ через `pnpm build`, прогоняет `prisma migrate deploy`, запускает `node dist/main.js` и опрашивает `/health` 30 секунд. Блокирует `deploy` (`needs: [..., smoke]`), если bootstrap не доходит до `app.listen`.
+
+Зачем: до ARCA-0033 PROD `verify` job был единственным gate'ом, ловящим bootstrap-time crashes (Prisma 7 driver-adapter, ESM imports, NestJS DI, peer-deps drift) — но ловил их **после** того как контейнер уже ушёл в restart-loop на проде. Smoke gate ловит тот же класс ошибок на CI runner до touch'а PROD.
+
+`apps/assistant/src/main.ts` использует `bufferLogs: false` + `bootstrap().catch(...)` с явным `console.error + process.exit(1)`, чтобы стек fatal'а попадал в stdout до switchover на pino — иначе compose `restart: unless-stopped` маскирует causal chain.
+
+**Cosmetic noise:** при boot'е `@nestjs/platform-fastify` PackageLoader пишет `ERROR: The "@fastify/static" package is missing` — пакет установлен (`apps/assistant/package.json` `dependencies`), `useStaticAssets()` не вызывается. Probe-import от FastifyAdapter, mis-leveled как ERROR. Игнорируется.
 
 ## Security
 
