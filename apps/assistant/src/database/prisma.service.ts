@@ -1,16 +1,13 @@
 import { Injectable, type OnModuleDestroy, type OnModuleInit } from '@nestjs/common';
 import prismaPkg from '@prisma/client';
-import adapterPkg from '@prisma/adapter-pg';
+import { PrismaPg } from '@prisma/adapter-pg';
 
-// CJS interop: Prisma 7's @prisma/client and @prisma/adapter-pg are both CJS.
-// Under NodeNext ESM only the default import works.
+// CJS interop: Prisma 7's @prisma/client is CJS — under NodeNext ESM only
+// the default import works. @prisma/adapter-pg already exports ESM-friendly.
 const { PrismaClient } = prismaPkg as unknown as {
   PrismaClient: new (opts: { adapter: unknown }) => PrismaClient;
 };
 type PrismaClient = InstanceType<typeof prismaPkg.PrismaClient>;
-const { PrismaPg } = adapterPkg as unknown as {
-  PrismaPg: new (opts: { connectionString: string }) => unknown;
-};
 
 export interface ProbeResult {
   ok: boolean;
