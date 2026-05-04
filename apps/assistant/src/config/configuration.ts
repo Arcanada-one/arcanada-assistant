@@ -1,8 +1,11 @@
 import { z } from 'zod';
 
-const httpsUrl = z.string().url().refine((u) => u.startsWith('https://'), {
-  message: 'must be https://',
-});
+const httpsUrl = z
+  .string()
+  .url()
+  .refine((u) => u.startsWith('https://'), {
+    message: 'must be https://',
+  });
 
 const httpOrHttpsUrl = z.string().url();
 
@@ -11,17 +14,13 @@ const hhmm = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'expected HH:mm');
 export const configurationSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'staging', 'production']).default('development'),
   PORT: z.coerce.number().int().positive().default(3800),
-  LOG_LEVEL: z
-    .enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace'])
-    .default('info'),
+  LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace']).default('info'),
 
   DATABASE_URL: z.string().min(1, 'DATABASE_URL required'),
   REDIS_URL: z.string().min(1, 'REDIS_URL required'),
 
   TELEGRAM_BOT_TOKEN: z.string().min(1),
-  TELEGRAM_WEBHOOK_SECRET: z
-    .string()
-    .min(32, 'TELEGRAM_WEBHOOK_SECRET must be ≥32 chars'),
+  TELEGRAM_WEBHOOK_SECRET: z.string().min(32, 'TELEGRAM_WEBHOOK_SECRET must be ≥32 chars'),
   TELEGRAM_WEBHOOK_PATH: z.string().startsWith('/').default('/webhook/telegram'),
 
   AUTH_ARCANA_BASE_URL: httpsUrl,
@@ -48,9 +47,7 @@ export type AppConfig = z.infer<typeof configurationSchema>;
 export function validateConfig(env: Record<string, unknown>): AppConfig {
   const result = configurationSchema.safeParse(env);
   if (!result.success) {
-    const issues = result.error.issues
-      .map((i) => `${i.path.join('.')}: ${i.message}`)
-      .join('; ');
+    const issues = result.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('; ');
     throw new Error(`Invalid environment configuration: ${issues}`);
   }
   return result.data;

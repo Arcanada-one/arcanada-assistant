@@ -1,11 +1,5 @@
 import { describe, it, expect, beforeAll } from 'vitest';
-import {
-  generateKeyPair,
-  SignJWT,
-  exportJWK,
-  type JWK,
-  type KeyLike,
-} from 'jose';
+import { generateKeyPair, SignJWT, exportJWK, type JWK, type KeyLike } from 'jose';
 
 import { JwtValidator, type JwksProvider } from './jwt-validator.js';
 
@@ -74,7 +68,11 @@ describe('JwtValidator', () => {
   });
 
   it('rejects token with wrong issuer', async () => {
-    const token = await signToken(privateKey, { sub: 'user-123' }, { issuer: 'https://evil.example' });
+    const token = await signToken(
+      privateKey,
+      { sub: 'user-123' },
+      { issuer: 'https://evil.example' },
+    );
     await expect(validator.verify(token)).rejects.toThrow(/iss|issuer/i);
   });
 

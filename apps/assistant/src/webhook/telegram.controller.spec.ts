@@ -7,9 +7,7 @@ const SECRET = 'a'.repeat(32);
 function makeController() {
   const handler = { handle: vi.fn().mockResolvedValue(undefined) };
   const config = {
-    get: vi.fn((key: string) =>
-      key === 'TELEGRAM_WEBHOOK_SECRET' ? SECRET : undefined,
-    ),
+    get: vi.fn((key: string) => (key === 'TELEGRAM_WEBHOOK_SECRET' ? SECRET : undefined)),
   };
   const controller = new TelegramController(handler as never, config as never);
   return { controller, handler, config };
@@ -30,9 +28,9 @@ describe('TelegramController', () => {
 
   it('throws Unauthorized when secret header is missing', async () => {
     const { controller } = makeController();
-    await expect(
-      controller.handle({ update_id: 2 } as never, undefined),
-    ).rejects.toBeInstanceOf(UnauthorizedException);
+    await expect(controller.handle({ update_id: 2 } as never, undefined)).rejects.toBeInstanceOf(
+      UnauthorizedException,
+    );
   });
 
   it('throws Unauthorized when secret_token mismatches', async () => {
@@ -44,9 +42,9 @@ describe('TelegramController', () => {
 
   it('does not invoke handler on bad secret', async () => {
     const { controller, handler } = makeController();
-    await expect(
-      controller.handle({ update_id: 4 } as never, 'nope'),
-    ).rejects.toBeInstanceOf(UnauthorizedException);
+    await expect(controller.handle({ update_id: 4 } as never, 'nope')).rejects.toBeInstanceOf(
+      UnauthorizedException,
+    );
     expect(handler.handle).not.toHaveBeenCalled();
   });
 });

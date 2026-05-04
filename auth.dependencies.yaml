@@ -10,9 +10,9 @@ service:
   domain: assistant.arcanada.one
 
 auth_arcana:
-  min_version: "1.0.0"
+  min_version: '1.0.0'
   max_version: null
-  last_validated: "2026-05-03"
+  last_validated: '2026-05-03'
 
 # Scopes this service consumes (calls into other services with these scopes attached)
 scopes_consumed: []

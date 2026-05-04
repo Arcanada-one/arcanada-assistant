@@ -11,11 +11,11 @@ services:
       POSTGRES_PASSWORD: dev_password_change_me
       POSTGRES_DB: assistant
     ports:
-      - "5432:5432"
+      - '5432:5432'
     volumes:
       - postgres-data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U assistant_app -d assistant"]
+      test: ['CMD-SHELL', 'pg_isready -U assistant_app -d assistant']
       interval: 5s
       timeout: 3s
       retries: 10
@@ -24,9 +24,9 @@ services:
     image: redis:7-alpine
     restart: unless-stopped
     ports:
-      - "6379:6379"
+      - '6379:6379'
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ['CMD', 'redis-cli', 'ping']
       interval: 5s
       timeout: 3s
       retries: 10
@@ -61,10 +61,10 @@ services:
       OPSBOT_BASE_URL: https://ops.arcanada.one
       OPSBOT_API_KEY: ${OPSBOT_API_KEY:-changeme}
       BRIEFING_TIMEZONE: Europe/Istanbul
-      BRIEFING_MORNING_TIME: "08:00"
-      BRIEFING_EVENING_TIME: "21:00"
+      BRIEFING_MORNING_TIME: '08:00'
+      BRIEFING_EVENING_TIME: '21:00'
     ports:
-      - "3800:3800"
+      - '3800:3800'
 
 volumes:
   postgres-data:

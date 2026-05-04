@@ -25,6 +25,10 @@ export default [
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
       '@typescript-eslint/no-explicit-any': 'warn',
       '@typescript-eslint/explicit-function-return-type': 'off',
+      'import/no-unresolved': 'off',
+      'import/named': 'off',
+      'import/namespace': 'off',
+      'import/default': 'off',
       'import/order': [
         'warn',
         {

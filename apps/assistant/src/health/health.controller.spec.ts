@@ -25,7 +25,9 @@ describe('HealthController', () => {
   });
 
   it('returns 503 when Redis fails', async () => {
-    const failRedis = { ping: vi.fn().mockResolvedValue({ ok: false, latencyMs: 200, error: 'ECONNREFUSED' }) };
+    const failRedis = {
+      ping: vi.fn().mockResolvedValue({ ok: false, latencyMs: 200, error: 'ECONNREFUSED' }),
+    };
     const ctl = new HealthController(okPrisma as never, failRedis as never);
     const result = await ctl.check();
     expect(result.statusCode).toBe(503);

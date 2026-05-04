@@ -45,10 +45,18 @@
     "@prisma/client": "^7.0.0"
   },
   "peerDependenciesMeta": {
-    "@nestjs/common": { "optional": true },
-    "@nestjs/core": { "optional": true },
-    "ioredis": { "optional": true },
-    "@prisma/client": { "optional": true }
+    "@nestjs/common": {
+      "optional": true
+    },
+    "@nestjs/core": {
+      "optional": true
+    },
+    "ioredis": {
+      "optional": true
+    },
+    "@prisma/client": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "msw": "^2.7.0",

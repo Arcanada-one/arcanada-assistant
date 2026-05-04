@@ -1,0 +1,137 @@
+name: CI
+
+on:
+  push:
+    branches: [main, 'feature/**', 'fix/**', 'chore/**']
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: deploy-arcanada-assistant
+  cancel-in-progress: false
+
+env:
+  NODE_VERSION: '24'
+  PNPM_VERSION: '10.30.3'
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm format:check
+      - run: pnpm -r lint
+
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: assistant_app
+          POSTGRES_PASSWORD: ci_password
+          POSTGRES_DB: assistant
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U assistant_app -d assistant"
+          --health-interval 5s --health-timeout 3s --health-retries 10
+      redis:
+        image: redis:7-alpine
+        ports: ['6379:6379']
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s --health-timeout 3s --health-retries 10
+    env:
+      DATABASE_URL: postgresql://assistant_app:ci_password@localhost:5432/assistant?schema=public&sslmode=disable
+      REDIS_URL: redis://localhost:6379/0
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: cd apps/assistant && pnpm exec prisma generate
+      - run: pnpm -r typecheck
+      - run: pnpm -r test:coverage
+
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm audit --prod --audit-level=high
+
+  deploy:
+    needs: [lint, test, audit]
+    if: github.ref == 'refs/heads/main'
+    runs-on: [self-hosted, linux, arcana-prod, docker]
+    steps:
+      - name: Pull repo on PROD path
+        run: |
+          cd /opt/arcanada-assistant
+          git fetch --all --prune
+          git reset --hard origin/main
+      - name: Build + start via docker compose
+        run: |
+          cd /opt/arcanada-assistant
+          docker compose build assistant
+          docker compose up -d --remove-orphans assistant postgres redis
+
+  verify:
+    needs: [deploy]
+    if: github.ref == 'refs/heads/main'
+    runs-on: [self-hosted, linux, arcana-prod, docker]
+    steps:
+      - name: Wait for /health
+        run: |
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:3800/health >/dev/null; then
+              echo "healthy after ${i}s"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "health check did not pass within 30s"
+          curl -v http://127.0.0.1:3800/health || true
+          docker compose -f /opt/arcanada-assistant/docker-compose.yml logs --tail=200 assistant || true
+          exit 1
+
+  notify-on-fail:
+    needs: [lint, test, audit, deploy, verify]
+    if: failure() && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Notify Ops Bot
+        run: |
+          curl -fsS -X POST https://ops.arcanada.one/events \
+            -H "Authorization: Bearer ${{ secrets.OPSBOT_API_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "category": "fatal",
+              "service": "arcanada-assistant",
+              "source": "github-actions",
+              "message": "CI/CD pipeline failed on '"${GITHUB_REF}"' (run '"${GITHUB_RUN_ID}"')",
+              "details": {
+                "run_url": "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}",
+                "sha": "${{ github.sha }}"
+              }
+            }' || true
