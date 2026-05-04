@@ -52,6 +52,7 @@ async function bootstrap(): Promise<void> {
 }
 
 bootstrap().catch((err) => {
+  // eslint-disable-next-line no-console -- pino logger may not be wired yet on bootstrap failure
   console.error('[bootstrap] fatal error before listen:', err);
   process.exit(1);
 });
