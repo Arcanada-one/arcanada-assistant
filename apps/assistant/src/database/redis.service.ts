@@ -6,14 +6,19 @@ import type { ProbeResult } from './prisma.service.js';
 export class RedisService implements OnModuleDestroy {
   readonly client: RedisClient;
 
-  constructor(client?: RedisClient) {
-    this.client =
-      client ??
-      new RedisCtor(process.env.REDIS_URL ?? 'redis://localhost:6379/0', {
-        lazyConnect: false,
-        maxRetriesPerRequest: 2,
-        enableReadyCheck: true,
-      });
+  constructor() {
+    this.client = new RedisCtor(process.env.REDIS_URL ?? 'redis://localhost:6379/0', {
+      lazyConnect: false,
+      maxRetriesPerRequest: 2,
+      enableReadyCheck: true,
+    });
+  }
+
+  /** Test-only: substitute a mock client. */
+  static withClient(client: RedisClient): RedisService {
+    const svc = Object.create(RedisService.prototype) as RedisService;
+    (svc as { client: RedisClient }).client = client;
+    return svc;
   }
 
   async onModuleDestroy(): Promise<void> {

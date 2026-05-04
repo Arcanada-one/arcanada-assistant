@@ -22,21 +22,21 @@ describe('PrismaService', () => {
 
   it('connects on module init', async () => {
     const mock = makeMock();
-    const svc = new PrismaService(mock as never);
+    const svc = PrismaService.withClient(mock as never);
     await svc.onModuleInit();
     expect(mock.$connect).toHaveBeenCalledOnce();
   });
 
   it('disconnects on module destroy', async () => {
     const mock = makeMock();
-    const svc = new PrismaService(mock as never);
+    const svc = PrismaService.withClient(mock as never);
     await svc.onModuleDestroy();
     expect(mock.$disconnect).toHaveBeenCalledOnce();
   });
 
   it('exposes ping() returning latency', async () => {
     const mock = makeMock();
-    const svc = new PrismaService(mock as never);
+    const svc = PrismaService.withClient(mock as never);
     const result = await svc.ping();
     expect(result.ok).toBe(true);
     expect(result.latencyMs).toBeGreaterThanOrEqual(0);
@@ -45,7 +45,7 @@ describe('PrismaService', () => {
   it('ping() returns ok=false on query failure', async () => {
     const mock = makeMock();
     mock.$queryRaw.mockRejectedValueOnce(new Error('connection refused'));
-    const svc = new PrismaService(mock as never);
+    const svc = PrismaService.withClient(mock as never);
     const result = await svc.ping();
     expect(result.ok).toBe(false);
     expect(result.error).toContain('connection refused');

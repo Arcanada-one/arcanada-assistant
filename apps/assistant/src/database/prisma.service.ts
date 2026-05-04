@@ -16,8 +16,15 @@ export interface ProbeResult {
 export class PrismaService implements OnModuleInit, OnModuleDestroy {
   readonly client: PrismaClient;
 
-  constructor(client?: PrismaClient) {
-    this.client = client ?? new PrismaClient();
+  constructor() {
+    this.client = new PrismaClient();
+  }
+
+  /** Test-only: substitute a mock client. */
+  static withClient(client: PrismaClient): PrismaService {
+    const svc = Object.create(PrismaService.prototype) as PrismaService;
+    (svc as { client: PrismaClient }).client = client;
+    return svc;
   }
 
   async onModuleInit(): Promise<void> {
