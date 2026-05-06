@@ -24,7 +24,12 @@ services:
   redis:
     image: redis:7-alpine
     restart: unless-stopped
-    command: ['redis-server', '--requirepass', '${REDIS_PASSWORD:?REDIS_PASSWORD required (Vault-injected)}']
+    command:
+      [
+        'redis-server',
+        '--requirepass',
+        '${REDIS_PASSWORD:?REDIS_PASSWORD required (Vault-injected)}',
+      ]
     ports:
       - '127.0.0.1:6379:6379'
     healthcheck:
