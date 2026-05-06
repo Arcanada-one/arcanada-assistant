@@ -1,6 +1,7 @@
-# Local-dev compose for Arcanada Assistant.
-# Production runs via the same Dockerfile, but Postgres+Redis live on arcana-db
-# (Tailscale-only); see Areas/Infrastructure/* and the deploy workflow.
+# Compose for Arcanada Assistant (dev + prod).
+# All bindings are loopback-only by design (SEC-0006). Production reaches
+# Postgres/Redis through the docker network only — never via the host's
+# public interface. Secrets MUST be Vault-injected via .env on deploy.
 
 services:
   postgres:
@@ -8,10 +9,10 @@ services:
     restart: unless-stopped
     environment:
       POSTGRES_USER: assistant_app
-      POSTGRES_PASSWORD: dev_password_change_me
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD required (Vault-injected)}
       POSTGRES_DB: assistant
     ports:
-      - '5432:5432'
+      - '127.0.0.1:5432:5432'
     volumes:
       - postgres-data:/var/lib/postgresql/data
     healthcheck:
@@ -23,13 +24,21 @@ services:
   redis:
     image: redis:7-alpine
     restart: unless-stopped
+    command:
+      [
+        'redis-server',
+        '--requirepass',
+        '${REDIS_PASSWORD:?REDIS_PASSWORD required (Vault-injected)}',
+      ]
     ports:
-      - '6379:6379'
+      - '127.0.0.1:6379:6379'
     healthcheck:
-      test: ['CMD', 'redis-cli', 'ping']
+      test: ['CMD-SHELL', 'redis-cli -a "$$REDIS_PASSWORD" --no-auth-warning ping']
       interval: 5s
       timeout: 3s
       retries: 10
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?REDIS_PASSWORD required (Vault-injected)}
 
   assistant:
     build:
@@ -45,8 +54,8 @@ services:
       NODE_ENV: development
       PORT: 3800
       LOG_LEVEL: info
-      DATABASE_URL: postgresql://assistant_app:dev_password_change_me@postgres:5432/assistant?schema=public&sslmode=disable
-      REDIS_URL: redis://redis:6379/3
+      DATABASE_URL: postgresql://assistant_app:${POSTGRES_PASSWORD}@postgres:5432/assistant?schema=public&sslmode=disable
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379/3
       TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-changeme}
       TELEGRAM_WEBHOOK_SECRET: ${TELEGRAM_WEBHOOK_SECRET:-changemechangemechangemechangeme}
       TELEGRAM_WEBHOOK_PATH: /webhook/telegram
@@ -64,7 +73,7 @@ services:
       BRIEFING_MORNING_TIME: '08:00'
       BRIEFING_EVENING_TIME: '21:00'
     ports:
-      - '3800:3800'
+      - '127.0.0.1:3800:3800'
 
 volumes:
   postgres-data:

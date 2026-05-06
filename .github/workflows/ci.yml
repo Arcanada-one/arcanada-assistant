@@ -165,6 +165,14 @@ jobs:
           cd /opt/arcanada-assistant
           git fetch --all --prune
           git reset --hard origin/main
+      - name: Inject runtime secrets to .env (SEC-0006)
+        run: |
+          umask 077
+          cat > /opt/arcanada-assistant/.env <<EOF
+          POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
+          REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}
+          EOF
+          chmod 600 /opt/arcanada-assistant/.env
       - name: Build + start via docker compose
         run: |
           cd /opt/arcanada-assistant
