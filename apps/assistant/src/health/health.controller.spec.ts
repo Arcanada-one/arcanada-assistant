@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
+
 import { HealthController } from './health.controller.js';
 
 const okPrisma = { ping: vi.fn().mockResolvedValue({ ok: true, latencyMs: 3 }) };

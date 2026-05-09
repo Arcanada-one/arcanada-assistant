@@ -1,5 +1,6 @@
 import { Injectable, type OnModuleDestroy } from '@nestjs/common';
 import { Redis as RedisCtor, type Redis as RedisClient } from 'ioredis';
+
 import type { ProbeResult } from './prisma.service.js';
 
 @Injectable()

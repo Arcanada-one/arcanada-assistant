@@ -36,6 +36,12 @@ export const configurationSchema = z.object({
 
   OPSBOT_BASE_URL: httpsUrl,
   OPSBOT_API_KEY: z.string().min(1),
+  // ARCA-0007 feature flag: when 'false', OpsAgent is не регистрируется в orchestrator,
+  // /status и /agents отвечают «команда временно отключена» через NoAgentForIntentError.
+  ECOSYSTEM_OPS_BOT_INTEGRATION: z
+    .union([z.literal('true'), z.literal('false')])
+    .default('true')
+    .transform((v) => v === 'true'),
 
   BRIEFING_TIMEZONE: z.string().min(1).default('Europe/Istanbul'),
   BRIEFING_MORNING_TIME: hhmm.default('08:00'),

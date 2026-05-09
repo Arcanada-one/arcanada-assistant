@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { UnauthorizedException } from '@nestjs/common';
+
 import { TelegramController } from './telegram.controller.js';
 
 const SECRET = 'a'.repeat(32);

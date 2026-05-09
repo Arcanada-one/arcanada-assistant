@@ -1,6 +1,7 @@
 import { Controller, Get, HttpCode, Res } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import type { FastifyReply } from 'fastify';
+
 import { PrismaService } from '../database/prisma.service.js';
 import { RedisService } from '../database/redis.service.js';
 

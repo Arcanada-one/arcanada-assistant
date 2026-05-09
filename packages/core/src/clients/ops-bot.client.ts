@@ -1,0 +1,274 @@
+import CircuitBreaker from 'opossum';
+import type { Redis } from 'ioredis';
+
+import {
+  EcosystemSnapshotSchema,
+  EmitEventInputSchema,
+  EmitEventResponseSchema,
+  type EcosystemSnapshot,
+  type EmitEventInput,
+  type EmitEventResponse,
+} from './ops-bot.types.js';
+import { parsePrometheusSnapshot } from './prometheus-parse.js';
+
+export interface OpsBotLogger {
+  info(obj: Record<string, unknown>, msg?: string): void;
+  warn(obj: Record<string, unknown>, msg?: string): void;
+  error(obj: Record<string, unknown>, msg?: string): void;
+  debug?(obj: Record<string, unknown>, msg?: string): void;
+}
+
+export interface RetryOptions {
+  maxAttempts: number;
+  baseDelayMs: number;
+}
+
+export interface CircuitOptions {
+  volumeThreshold: number;
+  errorThresholdPercentage: number;
+  rollingCountTimeout: number;
+  resetTimeout: number;
+}
+
+export interface OpsBotClientOptions {
+  baseUrl: string;
+  apiKey: string;
+  redis?: Redis;
+  logger?: OpsBotLogger;
+  fetchImpl?: typeof fetch;
+  timeoutMs?: number;
+  healthTimeoutMs?: number;
+  cacheTtlMs?: number;
+  cacheKey?: string;
+  retry?: RetryOptions;
+  circuit?: CircuitOptions;
+}
+
+export interface IOpsBotClient {
+  emitEvent(input: EmitEventInput): Promise<EmitEventResponse>;
+  getEcosystemSnapshot(): Promise<EcosystemSnapshot>;
+  healthReady(): Promise<boolean>;
+  isCircuitOpen(): boolean;
+}
+
+export class OpsBotClientError extends Error {
+  readonly cause?: unknown;
+  constructor(message: string, cause?: unknown) {
+    super(message);
+    this.name = 'OpsBotClientError';
+    this.cause = cause;
+  }
+}
+
+interface RequestPlan {
+  url: string;
+  method: 'GET' | 'POST';
+  body: string | null;
+  retryable: boolean;
+  timeoutMs: number;
+}
+
+interface HttpResult {
+  status: number;
+  text: string;
+  json?: unknown;
+}
+
+const DEFAULT_CIRCUIT: CircuitOptions = {
+  volumeThreshold: 5,
+  // opossum uses STRICT `>` against this percentage (lib/circuit.js line ~994);
+  // 99 means 100% error rate (всё 5 из 5) trips, but 80% (4 из 5) does not.
+  errorThresholdPercentage: 99,
+  rollingCountTimeout: 30_000,
+  resetTimeout: 60_000,
+};
+
+const DEFAULT_RETRY: RetryOptions = { maxAttempts: 2, baseDelayMs: 200 };
+
+export class OpsBotClient implements IOpsBotClient {
+  private readonly baseUrl: string;
+  private readonly apiKey: string;
+  private readonly redis?: Redis;
+  private readonly logger?: OpsBotLogger;
+  private readonly fetchImpl: typeof fetch;
+  private readonly timeoutMs: number;
+  private readonly healthTimeoutMs: number;
+  private readonly cacheTtlMs: number;
+  private readonly cacheKey: string;
+  private readonly retry: RetryOptions;
+  private readonly breaker: CircuitBreaker<[RequestPlan], HttpResult>;
+
+  constructor(opts: OpsBotClientOptions) {
+    this.baseUrl = opts.baseUrl.replace(/\/+$/, '');
+    this.apiKey = opts.apiKey;
+    this.redis = opts.redis;
+    this.logger = opts.logger;
+    this.fetchImpl = opts.fetchImpl ?? globalThis.fetch.bind(globalThis);
+    this.timeoutMs = opts.timeoutMs ?? 5_000;
+    this.healthTimeoutMs = opts.healthTimeoutMs ?? 2_000;
+    this.cacheTtlMs = opts.cacheTtlMs ?? 60_000;
+    this.cacheKey = opts.cacheKey ?? 'assistant:opsbot-snapshot:last';
+    this.retry = opts.retry ?? DEFAULT_RETRY;
+    const cb = opts.circuit ?? DEFAULT_CIRCUIT;
+    this.breaker = new CircuitBreaker(this.executeRequest.bind(this), {
+      timeout: false,
+      volumeThreshold: cb.volumeThreshold,
+      errorThresholdPercentage: cb.errorThresholdPercentage,
+      rollingCountTimeout: cb.rollingCountTimeout,
+      resetTimeout: cb.resetTimeout,
+    });
+  }
+
+  isCircuitOpen(): boolean {
+    return this.breaker.opened;
+  }
+
+  async emitEvent(input: EmitEventInput): Promise<EmitEventResponse> {
+    const parsed = EmitEventInputSchema.safeParse(input);
+    if (!parsed.success) {
+      throw new OpsBotClientError(`Invalid event input: ${parsed.error.message}`, parsed.error);
+    }
+    const body = JSON.stringify({
+      ...parsed.data,
+      timestamp: parsed.data.timestamp ?? new Date().toISOString(),
+    });
+    const result = await this.callBreaker({
+      url: `${this.baseUrl}/events`,
+      method: 'POST',
+      body,
+      retryable: false,
+      timeoutMs: this.timeoutMs,
+    });
+    const ack = EmitEventResponseSchema.safeParse(result.json);
+    if (!ack.success) {
+      throw new OpsBotClientError(`Invalid /events response: ${ack.error.message}`, ack.error);
+    }
+    return ack.data;
+  }
+
+  async getEcosystemSnapshot(): Promise<EcosystemSnapshot> {
+    const cached = await this.readCache();
+    if (cached) return cached;
+    const result = await this.callBreaker({
+      url: `${this.baseUrl}/metrics`,
+      method: 'GET',
+      body: null,
+      retryable: true,
+      timeoutMs: this.timeoutMs,
+    });
+    const snap = parsePrometheusSnapshot(result.text);
+    const validated = EcosystemSnapshotSchema.safeParse(snap);
+    if (!validated.success) {
+      throw new OpsBotClientError(
+        `Snapshot validation failed: ${validated.error.message}`,
+        validated.error,
+      );
+    }
+    await this.writeCache(validated.data);
+    return validated.data;
+  }
+
+  async healthReady(): Promise<boolean> {
+    try {
+      const result = await this.executeRequest({
+        url: `${this.baseUrl}/health/ready`,
+        method: 'GET',
+        body: null,
+        retryable: false,
+        timeoutMs: this.healthTimeoutMs,
+      });
+      return result.status >= 200 && result.status < 300;
+    } catch {
+      return false;
+    }
+  }
+
+  private async callBreaker(req: RequestPlan): Promise<HttpResult> {
+    try {
+      return await this.breaker.fire(req);
+    } catch (err) {
+      if (this.breaker.opened) {
+        const msg = err instanceof Error ? err.message : String(err);
+        throw new OpsBotClientError(`circuit open: ${msg}`, err);
+      }
+      if (err instanceof OpsBotClientError) throw err;
+      throw new OpsBotClientError(err instanceof Error ? err.message : String(err), err);
+    }
+  }
+
+  private async executeRequest(req: RequestPlan): Promise<HttpResult> {
+    let lastErr: unknown;
+    const attempts = req.retryable ? this.retry.maxAttempts + 1 : 1;
+    for (let attempt = 1; attempt <= attempts; attempt += 1) {
+      try {
+        return await this.doFetch(req);
+      } catch (err) {
+        lastErr = err;
+        if (!req.retryable || attempt === attempts) break;
+        const backoff = this.retry.baseDelayMs * 3 ** (attempt - 1);
+        await new Promise((r) => setTimeout(r, backoff));
+      }
+    }
+    throw lastErr instanceof Error
+      ? lastErr
+      : new OpsBotClientError(String(lastErr));
+  }
+
+  private async doFetch(req: RequestPlan): Promise<HttpResult> {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), req.timeoutMs);
+    try {
+      const headers: Record<string, string> = {
+        Authorization: `Bearer ${this.apiKey}`,
+      };
+      if (req.body !== null) headers['content-type'] = 'application/json';
+      const res = await this.fetchImpl(req.url, {
+        method: req.method,
+        headers,
+        body: req.body ?? undefined,
+        signal: controller.signal,
+      });
+      const contentType = res.headers.get('content-type') ?? '';
+      const text = await res.text();
+      if (!res.ok) {
+        this.logger?.warn(
+          { status: res.status, method: req.method, url: req.url },
+          'opsbot non-2xx',
+        );
+        throw new OpsBotClientError(
+          `HTTP ${res.status} (${req.method} ${req.url}): ${text.slice(0, 200)}`,
+        );
+      }
+      const json = contentType.includes('application/json') && text ? JSON.parse(text) : undefined;
+      return { status: res.status, text, json };
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
+  private async readCache(): Promise<EcosystemSnapshot | null> {
+    if (!this.redis) return null;
+    try {
+      const raw = await this.redis.get(this.cacheKey);
+      if (!raw) return null;
+      const parsed = EcosystemSnapshotSchema.safeParse(JSON.parse(raw));
+      return parsed.success ? parsed.data : null;
+    } catch (err) {
+      this.logger?.warn({ err: errMessage(err) }, 'opsbot cache read failed');
+      return null;
+    }
+  }
+
+  private async writeCache(snap: EcosystemSnapshot): Promise<void> {
+    if (!this.redis) return;
+    try {
+      await this.redis.set(this.cacheKey, JSON.stringify(snap), 'PX', this.cacheTtlMs);
+    } catch (err) {
+      this.logger?.warn({ err: errMessage(err) }, 'opsbot cache write failed');
+    }
+  }
+}
+
+function errMessage(e: unknown): string {
+  return e instanceof Error ? e.message : String(e);
+}

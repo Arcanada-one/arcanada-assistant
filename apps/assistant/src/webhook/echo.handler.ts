@@ -1,4 +1,5 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
+
 import { TELEGRAM_GATEWAY, type TelegramGateway } from './telegram.gateway.js';
 
 const APP_VERSION = '0.1.0';

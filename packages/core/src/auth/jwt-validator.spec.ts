@@ -8,7 +8,7 @@ const AUDIENCE = 'arcanada-assistant';
 
 class StaticJwks implements JwksProvider {
   constructor(private readonly jwk: JWK & { kid: string }) {}
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+   
   async getKey(_kid: string): Promise<JWK> {
     return this.jwk;
   }

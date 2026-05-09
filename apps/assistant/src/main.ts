@@ -5,6 +5,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import helmet from '@fastify/helmet';
 import rateLimit from '@fastify/rate-limit';
 import { Logger } from 'nestjs-pino';
+
 import { AppModule } from './app.module.js';
 
 async function bootstrap(): Promise<void> {

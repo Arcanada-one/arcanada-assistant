@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
+
 import { RedisService } from './redis.service.js';
 
 interface MockRedis {
