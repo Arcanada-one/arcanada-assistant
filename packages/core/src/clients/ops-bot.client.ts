@@ -42,6 +42,13 @@ export interface OpsBotClientOptions {
   cacheKey?: string;
   retry?: RetryOptions;
   circuit?: CircuitOptions;
+  /** Service identity for emitted events (creative-ARCA-0005 line 301-308). */
+  serviceName?: string;
+  /**
+   * If true, emits self_heal event when CB transitions to `close` (recovery).
+   * Default true. Per creative-ARCA-0005 line 251-253 + AAL Mandate § 8.
+   */
+  emitSelfHealOnRecovery?: boolean;
 }
 
 export interface IOpsBotClient {
@@ -96,6 +103,8 @@ export class OpsBotClient implements IOpsBotClient {
   private readonly cacheTtlMs: number;
   private readonly cacheKey: string;
   private readonly retry: RetryOptions;
+  private readonly serviceName: string;
+  private readonly emitSelfHealOnRecovery: boolean;
   private readonly breaker: CircuitBreaker<[RequestPlan], HttpResult>;
 
   constructor(opts: OpsBotClientOptions) {
@@ -109,6 +118,8 @@ export class OpsBotClient implements IOpsBotClient {
     this.cacheTtlMs = opts.cacheTtlMs ?? 60_000;
     this.cacheKey = opts.cacheKey ?? 'assistant:opsbot-snapshot:last';
     this.retry = opts.retry ?? DEFAULT_RETRY;
+    this.serviceName = opts.serviceName ?? 'arcanada-assistant';
+    this.emitSelfHealOnRecovery = opts.emitSelfHealOnRecovery ?? true;
     const cb = opts.circuit ?? DEFAULT_CIRCUIT;
     this.breaker = new CircuitBreaker(this.executeRequest.bind(this), {
       timeout: false,
@@ -116,6 +127,13 @@ export class OpsBotClient implements IOpsBotClient {
       errorThresholdPercentage: cb.errorThresholdPercentage,
       rollingCountTimeout: cb.rollingCountTimeout,
       resetTimeout: cb.resetTimeout,
+      // 4xx (auth/payload/not-found) — application errors, not transport faults;
+      // do not count toward CB threshold. Exception: 408 timeout, 429 rate-limit
+      // indicate downstream pressure → keep counting. Source: ARCA-0007 QA review.
+      errorFilter: (err: unknown) => isExcludedClientError(err),
+    });
+    this.breaker.on('close', () => {
+      if (this.emitSelfHealOnRecovery) void this.emitSelfHealRecovery();
     });
   }
 
@@ -246,6 +264,23 @@ export class OpsBotClient implements IOpsBotClient {
     }
   }
 
+  private async emitSelfHealRecovery(): Promise<void> {
+    try {
+      await this.emitEvent({
+        service: this.serviceName,
+        category: 'self_heal',
+        severity: 'info',
+        message: 'ops-bot client circuit breaker recovered (close)',
+        context: { component: 'ops-bot-client', state: 'close' },
+      });
+    } catch (err) {
+      this.logger?.warn(
+        { err: errMessage(err) },
+        'opsbot self_heal recovery emit failed (non-fatal)',
+      );
+    }
+  }
+
   private async readCache(): Promise<EcosystemSnapshot | null> {
     if (!this.redis) return null;
     try {
@@ -271,4 +306,21 @@ export class OpsBotClient implements IOpsBotClient {
 
 function errMessage(e: unknown): string {
   return e instanceof Error ? e.message : String(e);
+}
+
+const HTTP_CODE_RE = /^HTTP (\d+)/;
+
+/**
+ * Returns true when the error should be skipped by the circuit breaker
+ * (counted as «не fault, ОК-failure»). 4xx responses indicate application
+ * mistakes (bad payload, missing key) — they should propagate to the caller
+ * but should NOT trip the breaker. 408 (request timeout) and 429 (rate
+ * limit) signal downstream load — they DO count.
+ */
+function isExcludedClientError(err: unknown): boolean {
+  if (!(err instanceof OpsBotClientError)) return false;
+  const match = HTTP_CODE_RE.exec(err.message);
+  if (!match) return false;
+  const code = Number(match[1]);
+  return code >= 400 && code < 500 && code !== 408 && code !== 429;
 }

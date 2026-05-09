@@ -59,7 +59,14 @@ afterEach(() => {
 });
 afterAll(() => server.close());
 
-function makeClient(opts: Partial<{ redis: Redis; logger: OpsBotLogger }> = {}): OpsBotClient {
+interface ClientOverrides {
+  redis?: Redis;
+  logger?: OpsBotLogger;
+  resetTimeoutMs?: number;
+  emitSelfHealOnRecovery?: boolean;
+}
+
+function makeClient(opts: ClientOverrides = {}): OpsBotClient {
   return new OpsBotClient({
     baseUrl: BASE_URL,
     apiKey: API_KEY,
@@ -69,11 +76,12 @@ function makeClient(opts: Partial<{ redis: Redis; logger: OpsBotLogger }> = {}):
     healthTimeoutMs: 200,
     cacheTtlMs: 60_000,
     retry: { maxAttempts: 2, baseDelayMs: 5 },
+    emitSelfHealOnRecovery: opts.emitSelfHealOnRecovery ?? false,
     circuit: {
       volumeThreshold: 5,
       errorThresholdPercentage: 99,
       rollingCountTimeout: 30_000,
-      resetTimeout: 60_000,
+      resetTimeout: opts.resetTimeoutMs ?? 60_000,
     },
   });
 }
@@ -123,22 +131,95 @@ describe('OpsBotClient.emitEvent', () => {
 });
 
 describe('OpsBotClient circuit breaker', () => {
+  const event = {
+    service: 'arcanada-assistant',
+    category: 'fatal' as const,
+    severity: 'fatal' as const,
+    message: 'm',
+  };
+
   it('opens after configured volume of consecutive 5xx', async () => {
     server.use(
       http.post(`${BASE_URL}/events`, () => HttpResponse.json({ error: 'down' }, { status: 503 })),
     );
     const client = makeClient();
-    const event = {
-      service: 'arcanada-assistant',
-      category: 'fatal' as const,
-      severity: 'fatal' as const,
-      message: 'm',
-    };
     for (let i = 0; i < 5; i += 1) {
       await expect(client.emitEvent(event)).rejects.toBeInstanceOf(OpsBotClientError);
     }
     expect(client.isCircuitOpen()).toBe(true);
     await expect(client.emitEvent(event)).rejects.toThrow(/circuit/i);
+  });
+
+  it('does NOT trip CB on 4xx (application errors excluded by errorFilter)', async () => {
+    server.use(
+      http.post(`${BASE_URL}/events`, () => HttpResponse.json({ error: 'bad' }, { status: 400 })),
+    );
+    const client = makeClient();
+    for (let i = 0; i < 6; i += 1) {
+      await expect(client.emitEvent(event)).rejects.toBeInstanceOf(OpsBotClientError);
+    }
+    expect(client.isCircuitOpen()).toBe(false);
+  });
+
+  it('does NOT trip CB on 401 (auth) or 404 (route gone)', async () => {
+    let counter = 0;
+    server.use(
+      http.post(`${BASE_URL}/events`, () => {
+        counter += 1;
+        const status = counter % 2 === 0 ? 404 : 401;
+        return HttpResponse.json({ error: 'x' }, { status });
+      }),
+    );
+    const client = makeClient();
+    for (let i = 0; i < 6; i += 1) {
+      await expect(client.emitEvent(event)).rejects.toBeInstanceOf(OpsBotClientError);
+    }
+    expect(client.isCircuitOpen()).toBe(false);
+  });
+
+  it('DOES trip CB on 429 (downstream rate-limit signals load)', async () => {
+    server.use(
+      http.post(`${BASE_URL}/events`, () => HttpResponse.json({ error: 'rate' }, { status: 429 })),
+    );
+    const client = makeClient();
+    for (let i = 0; i < 5; i += 1) {
+      await expect(client.emitEvent(event)).rejects.toBeInstanceOf(OpsBotClientError);
+    }
+    expect(client.isCircuitOpen()).toBe(true);
+  });
+
+  it('emits self_heal event when CB transitions to close (recovery)', async () => {
+    let failsLeft = 5;
+    const bodies: Record<string, unknown>[] = [];
+    server.use(
+      http.post(`${BASE_URL}/events`, async ({ request }) => {
+        const body = (await request.json()) as Record<string, unknown>;
+        bodies.push(body);
+        if (failsLeft > 0) {
+          failsLeft -= 1;
+          return HttpResponse.json({ error: 'down' }, { status: 503 });
+        }
+        return HttpResponse.json(
+          { event_id: '01J2H7K8FXYJ9P0Q3R5T6V8W0Z', status: 'accepted' },
+          { status: 201 },
+        );
+      }),
+    );
+    const client = makeClient({ resetTimeoutMs: 30, emitSelfHealOnRecovery: true });
+    for (let i = 0; i < 5; i += 1) {
+      await client.emitEvent(event).catch(() => undefined);
+    }
+    expect(client.isCircuitOpen()).toBe(true);
+    await new Promise((r) => setTimeout(r, 80)); // > resetTimeoutMs (margin for CI)
+    await client.emitEvent(event); // half-open → success → close
+    await new Promise((r) => setTimeout(r, 100)); // let breaker.on('close') microtask flush
+    const selfHeal = bodies.filter((b) => b.category === 'self_heal');
+    expect(selfHeal.length).toBeGreaterThanOrEqual(1);
+    expect(selfHeal[0].message).toMatch(/recovered/);
+    expect(selfHeal[0].context).toMatchObject({
+      component: 'ops-bot-client',
+      state: 'close',
+    });
   });
 });
 

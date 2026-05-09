@@ -1,9 +1,9 @@
 import { Logger, Module, type OnModuleInit } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigService } from '@nestjs/config';
 import { OpsBotClient, type IOpsBotClient, type OpsBotLogger } from '@arcanada/core';
 import { PinoLogger } from 'nestjs-pino';
 
-import opsBotConfig, { OPS_BOT_CONFIG, type OpsBotConfig } from '../../config/ops-bot.config.js';
+import { OPS_BOT_CONFIG, type OpsBotConfig } from '../../config/ops-bot.config.js';
 import { DatabaseModule } from '../../database/database.module.js';
 import { RedisService } from '../../database/redis.service.js';
 import { AgentRegistry } from '../../orchestrator/agent.registry.js';
@@ -21,7 +21,9 @@ function adaptLogger(pino: PinoLogger): OpsBotLogger {
 }
 
 @Module({
-  imports: [DatabaseModule, OrchestratorModule, ConfigModule.forFeature(opsBotConfig)],
+  // opsBotConfig namespace зарегистрирован globally в AppModule.forRoot.load
+  // (isGlobal: true), forFeature избыточен.
+  imports: [DatabaseModule, OrchestratorModule],
   providers: [
     OpsAgentService,
     {
