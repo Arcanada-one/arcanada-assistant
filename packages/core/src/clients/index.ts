@@ -19,3 +19,33 @@ export {
   type OpsBotEvent,
 } from './ops-bot.types.js';
 export { parsePrometheusSnapshot } from './prometheus-parse.js';
+export {
+  ScrutatorClient,
+  ScrutatorClientError,
+  type IScrutatorClient,
+  type ScrutatorClientOptions,
+  type ScrutatorLogger,
+  type ScrutatorCircuitOptions,
+  type ScrutatorRetryOptions,
+} from './scrutator.client.js';
+export {
+  SearchRequestSchema,
+  SearchHitSchema,
+  SearchResultSchema,
+  IngestRequestSchema,
+  IngestResultSchema,
+  RecallRequestSchema,
+  RecallHitSchema,
+  RecallResultSchema,
+  HealthResponseSchema,
+  type SearchRequest,
+  type SearchHit,
+  type SearchResult,
+  type IngestRequest,
+  type IngestResult,
+  type RecallRequest,
+  type RecallHit,
+  type RecallResult,
+  type HealthResponse,
+  type PingResult,
+} from './scrutator.types.js';
