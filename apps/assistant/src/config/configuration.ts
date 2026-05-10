@@ -42,6 +42,13 @@ export const configurationSchema = z.object({
     .union([z.literal('true'), z.literal('false')])
     .default('true')
     .transform((v) => v === 'true'),
+  // ARCA-0008 feature flag: when 'false', KnowledgeAgent is не регистрируется,
+  // /wiki, /remember, /recall возвращают «команда временно отключена», а dialog-RAG
+  // обходит recall (см. dialog.context.ts).
+  ECOSYSTEM_SCRUTATOR_INTEGRATION: z
+    .union([z.literal('true'), z.literal('false')])
+    .default('true')
+    .transform((v) => v === 'true'),
 
   BRIEFING_TIMEZONE: z.string().min(1).default('Europe/Istanbul'),
   BRIEFING_MORNING_TIME: hhmm.default('08:00'),

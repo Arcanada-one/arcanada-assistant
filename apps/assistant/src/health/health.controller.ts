@@ -1,9 +1,11 @@
-import { Controller, Get, HttpCode, Res } from '@nestjs/common';
+import { Controller, Get, HttpCode, Inject, Res } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import type { FastifyReply } from 'fastify';
+import type { IScrutatorClient } from '@arcanada/core';
 
 import { PrismaService } from '../database/prisma.service.js';
 import { RedisService } from '../database/redis.service.js';
+import { SCRUTATOR_CLIENT } from '../agents/knowledge-agent/knowledge-agent.service.js';
 
 const APP_VERSION = '0.1.0';
 
@@ -11,6 +13,7 @@ interface DepStatus {
   status: 'ok' | 'fail' | 'pending-integration';
   latencyMs?: number;
   error?: string;
+  version?: string;
 }
 
 interface HealthBody {
@@ -38,10 +41,20 @@ export class HealthController {
   constructor(
     private readonly prisma: PrismaService,
     private readonly redis: RedisService,
+    @Inject(SCRUTATOR_CLIENT) private readonly scrutator: IScrutatorClient,
   ) {}
 
   async check(): Promise<HealthResponse> {
-    const [pg, rd] = await Promise.all([this.prisma.ping(), this.redis.ping()]);
+    const [pg, rd, sc] = await Promise.all([
+      this.prisma.ping(),
+      this.redis.ping(),
+      this.scrutator.ping().catch((err: unknown) => ({
+        ok: false,
+        latencyMs: -1,
+        error: err instanceof Error ? err.message : String(err),
+        version: undefined,
+      })),
+    ]);
 
     const dependencies: HealthBody['dependencies'] = {
       postgres: {
@@ -54,13 +67,18 @@ export class HealthController {
         latencyMs: rd.latencyMs,
         ...(rd.error ? { error: rd.error } : {}),
       },
-      scrutator: { status: 'pending-integration' },
+      scrutator: {
+        status: sc.ok ? 'ok' : 'fail',
+        ...(sc.latencyMs >= 0 ? { latencyMs: sc.latencyMs } : {}),
+        ...(sc.version ? { version: sc.version } : {}),
+        ...(sc.error ? { error: sc.error } : {}),
+      },
       modelConnector: { status: 'pending-integration' },
       opsBot: { status: 'pending-integration' },
       authArcana: { status: 'pending-integration' },
     };
 
-    const allOk = pg.ok && rd.ok;
+    const allOk = pg.ok && rd.ok && sc.ok;
     const body: HealthBody = {
       status: allOk ? 'ok' : 'fail',
       version: APP_VERSION,

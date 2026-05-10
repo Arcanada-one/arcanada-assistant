@@ -4,12 +4,14 @@ import { APP_INTERCEPTOR } from '@nestjs/core';
 import { LoggerModule } from 'nestjs-pino';
 
 import opsBotConfig from './config/ops-bot.config.js';
+import scrutatorConfig from './config/scrutator.config.js';
 import { configurationSchema, validateConfig } from './config/configuration.js';
 import { DatabaseModule } from './database/database.module.js';
 import { HealthModule } from './health/health.module.js';
 import { WebhookModule } from './webhook/webhook.module.js';
 import { OrchestratorModule } from './orchestrator/orchestrator.module.js';
 import { OpsAgentModule } from './agents/ops-agent/ops-agent.module.js';
+import { KnowledgeAgentModule } from './agents/knowledge-agent/knowledge-agent.module.js';
 import { FatalInterceptor } from './lifecycle/fatal.interceptor.js';
 
 @Module({
@@ -17,7 +19,7 @@ import { FatalInterceptor } from './lifecycle/fatal.interceptor.js';
     ConfigModule.forRoot({
       isGlobal: true,
       cache: true,
-      load: [opsBotConfig],
+      load: [opsBotConfig, scrutatorConfig],
       validate: (env) => validateConfig(env),
     }),
     LoggerModule.forRoot({
@@ -46,6 +48,7 @@ import { FatalInterceptor } from './lifecycle/fatal.interceptor.js';
     HealthModule,
     OrchestratorModule,
     OpsAgentModule,
+    KnowledgeAgentModule,
     WebhookModule,
   ],
   providers: [
