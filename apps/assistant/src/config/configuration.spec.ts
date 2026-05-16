@@ -22,6 +22,8 @@ const minimalValid = {
   SCRUTATOR_LTM_NAMESPACE: 'assistant-ltm-pavel',
   OPSBOT_BASE_URL: 'https://ops.arcanada.one',
   OPSBOT_API_KEY: 'opsbot-key',
+  MUNERA_BASE_URL: 'http://localhost:3500',
+  MUNERA_API_TOKEN: 'munera-test-token',
   BRIEFING_TIMEZONE: 'Europe/Istanbul',
   BRIEFING_MORNING_TIME: '08:00',
   BRIEFING_EVENING_TIME: '21:00',

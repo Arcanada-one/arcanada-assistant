@@ -36,6 +36,28 @@ export interface ScrutatorCircuitOptions {
   resetTimeout: number;
 }
 
+/**
+ * Self-heal event payload emitted by the Scrutator client when its circuit
+ * breaker recovers (close transition). Consumers wire this to Ops Bot
+ * `POST /events` via an injected emitter — keeps `packages/core` free of any
+ * Ops Bot HTTP dependency while still satisfying AAL Mandate § 8.
+ *
+ * Per PRD-ARCA-0009 V-AC-19, the payload MUST contain:
+ *   `{component: 'scrutator-client', level_attempted: 'L4',
+ *     fix_applied: 'cb-recovered', outcome: 'ok'}`.
+ */
+export interface ScrutatorSelfHealPayload {
+  readonly component: 'scrutator-client';
+  readonly level_attempted: 'L4';
+  readonly fix_applied: 'cb-recovered';
+  readonly outcome: 'ok';
+  readonly state: 'close';
+}
+
+export type ScrutatorSelfHealEmitter = (
+  payload: ScrutatorSelfHealPayload,
+) => void | Promise<void>;
+
 export interface ScrutatorClientOptions {
   /**
    * Base URL — e.g. `http://arcana-db:8310` (Tailscale-only network policy
@@ -52,6 +74,13 @@ export interface ScrutatorClientOptions {
   circuit?: ScrutatorCircuitOptions;
   /** Service identity for log lines. */
   serviceName?: string;
+  /**
+   * Optional emitter invoked when the circuit breaker recovers (`close`).
+   * When wired to Ops Bot, satisfies ARCA-0102 / V-AC-19. Default: no-op.
+   */
+  selfHealEmit?: ScrutatorSelfHealEmitter;
+  /** If false, the `close` event is not surfaced to the emitter. Default true. */
+  emitSelfHealOnRecovery?: boolean;
 }
 
 export interface IScrutatorClient {
@@ -104,6 +133,8 @@ export class ScrutatorClient implements IScrutatorClient {
   private readonly healthTimeoutMs: number;
   private readonly retry: ScrutatorRetryOptions;
   private readonly serviceName: string;
+  private readonly selfHealEmit?: ScrutatorSelfHealEmitter;
+  private readonly emitSelfHealOnRecovery: boolean;
   private readonly breaker: CircuitBreaker<[RequestPlan], HttpResult>;
 
   constructor(opts: ScrutatorClientOptions) {
@@ -114,6 +145,8 @@ export class ScrutatorClient implements IScrutatorClient {
     this.healthTimeoutMs = opts.healthTimeoutMs ?? 2_000;
     this.retry = opts.retry ?? DEFAULT_RETRY;
     this.serviceName = opts.serviceName ?? 'arcanada-assistant';
+    this.selfHealEmit = opts.selfHealEmit;
+    this.emitSelfHealOnRecovery = opts.emitSelfHealOnRecovery ?? true;
     const cb = opts.circuit ?? DEFAULT_CIRCUIT;
     this.breaker = new CircuitBreaker(this.executeRequest.bind(this), {
       timeout: false,
@@ -122,6 +155,32 @@ export class ScrutatorClient implements IScrutatorClient {
       rollingCountTimeout: cb.rollingCountTimeout,
       resetTimeout: cb.resetTimeout,
       errorFilter: (err: unknown) => isExcludedClientError(err),
+    });
+    this.breaker.on('close', () => {
+      if (!this.emitSelfHealOnRecovery || !this.selfHealEmit) return;
+      const payload: ScrutatorSelfHealPayload = {
+        component: 'scrutator-client',
+        level_attempted: 'L4',
+        fix_applied: 'cb-recovered',
+        outcome: 'ok',
+        state: 'close',
+      };
+      try {
+        const out = this.selfHealEmit(payload);
+        if (out && typeof (out as Promise<void>).then === 'function') {
+          (out as Promise<void>).catch((err) =>
+            this.logger?.warn(
+              { err: err instanceof Error ? err.message : String(err) },
+              'scrutator self_heal recovery emit failed (non-fatal)',
+            ),
+          );
+        }
+      } catch (err) {
+        this.logger?.warn(
+          { err: err instanceof Error ? err.message : String(err) },
+          'scrutator self_heal recovery emit threw (non-fatal)',
+        );
+      }
     });
   }
 

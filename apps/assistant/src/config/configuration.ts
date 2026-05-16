@@ -56,6 +56,27 @@ export const configurationSchema = z.object({
     .union([z.literal('true'), z.literal('false')])
     .default('true')
     .transform((v) => v === 'true'),
+  // ARCA-0009 M5: MuneraAgent — Bearer JWT issued via Munera `POST /api/v1/auth/telegram`
+  // (or Auth Arcana OIDC client_credentials after AUTH-* migration). Stored in Vault
+  // `secret/munera/assistant-token`. Default flag enabled; tests/dev use stub token.
+  MUNERA_BASE_URL: httpOrHttpsUrl,
+  MUNERA_API_TOKEN: z.string().min(1, 'MUNERA_API_TOKEN required (Vault-managed JWT)'),
+  MUNERA_TIMEOUT_MS: z.coerce.number().int().positive().default(10_000),
+  ECOSYSTEM_MUNERA_INTEGRATION: z
+    .union([z.literal('true'), z.literal('false')])
+    .default('true')
+    .transform((v) => v === 'true'),
+  // ARCA-0009 M6: DreamerClient skeleton — feature-flagged OFF until AGENT-* server
+  // migration lands (Operational Resilience Mandate Principle 2). When false, the
+  // module registers but execute() returns `unavailable:dreamer_not_migrated`. When
+  // true (post-migration via ARCA-* Phase 6b), live HTTP path activates.
+  DREAMER_BASE_URL: z.string().url().optional(),
+  DREAMER_API_TOKEN: z.string().min(1).optional(),
+  DREAMER_TIMEOUT_MS: z.coerce.number().int().positive().default(15_000),
+  ECOSYSTEM_DREAMER_LIVE: z
+    .union([z.literal('true'), z.literal('false')])
+    .default('false')
+    .transform((v) => v === 'true'),
 
   BRIEFING_TIMEZONE: z.string().min(1).default('Europe/Istanbul'),
   BRIEFING_MORNING_TIME: hhmm.default('08:00'),

@@ -27,6 +27,8 @@ export {
   type ScrutatorLogger,
   type ScrutatorCircuitOptions,
   type ScrutatorRetryOptions,
+  type ScrutatorSelfHealEmitter,
+  type ScrutatorSelfHealPayload,
 } from './scrutator.client.js';
 export {
   SearchRequestSchema,
