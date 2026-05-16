@@ -1,0 +1,44 @@
+version: 1
+tools:
+  - tool_name: task_create
+    requires_approval: true
+    approval_timeout_ms: 300000
+    idempotency_strategy: redis_nx
+    approve_requires: []
+
+  - tool_name: task_update
+    requires_approval: true
+    approval_timeout_ms: 300000
+    idempotency_strategy: redis_nx
+    approve_requires: []
+
+  - tool_name: task_query
+    requires_approval: conditional
+    condition:
+      or:
+        - "==":
+            - var: payload.where
+            - null
+        - "==":
+            - var: payload.where
+            - {}
+    approval_timeout_ms: 300000
+    idempotency_strategy: redis_nx
+
+  - tool_name: task_get
+    requires_approval: false
+
+  - tool_name: task_list
+    requires_approval: false
+
+  - tool_name: task_search
+    requires_approval: false
+
+  - tool_name: transcribe_audio
+    requires_approval: false
+
+  - tool_name: opsbot_command
+    requires_approval: true
+    approval_timeout_ms: 300000
+    idempotency_strategy: redis_nx
+    approve_requires: []

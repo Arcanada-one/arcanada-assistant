@@ -17,6 +17,7 @@ const minimalValid = {
   AUTH_ARCANA_JWT_AUDIENCE: 'arcanada-assistant',
   MODEL_CONNECTOR_BASE_URL: 'http://connector.arcanada.one:3900',
   MODEL_CONNECTOR_DEFAULT_MODEL: 'anthropic/claude-haiku-4-5',
+  MODEL_CONNECTOR_API_KEY: 'mc-test-key',
   SCRUTATOR_BASE_URL: 'http://arcana-db:8310',
   SCRUTATOR_LTM_NAMESPACE: 'assistant-ltm-pavel',
   OPSBOT_BASE_URL: 'https://ops.arcanada.one',

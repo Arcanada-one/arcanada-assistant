@@ -5,6 +5,7 @@ import { LoggerModule } from 'nestjs-pino';
 
 import opsBotConfig from './config/ops-bot.config.js';
 import scrutatorConfig from './config/scrutator.config.js';
+import transcriberConfig from './config/transcriber.config.js';
 import { configurationSchema, validateConfig } from './config/configuration.js';
 import { DatabaseModule } from './database/database.module.js';
 import { HealthModule } from './health/health.module.js';
@@ -12,6 +13,8 @@ import { WebhookModule } from './webhook/webhook.module.js';
 import { OrchestratorModule } from './orchestrator/orchestrator.module.js';
 import { OpsAgentModule } from './agents/ops-agent/ops-agent.module.js';
 import { KnowledgeAgentModule } from './agents/knowledge-agent/knowledge-agent.module.js';
+import { TranscriberAgentModule } from './agents/transcriber/transcriber-agent.module.js';
+import { ApprovalModule } from './approval/approval.module.js';
 import { FatalInterceptor } from './lifecycle/fatal.interceptor.js';
 
 @Module({
@@ -19,7 +22,7 @@ import { FatalInterceptor } from './lifecycle/fatal.interceptor.js';
     ConfigModule.forRoot({
       isGlobal: true,
       cache: true,
-      load: [opsBotConfig, scrutatorConfig],
+      load: [opsBotConfig, scrutatorConfig, transcriberConfig],
       validate: (env) => validateConfig(env),
     }),
     LoggerModule.forRoot({
@@ -49,6 +52,8 @@ import { FatalInterceptor } from './lifecycle/fatal.interceptor.js';
     OrchestratorModule,
     OpsAgentModule,
     KnowledgeAgentModule,
+    TranscriberAgentModule,
+    ApprovalModule,
     WebhookModule,
   ],
   providers: [

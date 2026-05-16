@@ -30,6 +30,13 @@ export const configurationSchema = z.object({
 
   MODEL_CONNECTOR_BASE_URL: httpOrHttpsUrl,
   MODEL_CONNECTOR_DEFAULT_MODEL: z.string().min(1),
+  MODEL_CONNECTOR_API_KEY: z.string().min(1, 'MODEL_CONNECTOR_API_KEY required for STT'),
+  MODEL_CONNECTOR_STT_DEFAULT_MODEL: z.string().min(1).optional(),
+  TRANSCRIBER_TIMEOUT_MS: z.coerce.number().int().positive().default(30_000),
+  ECOSYSTEM_TRANSCRIBER_INTEGRATION: z
+    .union([z.literal('true'), z.literal('false')])
+    .default('true')
+    .transform((v) => v === 'true'),
 
   SCRUTATOR_BASE_URL: httpOrHttpsUrl,
   SCRUTATOR_LTM_NAMESPACE: z.string().min(1),
