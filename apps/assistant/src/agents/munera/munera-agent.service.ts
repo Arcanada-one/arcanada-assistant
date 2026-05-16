@@ -1,6 +1,10 @@
 import { Inject, Injectable } from '@nestjs/common';
 
 import type { IAgent } from '../../orchestrator/agent.registry.js';
+import type {
+  AgentHealthSnapshot,
+  IAgentHealth,
+} from '../../aal/agent-health.types.js';
 
 import type { IMuneraClient } from './munera.client.js';
 import type {
@@ -32,7 +36,7 @@ export interface TaskListPayload {
 export type MuneraAgentResult = TaskResult | TaskListResult;
 
 @Injectable()
-export class MuneraAgentService implements IAgent {
+export class MuneraAgentService implements IAgent, IAgentHealth {
   readonly name = 'munera';
   readonly intents = [
     MUNERA_INTENT_TASK_CREATE,
@@ -42,6 +46,17 @@ export class MuneraAgentService implements IAgent {
   ] as const;
 
   constructor(@Inject(MUNERA_CLIENT) private readonly client: IMuneraClient) {}
+
+  healthSnapshot(): AgentHealthSnapshot {
+    const open = this.client.isCircuitOpen();
+    return {
+      agent: this.name,
+      state: open ? 'unavailable' : 'ok',
+      circuit: open ? 'open' : 'closed',
+      ...(open ? { reason: 'circuit_open' } : {}),
+      checkedAt: new Date().toISOString(),
+    };
+  }
 
   async execute(intent: string, payload?: unknown): Promise<MuneraAgentResult> {
     if (this.client.isCircuitOpen()) {

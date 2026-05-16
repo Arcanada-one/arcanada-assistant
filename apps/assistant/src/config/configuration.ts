@@ -81,6 +81,19 @@ export const configurationSchema = z.object({
   BRIEFING_TIMEZONE: z.string().min(1).default('Europe/Istanbul'),
   BRIEFING_MORNING_TIME: hhmm.default('08:00'),
   BRIEFING_EVENING_TIME: hhmm.default('21:00'),
+
+  // ARCA-0009 M7 — hybrid inter-agent auth (V-AC-6).
+  // MESH_VAULT_API_KEY: opaque `arc_api_*` key issued by Vault AppRole; required
+  // for mesh peers to call assistant endpoints. Optional in dev (preflight
+  // returns 401 when absent and no JWT/tailnet identity matches).
+  MESH_VAULT_API_KEY: z.string().min(1).optional(),
+  // MESH_AUTH_ARCANA_JWT: when 'true', AuthArcanaJwtStrategy becomes the
+  // highest-priority gate (V-AC-6). Default 'false' — Vault API key path
+  // remains active until AUTH-* phases ship.
+  MESH_AUTH_ARCANA_JWT: z
+    .union([z.literal('true'), z.literal('false')])
+    .default('false')
+    .transform((v) => v === 'true'),
 });
 
 export type AppConfig = z.infer<typeof configurationSchema>;

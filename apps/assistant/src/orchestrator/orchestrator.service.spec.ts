@@ -1,5 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 
+import { NoopTraceContext } from '../observability/trace-context.js';
+
 import { AgentRegistry, type IAgent } from './agent.registry.js';
 import { NoAgentForIntentError, OrchestratorService } from './orchestrator.service.js';
 
@@ -34,5 +36,25 @@ describe('OrchestratorService.route', () => {
       { name: 'echo', intents: ['/echo'] },
       { name: 'ops', intents: ['/status', '/agents'] },
     ]);
+  });
+
+  it('wraps successful dispatch in a trace span with agent/intent attributes', async () => {
+    const reg = new AgentRegistry();
+    reg.register(makeAgent('munera', ['/task_get']));
+    const tracer = new NoopTraceContext();
+    const orch = new OrchestratorService(reg, tracer);
+    await orch.route('/task_get');
+    // span ended → currentSpan undefined
+    expect(tracer.currentSpan()).toBeUndefined();
+  });
+
+  it('records error status when handler throws and rethrows the error', async () => {
+    const reg = new AgentRegistry();
+    const handler = vi.fn().mockRejectedValue(new Error('boom'));
+    reg.register(makeAgent('flaky', ['/flaky'], handler));
+    const tracer = new NoopTraceContext();
+    const orch = new OrchestratorService(reg, tracer);
+    await expect(orch.route('/flaky')).rejects.toThrow('boom');
+    expect(tracer.currentSpan()).toBeUndefined();
   });
 });

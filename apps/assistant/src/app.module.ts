@@ -20,6 +20,11 @@ import { TranscriberAgentModule } from './agents/transcriber/transcriber-agent.m
 import { MuneraAgentModule } from './agents/munera/munera-agent.module.js';
 import { DreamerAgentModule } from './agents/dreamer/dreamer-agent.module.js';
 import { ApprovalModule } from './approval/approval.module.js';
+import { AalModule } from './aal/aal.module.js';
+import { AuthModule } from './auth/auth.module.js';
+import { TracingModule } from './observability/tracing.module.js';
+import { defaultTraceContext } from './observability/default-trace-context.js';
+import { pinoTraceMixin } from './observability/otel-pino-bridge.js';
 import { FatalInterceptor } from './lifecycle/fatal.interceptor.js';
 
 @Module({
@@ -33,9 +38,11 @@ import { FatalInterceptor } from './lifecycle/fatal.interceptor.js';
     LoggerModule.forRoot({
       pinoHttp: {
         level: process.env.LOG_LEVEL ?? 'info',
+        mixin: pinoTraceMixin(defaultTraceContext()),
         redact: {
           paths: [
             'req.headers.authorization',
+            'req.headers["x-api-key"]',
             'req.headers["x-telegram-bot-api-secret-token"]',
             'req.headers.cookie',
             '*.DATABASE_URL',
@@ -43,6 +50,7 @@ import { FatalInterceptor } from './lifecycle/fatal.interceptor.js';
             '*.TELEGRAM_BOT_TOKEN',
             '*.TELEGRAM_WEBHOOK_SECRET',
             '*.OPSBOT_API_KEY',
+            '*.MESH_VAULT_API_KEY',
           ],
           censor: '[REDACTED]',
         },
@@ -53,6 +61,9 @@ import { FatalInterceptor } from './lifecycle/fatal.interceptor.js';
       },
     }),
     DatabaseModule,
+    TracingModule.forRoot({ factory: defaultTraceContext }),
+    AalModule.forRoot(),
+    AuthModule.forRoot(),
     HealthModule,
     OrchestratorModule,
     OpsAgentModule,

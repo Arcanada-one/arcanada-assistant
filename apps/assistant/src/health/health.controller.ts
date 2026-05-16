@@ -6,6 +6,9 @@ import type { IScrutatorClient } from '@arcanada/core';
 import { PrismaService } from '../database/prisma.service.js';
 import { RedisService } from '../database/redis.service.js';
 import { SCRUTATOR_CLIENT } from '../agents/knowledge-agent/knowledge-agent.service.js';
+import type { AgentHealthSnapshot } from '../aal/agent-health.types.js';
+
+import { PerAgentHealthIndicator } from './per-agent.health.indicator.js';
 
 const APP_VERSION = '0.1.0';
 
@@ -28,6 +31,7 @@ interface HealthBody {
     opsBot: DepStatus;
     authArcana: DepStatus;
   };
+  agents: AgentHealthSnapshot[];
 }
 
 interface HealthResponse {
@@ -42,10 +46,11 @@ export class HealthController {
     private readonly prisma: PrismaService,
     private readonly redis: RedisService,
     @Inject(SCRUTATOR_CLIENT) private readonly scrutator: IScrutatorClient,
+    private readonly perAgentHealth: PerAgentHealthIndicator,
   ) {}
 
   async check(): Promise<HealthResponse> {
-    const [pg, rd, sc] = await Promise.all([
+    const [pg, rd, sc, mesh] = await Promise.all([
       this.prisma.ping(),
       this.redis.ping(),
       this.scrutator.ping().catch((err: unknown) => ({
@@ -54,6 +59,7 @@ export class HealthController {
         error: err instanceof Error ? err.message : String(err),
         version: undefined,
       })),
+      this.perAgentHealth.snapshot(),
     ]);
 
     const dependencies: HealthBody['dependencies'] = {
@@ -78,15 +84,25 @@ export class HealthController {
       authArcana: { status: 'pending-integration' },
     };
 
-    const allOk = pg.ok && rd.ok && sc.ok;
+    const depsOk = pg.ok && rd.ok && sc.ok;
+    const meshOk = mesh.status === 'ok';
+    const status: HealthBody['status'] = !depsOk
+      ? 'fail'
+      : mesh.status === 'fail'
+        ? 'fail'
+        : meshOk
+          ? 'ok'
+          : 'degraded';
+    const httpStatus = status === 'fail' ? 503 : 200;
     const body: HealthBody = {
-      status: allOk ? 'ok' : 'fail',
+      status,
       version: APP_VERSION,
       timestamp: new Date().toISOString(),
       dependencies,
+      agents: mesh.agents,
     };
 
-    return { statusCode: allOk ? 200 : 503, body };
+    return { statusCode: httpStatus, body };
   }
 
   @Get()

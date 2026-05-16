@@ -1,6 +1,10 @@
 import { Inject, Injectable } from '@nestjs/common';
 
 import type { IAgent } from '../../orchestrator/agent.registry.js';
+import type {
+  AgentHealthSnapshot,
+  IAgentHealth,
+} from '../../aal/agent-health.types.js';
 
 import type { ITranscriberClient } from './transcriber.client.js';
 import {
@@ -23,11 +27,22 @@ export interface TranscribePayload {
 export type TranscriberAgentResult = TranscribeResult;
 
 @Injectable()
-export class TranscriberAgentService implements IAgent {
+export class TranscriberAgentService implements IAgent, IAgentHealth {
   readonly name = 'transcriber';
   readonly intents = ['/transcribe'] as const;
 
   constructor(@Inject(TRANSCRIBER_CLIENT) private readonly client: ITranscriberClient) {}
+
+  healthSnapshot(): AgentHealthSnapshot {
+    const open = this.client.isCircuitOpen();
+    return {
+      agent: this.name,
+      state: open ? 'unavailable' : 'ok',
+      circuit: open ? 'open' : 'closed',
+      ...(open ? { reason: 'circuit_open' } : {}),
+      checkedAt: new Date().toISOString(),
+    };
+  }
 
   async execute(intent: string, payload?: unknown): Promise<TranscriberAgentResult> {
     if (intent !== '/transcribe') {

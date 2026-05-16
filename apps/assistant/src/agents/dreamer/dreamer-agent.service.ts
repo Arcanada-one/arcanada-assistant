@@ -1,6 +1,10 @@
 import { Inject, Injectable } from '@nestjs/common';
 
 import type { IAgent } from '../../orchestrator/agent.registry.js';
+import type {
+  AgentHealthSnapshot,
+  IAgentHealth,
+} from '../../aal/agent-health.types.js';
 
 import type { IDreamerClient } from './dreamer.client.js';
 import {
@@ -16,7 +20,7 @@ import {
 export const DREAMER_CLIENT = Symbol.for('DREAMER_CLIENT');
 
 @Injectable()
-export class DreamerAgentService implements IAgent {
+export class DreamerAgentService implements IAgent, IAgentHealth {
   readonly name = 'dreamer';
   readonly intents = [
     DREAMER_INTENT_INDEX_PAGE,
@@ -25,6 +29,15 @@ export class DreamerAgentService implements IAgent {
   ] as const;
 
   constructor(@Inject(DREAMER_CLIENT) private readonly client: IDreamerClient) {}
+
+  healthSnapshot(): AgentHealthSnapshot {
+    return {
+      agent: this.name,
+      state: this.client.isLive() ? 'ok' : 'degraded',
+      reason: this.client.isLive() ? 'live' : 'skeleton_dreamer_not_migrated',
+      checkedAt: new Date().toISOString(),
+    };
+  }
 
   async execute(intent: string, payload?: unknown): Promise<DreamerResult> {
     if (!isObject(payload)) {
