@@ -66,6 +66,11 @@ export const configurationSchema = z.object({
     .union([z.literal('true'), z.literal('false')])
     .default('true')
     .transform((v) => v === 'true'),
+  // ARCA-0009 session 4: default Munera project used by Telegram /task NL flow
+  // (TaskHandler). When unset, TaskHandler replies with a configuration-error
+  // notice and skips both approval and orchestrator dispatch. Per-user / per-
+  // chat project mapping deferred to follow-up task.
+  MUNERA_DEFAULT_PROJECT_ID: z.string().uuid().optional(),
   // ARCA-0009 M6: DreamerClient skeleton — feature-flagged OFF until AGENT-* server
   // migration lands (Operational Resilience Mandate Principle 2). When false, the
   // module registers but execute() returns `unavailable:dreamer_not_migrated`. When

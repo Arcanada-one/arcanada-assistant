@@ -4,14 +4,9 @@ import { Body, Controller, Headers, HttpCode, Post, UnauthorizedException } from
 import { ConfigService } from '@nestjs/config';
 import { ApiTags } from '@nestjs/swagger';
 
-import { CommandRouter } from '../telegram/handlers/command-router.handler.js';
+import { CommandRouter, type IncomingUpdate } from '../telegram/handlers/command-router.handler.js';
 
 const SECRET_HEADER = 'x-telegram-bot-api-secret-token';
-
-interface TelegramUpdate {
-  update_id: number;
-  message?: { message_id: number; chat: { id: number }; text?: string };
-}
 
 function safeEq(a: string, b: string): boolean {
   const ab = Buffer.from(a, 'utf8');
@@ -33,7 +28,7 @@ export class TelegramController {
   @Post('telegram')
   @HttpCode(200)
   async handle(
-    @Body() update: TelegramUpdate,
+    @Body() update: IncomingUpdate,
     @Headers(SECRET_HEADER) secret?: string,
   ): Promise<{ ok: true }> {
     const expected = this.config.get<string>('TELEGRAM_WEBHOOK_SECRET') ?? '';
