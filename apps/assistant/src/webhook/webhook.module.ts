@@ -8,6 +8,7 @@ import { WikiHandler } from '../telegram/handlers/wiki.handler.js';
 import { RememberHandler } from '../telegram/handlers/remember.handler.js';
 import { VoiceHandler } from '../telegram/handlers/voice.handler.js';
 import { TaskHandler, MUNERA_DEFAULT_PROJECT_ID } from '../telegram/handlers/task.handler.js';
+import { OpsCommandHandler } from '../telegram/handlers/ops-command.handler.js';
 import { ApprovalCallbackHandler } from '../telegram/handlers/approval-callback.handler.js';
 import { OrchestratorModule } from '../orchestrator/orchestrator.module.js';
 import { ApprovalModule } from '../approval/approval.module.js';
@@ -27,6 +28,7 @@ import { EchoHandler } from './echo.handler.js';
     RememberHandler,
     VoiceHandler,
     TaskHandler,
+    OpsCommandHandler,
     ApprovalCallbackHandler,
     CommandRouter,
     {

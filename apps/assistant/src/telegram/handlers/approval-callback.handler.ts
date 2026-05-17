@@ -161,7 +161,14 @@ function lookupPayload(envelope: unknown): unknown {
 
 function renderResponse(intent: string, response: unknown): string {
   if (response && typeof response === 'object' && 'kind' in response) {
-    const r = response as { kind: string; task?: { title?: string; id?: string }; reason?: string; detail?: string };
+    const r = response as {
+      kind: string;
+      task?: { title?: string; id?: string };
+      reason?: string;
+      detail?: string;
+      command_id?: string;
+      result?: { echo?: { token?: string } };
+    };
     if (r.kind === 'ok') {
       if (intent === '/task_create' && r.task) {
         return `✓ Задача создана: «${r.task.title ?? ''}» (id ${r.task.id ?? '?'}).`;
@@ -171,6 +178,18 @@ function renderResponse(intent: string, response: unknown): string {
     if (r.kind === 'unavailable') {
       const det = r.detail ? ` — ${r.detail}` : '';
       return `⚠️ Действие не выполнено (${r.reason ?? 'unavailable'})${det}.`;
+    }
+    if (r.kind === 'command_ok') {
+      const echoToken = r.result?.echo?.token;
+      if (intent === '/opsbot_command' && typeof echoToken === 'string') {
+        return `✓ Ops Bot echo: «${echoToken}» (id ${r.command_id ?? '?'}).`;
+      }
+      return `✓ Команда выполнена (id ${r.command_id ?? '?'}).`;
+    }
+    if (r.kind === 'command_failed') {
+      const det = r.detail ? ` — ${r.detail}` : '';
+      const cmd = intent === '/opsbot_command' ? 'echo-back' : 'команда';
+      return `⚠️ Команда «${cmd}» не выполнена (${r.reason ?? 'failed'})${det}.`;
     }
   }
   return '✓ Действие выполнено.';

@@ -268,6 +268,175 @@ describe('OpsBotClient.healthReady', () => {
   });
 });
 
+describe('OpsBotClient.executeCommand (ARCA-0009 M3, V-AC-3)', () => {
+  const CMD_ID = '01J3K9Q2V4ZAB6X8Y0R2M5N7P9';
+  const IDEMPOTENCY_KEY = '018f8e2a-1c2d-7000-9000-000000000001';
+
+  function commandsServer(): {
+    cmdCalls: { authorization: string | null; bodies: Record<string, unknown>[] };
+  } {
+    const cmdCalls = { authorization: null as string | null, bodies: [] as Record<string, unknown>[] };
+    server.use(
+      http.post(`${BASE_URL}/commands`, async ({ request }) => {
+        cmdCalls.authorization = request.headers.get('authorization');
+        const body = (await request.json()) as Record<string, unknown>;
+        cmdCalls.bodies.push(body);
+        return HttpResponse.json(
+          {
+            ok: true,
+            command_id: CMD_ID,
+            result: { echo: body.payload },
+            executed_at: '2026-05-17T20:30:00.000Z',
+          },
+          { status: 201 },
+        );
+      }),
+    );
+    return { cmdCalls };
+  }
+
+  it('POSTs /commands with Bearer auth and parses ack', async () => {
+    const { cmdCalls } = commandsServer();
+    const client = makeClient();
+    const ack = await client.executeCommand({
+      cmd: 'echo-back',
+      payload: { token: 'ARCA-0009' },
+      idempotencyKey: IDEMPOTENCY_KEY,
+    });
+    expect(ack.ok).toBe(true);
+    expect(ack.command_id).toBe(CMD_ID);
+    expect(ack.result).toEqual({ echo: { token: 'ARCA-0009' } });
+    expect(cmdCalls.authorization).toBe(`Bearer ${API_KEY}`);
+    expect(cmdCalls.bodies[0]).toMatchObject({
+      cmd: 'echo-back',
+      payload: { token: 'ARCA-0009' },
+      idempotency_key: IDEMPOTENCY_KEY,
+    });
+  });
+
+  it('rejects malformed input via Zod before HTTP (closed enum + uuid guard)', async () => {
+    const client = makeClient();
+    await expect(
+      client.executeCommand({
+        // @ts-expect-error — invalid enum value, must fail at runtime via Zod
+        cmd: 'unknown-cmd',
+        payload: {},
+        idempotencyKey: IDEMPOTENCY_KEY,
+      }),
+    ).rejects.toBeInstanceOf(OpsBotClientError);
+    await expect(
+      client.executeCommand({
+        cmd: 'echo-back',
+        payload: {},
+        idempotencyKey: 'not-a-uuid',
+      }),
+    ).rejects.toBeInstanceOf(OpsBotClientError);
+    expect(calls.count.events).toBe(0);
+  });
+
+  it('throws OpsBotClientError on 4xx without retry', async () => {
+    server.use(
+      http.post(`${BASE_URL}/commands`, () => HttpResponse.json({ error: 'bad' }, { status: 400 })),
+    );
+    const client = makeClient();
+    await expect(
+      client.executeCommand({
+        cmd: 'echo-back',
+        payload: {},
+        idempotencyKey: IDEMPOTENCY_KEY,
+      }),
+    ).rejects.toThrow(/HTTP 400/);
+  });
+
+  it('emits pre-execute + post-execute audit events (T4 control)', async () => {
+    commandsServer();
+    const client = makeClient();
+    await client.executeCommand({
+      cmd: 'echo-back',
+      payload: { token: 'ARCA-0009' },
+      idempotencyKey: IDEMPOTENCY_KEY,
+    });
+    // Audit events go to /events (not /commands). The default server /events
+    // handler in makeServer() increments calls.count.events — one for the
+    // pre-execute envelope and one for the post-execute result envelope.
+    expect(calls.count.events).toBe(2);
+  });
+
+  it('emits post-execute audit with ok=false when Ops Bot returns ok:false', async () => {
+    server.use(
+      http.post(`${BASE_URL}/commands`, () =>
+        HttpResponse.json(
+          {
+            ok: false,
+            command_id: CMD_ID,
+            result: { reason: 'unsupported_command' },
+            executed_at: '2026-05-17T20:31:00.000Z',
+          },
+          { status: 200 },
+        ),
+      ),
+    );
+    const bodies: Record<string, unknown>[] = [];
+    server.use(
+      http.post(`${BASE_URL}/events`, async ({ request }) => {
+        const body = (await request.json()) as Record<string, unknown>;
+        bodies.push(body);
+        return HttpResponse.json(
+          { event_id: '01J2H7K8FXYJ9P0Q3R5T6V8W0Z', status: 'accepted' },
+          { status: 201 },
+        );
+      }),
+    );
+    const client = makeClient();
+    const ack = await client.executeCommand({
+      cmd: 'echo-back',
+      payload: {},
+      idempotencyKey: IDEMPOTENCY_KEY,
+    });
+    expect(ack.ok).toBe(false);
+    const post = bodies.find(
+      (b) => typeof b.message === 'string' && (b.message as string).includes('result'),
+    );
+    expect(post).toBeDefined();
+    expect((post?.context as Record<string, unknown>)?.ok).toBe(false);
+  });
+
+  it('does NOT retry on 5xx (executeCommand is non-idempotent at transport layer)', async () => {
+    let calls5xx = 0;
+    server.use(
+      http.post(`${BASE_URL}/commands`, () => {
+        calls5xx += 1;
+        return HttpResponse.json({ error: 'down' }, { status: 503 });
+      }),
+    );
+    const client = makeClient();
+    await expect(
+      client.executeCommand({
+        cmd: 'echo-back',
+        payload: {},
+        idempotencyKey: IDEMPOTENCY_KEY,
+      }),
+    ).rejects.toBeInstanceOf(OpsBotClientError);
+    expect(calls5xx).toBe(1);
+  });
+
+  it('rejects malformed Ops Bot response via Zod', async () => {
+    server.use(
+      http.post(`${BASE_URL}/commands`, () =>
+        HttpResponse.json({ command_id: CMD_ID, executed_at: 'not-iso' }, { status: 201 }),
+      ),
+    );
+    const client = makeClient();
+    await expect(
+      client.executeCommand({
+        cmd: 'echo-back',
+        payload: {},
+        idempotencyKey: IDEMPOTENCY_KEY,
+      }),
+    ).rejects.toThrow(/response/i);
+  });
+});
+
 describe('OpsBotClient logger discipline', () => {
   it('never logs raw Authorization header', async () => {
     const logger: OpsBotLogger = {

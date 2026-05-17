@@ -11,11 +11,17 @@ export {
   EmitEventInputSchema,
   EmitEventResponseSchema,
   EcosystemSnapshotSchema,
+  ExecuteCommandInputSchema,
+  ExecuteCommandResponseSchema,
+  OpsBotCommandKindSchema,
   OpsBotEventSchema,
   OpsBotEventCategory,
   type EmitEventInput,
   type EmitEventResponse,
   type EcosystemSnapshot,
+  type ExecuteCommandInput,
+  type ExecuteCommandResponse,
+  type OpsBotCommandKind,
   type OpsBotEvent,
 } from './ops-bot.types.js';
 export { parsePrometheusSnapshot } from './prometheus-parse.js';

@@ -9,6 +9,7 @@ import type { WikiHandler } from './wiki.handler.js';
 import type { RememberHandler } from './remember.handler.js';
 import type { VoiceHandler } from './voice.handler.js';
 import type { TaskHandler } from './task.handler.js';
+import type { OpsCommandHandler } from './ops-command.handler.js';
 import type { ApprovalCallbackHandler } from './approval-callback.handler.js';
 
 function build() {
@@ -19,6 +20,7 @@ function build() {
   const remember = { handle: vi.fn() } as unknown as RememberHandler;
   const voice = { handle: vi.fn() } as unknown as VoiceHandler;
   const task = { handle: vi.fn() } as unknown as TaskHandler;
+  const ops = { handle: vi.fn() } as unknown as OpsCommandHandler;
   const approvalCallback = { handle: vi.fn() } as unknown as ApprovalCallbackHandler;
   return {
     echo,
@@ -28,6 +30,7 @@ function build() {
     remember,
     voice,
     task,
+    ops,
     approvalCallback,
     router: new CommandRouter(
       status,
@@ -37,6 +40,7 @@ function build() {
       echo,
       voice,
       task,
+      ops,
       approvalCallback,
     ),
   };
@@ -187,6 +191,24 @@ describe('CommandRouter', () => {
       message: { message_id: 14, chat: { id: 5 }, text: '/task Купить хлеб' },
     });
     expect(task.handle).toHaveBeenCalledWith(5, 'Купить хлеб');
+  });
+
+  it('dispatches /ops <subcmd> <args> to OpsCommandHandler', async () => {
+    const { router, ops } = build();
+    await router.handle({
+      update_id: 145,
+      message: { message_id: 145, chat: { id: 5 }, text: '/ops echo-back ARCA-0009' },
+    });
+    expect(ops.handle).toHaveBeenCalledWith(5, 'echo-back ARCA-0009');
+  });
+
+  it('dispatches bare /ops with empty args to OpsCommandHandler (handler validates)', async () => {
+    const { router, ops } = build();
+    await router.handle({
+      update_id: 146,
+      message: { message_id: 146, chat: { id: 5 }, text: '/ops' },
+    });
+    expect(ops.handle).toHaveBeenCalledWith(5, '');
   });
 
   it('routes natural-language «создай задачу …» to TaskHandler', async () => {

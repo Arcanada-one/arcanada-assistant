@@ -5,9 +5,13 @@ import {
   EcosystemSnapshotSchema,
   EmitEventInputSchema,
   EmitEventResponseSchema,
+  ExecuteCommandInputSchema,
+  ExecuteCommandResponseSchema,
   type EcosystemSnapshot,
   type EmitEventInput,
   type EmitEventResponse,
+  type ExecuteCommandInput,
+  type ExecuteCommandResponse,
 } from './ops-bot.types.js';
 import { parsePrometheusSnapshot } from './prometheus-parse.js';
 
@@ -56,6 +60,14 @@ export interface IOpsBotClient {
   getEcosystemSnapshot(): Promise<EcosystemSnapshot>;
   healthReady(): Promise<boolean>;
   isCircuitOpen(): boolean;
+  /**
+   * Bidirectional command issue (ARCA-0009 M3, PRD V-AC-3). Emits pre-execute
+   * and post-execute `audit` events around the call so threat-model T4
+   * (unauthorised command execution + audit-gap) is closed end-to-end.
+   * Idempotency is delegated to Ops Bot via the caller-supplied uuid v7
+   * `idempotencyKey`; transport layer does NOT retry on 5xx.
+   */
+  executeCommand(input: ExecuteCommandInput): Promise<ExecuteCommandResponse>;
 }
 
 export class OpsBotClientError extends Error {
@@ -186,6 +198,66 @@ export class OpsBotClient implements IOpsBotClient {
     return validated.data;
   }
 
+  async executeCommand(input: ExecuteCommandInput): Promise<ExecuteCommandResponse> {
+    const parsed = ExecuteCommandInputSchema.safeParse(input);
+    if (!parsed.success) {
+      throw new OpsBotClientError(
+        `Invalid executeCommand input: ${parsed.error.message}`,
+        parsed.error,
+      );
+    }
+    const { cmd, payload, idempotencyKey } = parsed.data;
+    await this.safeAuditEmit({
+      message: 'opsbot-command-issued',
+      context: { component: 'ops-bot-client', cmd, idempotency_key: idempotencyKey },
+    });
+    const body = JSON.stringify({
+      cmd,
+      payload,
+      idempotency_key: idempotencyKey,
+    });
+    let response: ExecuteCommandResponse;
+    try {
+      const result = await this.callBreaker({
+        url: `${this.baseUrl}/commands`,
+        method: 'POST',
+        body,
+        retryable: false,
+        timeoutMs: this.timeoutMs,
+      });
+      const ack = ExecuteCommandResponseSchema.safeParse(result.json);
+      if (!ack.success) {
+        throw new OpsBotClientError(
+          `Invalid /commands response: ${ack.error.message}`,
+          ack.error,
+        );
+      }
+      response = ack.data;
+    } catch (err) {
+      await this.safeAuditEmit({
+        message: 'opsbot-command-error',
+        context: {
+          component: 'ops-bot-client',
+          cmd,
+          idempotency_key: idempotencyKey,
+          error: err instanceof Error ? err.message : String(err),
+        },
+      });
+      throw err;
+    }
+    await this.safeAuditEmit({
+      message: 'opsbot-command-result',
+      context: {
+        component: 'ops-bot-client',
+        cmd,
+        idempotency_key: idempotencyKey,
+        ok: response.ok,
+        command_id: response.command_id,
+      },
+    });
+    return response;
+  }
+
   async healthReady(): Promise<boolean> {
     try {
       const result = await this.executeRequest({
@@ -261,6 +333,26 @@ export class OpsBotClient implements IOpsBotClient {
       return { status: res.status, text, json };
     } finally {
       clearTimeout(timer);
+    }
+  }
+
+  private async safeAuditEmit(args: {
+    message: string;
+    context: Record<string, unknown>;
+  }): Promise<void> {
+    try {
+      await this.emitEvent({
+        service: this.serviceName,
+        category: 'audit',
+        severity: 'info',
+        message: args.message,
+        context: args.context,
+      });
+    } catch (err) {
+      this.logger?.warn(
+        { err: errMessage(err), message: args.message },
+        'opsbot audit emit failed (non-fatal)',
+      );
     }
   }
 

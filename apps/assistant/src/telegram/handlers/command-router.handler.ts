@@ -8,6 +8,7 @@ import { WikiHandler } from './wiki.handler.js';
 import { RememberHandler } from './remember.handler.js';
 import { VoiceHandler, type TelegramVoice } from './voice.handler.js';
 import { TaskHandler } from './task.handler.js';
+import { OpsCommandHandler } from './ops-command.handler.js';
 import {
   ApprovalCallbackHandler,
   type TelegramCallbackQuery,
@@ -38,6 +39,7 @@ export class CommandRouter {
     private readonly echo: EchoHandler,
     private readonly voice: VoiceHandler,
     private readonly task: TaskHandler,
+    private readonly ops: OpsCommandHandler,
     private readonly approvalCallback: ApprovalCallbackHandler,
   ) {}
 
@@ -68,6 +70,10 @@ export class CommandRouter {
       if (command === '/task') {
         const title = text.slice(command.length).trim();
         return await this.task.handle(chatId, title);
+      }
+      if (command === '/ops') {
+        const args = text.slice(command.length).trim();
+        return await this.ops.handle(chatId, args);
       }
       const taskMatch = TASK_NL_PREFIX.exec(text);
       if (taskMatch) {
