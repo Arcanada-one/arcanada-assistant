@@ -3,7 +3,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { BriefingAggregator } from './briefing.aggregator.js';
 import { DigestAggregator } from './digest.aggregator.js';
 import { ProactiveDispatcherService } from './proactive-dispatcher.service.js';
-import type { ProactiveConfigService } from './proactive-config.service.js';
+import { ProactiveConfigService } from './proactive-config.service.js';
 import type { DispatchResult, ProactiveKind } from './proactive.types.js';
 
 export interface ProcessJobInput {
