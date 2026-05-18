@@ -175,13 +175,18 @@ jobs:
           cd /opt/arcanada-assistant
           git fetch --all --prune
           git reset --hard origin/main
-      - name: Inject runtime secrets to .env (SEC-0006)
+      - name: Inject runtime secrets to .env (SEC-0006 + INFRA-0240)
         run: |
           umask 077
           cat > /opt/arcanada-assistant/.env <<EOF
           POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
           REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}
           TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_WEBHOOK_SECRET=${{ secrets.TELEGRAM_WEBHOOK_SECRET }}
+          MODEL_CONNECTOR_API_KEY=${{ secrets.MODEL_CONNECTOR_API_KEY }}
+          OPSBOT_API_KEY=${{ secrets.OPSBOT_API_KEY }}
+          MESH_VAULT_API_KEY=${{ secrets.MESH_VAULT_API_KEY }}
+          SCRUTATOR_BASE_URL=http://100.70.137.104:8310
           EOF
           chmod 600 /opt/arcanada-assistant/.env
       - name: Build + start via docker compose
