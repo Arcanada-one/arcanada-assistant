@@ -66,12 +66,15 @@ services:
       MODEL_CONNECTOR_BASE_URL: http://connector.arcanada.one:3900
       MODEL_CONNECTOR_DEFAULT_MODEL: anthropic/claude-haiku-4-5
       MODEL_CONNECTOR_API_KEY: ${MODEL_CONNECTOR_API_KEY:-changeme}
-      SCRUTATOR_BASE_URL: http://arcana-db:8310
+      # INFRA-0240: hostname `arcana-db` not resolvable inside docker (no MagicDNS); fall back to Tailscale IP for arcana-db. Override via .env on hosts с разной топологией.
+      SCRUTATOR_BASE_URL: ${SCRUTATOR_BASE_URL:-http://100.70.137.104:8310}
       SCRUTATOR_LTM_NAMESPACE: assistant-ltm-pavel
       OPSBOT_BASE_URL: https://ops.arcanada.one
       OPSBOT_API_KEY: ${OPSBOT_API_KEY:-changeme}
       MUNERA_BASE_URL: ${MUNERA_BASE_URL:-https://muneral.com}
       MUNERA_API_TOKEN: ${MUNERA_API_TOKEN:-changeme}
+      # INFRA-0240: mesh-auth API key (Zod .optional(); placeholder satisfies min(1) Zod check для dev/test).
+      MESH_VAULT_API_KEY: ${MESH_VAULT_API_KEY:-arc_api_placeholder_dev_not_set_value_padding_padding}
       BRIEFING_TIMEZONE: Europe/Istanbul
       BRIEFING_MORNING_TIME: '08:00'
       BRIEFING_EVENING_TIME: '21:00'
