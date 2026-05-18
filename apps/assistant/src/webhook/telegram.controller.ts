@@ -1,15 +1,12 @@
+import { timingSafeEqual } from 'node:crypto';
+
 import { Body, Controller, Headers, HttpCode, Post, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ApiTags } from '@nestjs/swagger';
-import { timingSafeEqual } from 'node:crypto';
-import { EchoHandler } from './echo.handler.js';
+
+import { CommandRouter, type IncomingUpdate } from '../telegram/handlers/command-router.handler.js';
 
 const SECRET_HEADER = 'x-telegram-bot-api-secret-token';
-
-interface TelegramUpdate {
-  update_id: number;
-  message?: { message_id: number; chat: { id: number }; text?: string };
-}
 
 function safeEq(a: string, b: string): boolean {
   const ab = Buffer.from(a, 'utf8');
@@ -24,14 +21,14 @@ function safeEq(a: string, b: string): boolean {
 @Controller('webhook')
 export class TelegramController {
   constructor(
-    private readonly echo: EchoHandler,
+    private readonly router: CommandRouter,
     private readonly config: ConfigService,
   ) {}
 
   @Post('telegram')
   @HttpCode(200)
   async handle(
-    @Body() update: TelegramUpdate,
+    @Body() update: IncomingUpdate,
     @Headers(SECRET_HEADER) secret?: string,
   ): Promise<{ ok: true }> {
     const expected = this.config.get<string>('TELEGRAM_WEBHOOK_SECRET') ?? '';
@@ -39,7 +36,7 @@ export class TelegramController {
       throw new UnauthorizedException('invalid webhook secret');
     }
     // Fire-and-forget: ack <100ms regardless of handler outcome.
-    void this.echo.handle(update);
+    void this.router.handle(update);
     return { ok: true };
   }
 }

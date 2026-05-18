@@ -1,0 +1,75 @@
+# Arcanada Assistant — autonomy manifest (AAL Mandate, ARCA-0016).
+#
+# Bumped to L3 in ARCA-0009 M8 — see V-AC-7..13 + V-AC-18 evidence below.
+# Source-of-truth for /dr-optimize quarterly review and the public AAL page
+# (ARCA-0017). Edit only via /dr-archive of a task that closes another
+# dimension or migrates the assistant to a new level.
+
+project: arcanada-assistant
+current_aal: L3
+target_aal: L4
+last_validated: 2026-05-17
+
+# Evidence per AAL dimension. Each entry references a falsifiable artifact
+# (spec, manifest, controller, dev-tools script). The check
+# `dev-tools/aal-l3-evidence-check.sh` aggregates these into a single
+# gate suitable for /dr-qa and CI.
+evidence:
+  liveness:
+    indicator: per-agent.health.indicator.ts
+    aggregator: health.controller.ts
+    verified_by: health.controller.spec.ts
+  smoke:
+    endpoint: v1/agents/{name}/ping
+    controller: agent-ping.controller.ts
+    runner: dev-tools/smoke-agent-ping.sh
+    verified_by: agent-ping.controller.spec.ts
+  observability:
+    surface: observability/trace-context.ts
+    pino_bridge: observability/otel-pino-bridge.ts
+    sdk_status: noop-bridge (real OTel SDK install deferred to follow-up backlog row)
+    verified_by: observability/trace-context.spec.ts
+    wired_in: orchestrator/orchestrator.service.ts (startSpan around route)
+  credential_validation:
+    registry: aal/bootstrap-credential.ts
+    runner: aal/bootstrap-runner.service.ts (OnApplicationBootstrap)
+    verified_by: aal/bootstrap-credential.spec.ts
+  exception_hierarchy:
+    base: aal/exceptions.ts (AgentError + 5 named subclasses)
+    classifier: classifyAgentError / isAgentError
+    verified_by: aal/exceptions.spec.ts
+  zod_validation:
+    gate: dev-tools/check-zod-coverage.sh
+    coverage_target: every *.client.ts under apps/assistant/src/agents + packages/core/src/clients
+    verified_by: spec exit 0 after each /dr-do session
+  tool_scope:
+    manifest: aal/agent-scopes.yaml
+    loader: aal/scope.loader.ts
+    guard: aal/scope-guard.ts
+    verified_by:
+      - aal/scope-guard.spec.ts
+      - aal/scope.loader.spec.ts
+
+# Weakest-link tracking — anything we know is not at L3-grade yet.
+# Empty means /dr-optimize can claim L3 honestly. Items here block L4 not L3.
+weakest_links: []
+
+# What it would take to claim L4 (Adaptive Autonomy):
+# - real OTel SDK + AsyncLocalStorage trace propagation (replace NoopTraceContext)
+# - cost circuit breakers per agent (model-spend cap)
+# - drift detection (schema fingerprint diff against captured fixtures)
+# - model fallback chain auto-recovery (already partial via MC cascade)
+# - labeled eval set ≥1000 examples for golden-path regression detection
+target_l4_gates:
+  - real_otel_sdk
+  - cost_circuit_breakers_per_agent
+  - schema_drift_detection
+  - labeled_eval_set_min_1000
+
+mandates:
+  - operational-resilience-mandate
+  - autonomous-agent-operating-rules
+  - public-surface-hygiene-mandate
+  - documentation-taxonomy-mandate
+  - auth-arcana-mandate
+  - file-sync-policy

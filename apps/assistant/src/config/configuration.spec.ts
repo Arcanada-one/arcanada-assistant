@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+
 import { configurationSchema, validateConfig } from './configuration.js';
 
 const minimalValid = {
@@ -16,10 +17,13 @@ const minimalValid = {
   AUTH_ARCANA_JWT_AUDIENCE: 'arcanada-assistant',
   MODEL_CONNECTOR_BASE_URL: 'http://connector.arcanada.one:3900',
   MODEL_CONNECTOR_DEFAULT_MODEL: 'anthropic/claude-haiku-4-5',
+  MODEL_CONNECTOR_API_KEY: 'mc-test-key',
   SCRUTATOR_BASE_URL: 'http://arcana-db:8310',
   SCRUTATOR_LTM_NAMESPACE: 'assistant-ltm-pavel',
   OPSBOT_BASE_URL: 'https://ops.arcanada.one',
   OPSBOT_API_KEY: 'opsbot-key',
+  MUNERA_BASE_URL: 'http://localhost:3500',
+  MUNERA_API_TOKEN: 'munera-test-token',
   BRIEFING_TIMEZONE: 'Europe/Istanbul',
   BRIEFING_MORNING_TIME: '08:00',
   BRIEFING_EVENING_TIME: '21:00',

@@ -1,0 +1,57 @@
+# ARCA-0009 M8 D7 — Tool scope manifest (V-AC-13).
+#
+# Per-principal allow-list of agent intents. Default policy is deny: a
+# principal not listed here cannot invoke any mesh intent. `ScopeGuard` is
+# the single gate at the orchestrator dispatch layer; it throws
+# `AgentScopeError` when a request fails the lookup.
+#
+# Principal identifiers mirror the active auth strategy:
+#   - svc:assistant        — internal Telegram dispatch (default operator
+#                             scope; the assistant invokes its own agents
+#                             on behalf of the human operator).
+#   - svc:opsbot           — bidirectional Ops Bot reverse-command path
+#                             (M3, separate session — keep the row so the
+#                             scope manifest doesn't churn on M3 landing).
+#   - svc:scheduler        — daily-briefing scheduler / cron flows.
+#
+version: 1
+scopes:
+  - principal: svc:assistant
+    agents:
+      - name: transcriber
+        intents:
+          - /transcribe
+      - name: munera
+        intents:
+          - /task_get
+          - /task_list
+          - /task_create
+          - /task_update
+      - name: dreamer
+        intents:
+          - /dreamer/index_page
+          - /dreamer/summarize
+          - /dreamer/link_graph
+      - name: knowledge
+        intents:
+          - /wiki
+          - /remember
+          - /recall
+      - name: ops-bot
+        intents:
+          - /status
+          - /agents
+  - principal: svc:opsbot
+    agents:
+      - name: ops-bot
+        intents:
+          - /opsbot/echo
+          - /opsbot/command
+  - principal: svc:scheduler
+    agents:
+      - name: knowledge
+        intents:
+          - /recall
+      - name: ops-bot
+        intents:
+          - /status

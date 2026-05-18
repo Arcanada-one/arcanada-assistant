@@ -5,7 +5,10 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import helmet from '@fastify/helmet';
 import rateLimit from '@fastify/rate-limit';
 import { Logger } from 'nestjs-pino';
+
 import { AppModule } from './app.module.js';
+import { AuthDispatcher } from './auth/auth.dispatcher.js';
+import { registerAuthPreflight } from './auth/auth.preflight.js';
 
 async function bootstrap(): Promise<void> {
   const adapter = new FastifyAdapter({
@@ -36,6 +39,11 @@ async function bootstrap(): Promise<void> {
     max: 30,
     timeWindow: '1 minute',
     allowList: ['127.0.0.1'],
+  });
+
+  const dispatcher = app.get(AuthDispatcher);
+  registerAuthPreflight(adapter.getInstance(), dispatcher, {
+    publicPrefixes: ['/health', '/docs', '/webhook'],
   });
 
   const swaggerConfig = new DocumentBuilder()

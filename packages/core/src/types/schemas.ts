@@ -12,6 +12,10 @@ export const OpsBotEventCategory = [
   'briefing_cycle',
   'tool_failure',
   'warning',
+  // ARCA-0009 M3 (V-AC-3): pre/post-execute audit envelopes around bidirectional
+  // command invocation. Receiving-side enum extension tracked as part of the
+  // cross-repo PR on `Arcanada-one/opsbot` (M3.3).
+  'audit',
 ] as const;
 export type OpsBotEventCategory = (typeof OpsBotEventCategory)[number];
 

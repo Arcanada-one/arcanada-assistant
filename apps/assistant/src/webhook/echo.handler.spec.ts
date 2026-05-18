@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
+
 import { EchoHandler } from './echo.handler.js';
 
 describe('EchoHandler', () => {

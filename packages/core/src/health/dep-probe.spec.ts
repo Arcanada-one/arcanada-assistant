@@ -33,7 +33,7 @@ describe('runProbe', () => {
   it('returns fail with stringified non-Error throwable', async () => {
     const probe: DepProbe = {
       name: 'odd',
-      // eslint-disable-next-line @typescript-eslint/require-await
+
       async check() {
         throw 'string-thrown';
       },

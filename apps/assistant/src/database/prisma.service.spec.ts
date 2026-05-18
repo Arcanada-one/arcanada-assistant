@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
+
 import { PrismaService } from './prisma.service.js';
 
 interface MockClient {
