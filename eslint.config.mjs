@@ -13,6 +13,8 @@ export default [
       '**/coverage/**',
       '**/*.config.{js,ts,mjs}',
       '**/scripts/**',
+      'scripts/**',
+      'apps/*/scripts/**',
     ],
   },
   eslint.configs.recommended,
