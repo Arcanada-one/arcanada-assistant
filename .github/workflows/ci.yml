@@ -181,6 +181,7 @@ jobs:
           cat > /opt/arcanada-assistant/.env <<EOF
           POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
           REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}
+          TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }}
           EOF
           chmod 600 /opt/arcanada-assistant/.env
       - name: Build + start via docker compose
