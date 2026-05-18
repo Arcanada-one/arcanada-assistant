@@ -27,12 +27,28 @@ const QUEUE_NAME = 'proactive';
 const BRIEFING_JOB_ID = 'proactive:briefing:daily';
 const DIGEST_JOB_ID = 'proactive:digest:daily';
 
-function parseRedisUrl(url: string): { host: string; port: number; db?: number } {
+function parseRedisUrl(url: string): {
+  host: string;
+  port: number;
+  db?: number;
+  password?: string;
+  username?: string;
+} {
   const u = new URL(url);
-  const out: { host: string; port: number; db?: number } = {
+  const out: {
+    host: string;
+    port: number;
+    db?: number;
+    password?: string;
+    username?: string;
+  } = {
     host: u.hostname,
     port: Number(u.port || 6379),
   };
+  // BullMQ uses ioredis; both honour password/username on the connection
+  // descriptor. URL.password is percent-decoded by the WHATWG URL parser.
+  if (u.password) out.password = decodeURIComponent(u.password);
+  if (u.username) out.username = decodeURIComponent(u.username);
   const dbPart = u.pathname.replace(/^\//, '');
   if (dbPart) out.db = Number(dbPart);
   return out;
