@@ -16,8 +16,7 @@ const MAX_PAGES = 25;
 const MAX_TEXT_TOKENS = 100_000; // estimated as `text.length / 4`
 
 const PDF_MIME = 'application/pdf';
-const DEFAULT_QUESTION =
-  'Резюмируй документ кратко по-русски: ключевые тезисы, выводы, цифры.';
+const DEFAULT_QUESTION = 'Резюмируй документ кратко по-русски: ключевые тезисы, выводы, цифры.';
 
 @Injectable()
 export class DocumentHandler {
@@ -35,18 +34,12 @@ export class DocumentHandler {
     userId: number,
   ): Promise<void> {
     if (doc.mime_type !== PDF_MIME) {
-      this.logger.warn(
-        { chatId, mime: doc.mime_type },
-        'unsupported document mime',
-      );
+      this.logger.warn({ chatId, mime: doc.mime_type }, 'unsupported document mime');
       await this.replySafe(chatId, '⚠️ Поддерживаются только PDF-документы.');
       return;
     }
     if (doc.file_size !== undefined && doc.file_size > MAX_PDF_BYTES) {
-      await this.replySafe(
-        chatId,
-        '⚠️ Документ слишком большой (>20 МБ).',
-      );
+      await this.replySafe(chatId, '⚠️ Документ слишком большой (>20 МБ).');
       return;
     }
     let bytes: Buffer;
@@ -83,10 +76,7 @@ export class DocumentHandler {
     }
     const approxTokens = Math.ceil(text.length / 4);
     if (approxTokens > MAX_TEXT_TOKENS) {
-      await this.replySafe(
-        chatId,
-        '⚠️ Документ слишком длинный (>100k токенов).',
-      );
+      await this.replySafe(chatId, '⚠️ Документ слишком длинный (>100k токенов).');
       return;
     }
     if (text.trim().length === 0) {

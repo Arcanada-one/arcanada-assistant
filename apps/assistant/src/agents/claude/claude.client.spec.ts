@@ -3,9 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { ClaudeClient } from './claude.client.js';
 import type { ClaudeCompletionRequest } from './claude.schemas.js';
 
-function makeReq(
-  overrides: Partial<ClaudeCompletionRequest> = {},
-): ClaudeCompletionRequest {
+function makeReq(overrides: Partial<ClaudeCompletionRequest> = {}): ClaudeCompletionRequest {
   return {
     systemPrompt: 'Ты — Arcanada Assistant.',
     content: 'Привет',
@@ -13,11 +11,7 @@ function makeReq(
   } as ClaudeCompletionRequest;
 }
 
-function mcResponse(
-  status: number,
-  body: unknown,
-  contentType = 'application/json',
-): Response {
+function mcResponse(status: number, body: unknown, contentType = 'application/json'): Response {
   return new Response(typeof body === 'string' ? body : JSON.stringify(body), {
     status,
     headers: { 'content-type': contentType },
@@ -124,9 +118,7 @@ describe('ClaudeClient', () => {
       }),
     );
     const client = new ClaudeClient({ baseUrl, apiKey, fetchImpl });
-    const result = await client.complete(
-      makeReq({ content: [{ type: 'text', text: 'hi' }] }),
-    );
+    const result = await client.complete(makeReq({ content: [{ type: 'text', text: 'hi' }] }));
     expect(result.kind).toBe('unavailable');
     if (result.kind === 'unavailable') {
       expect(result.reason).toBe('claude_unsupported_modality');

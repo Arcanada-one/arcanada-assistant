@@ -18,7 +18,10 @@ const MAX_PHOTO_BYTES = 20 * 1024 * 1024;
 // Recognise JPEG / PNG / GIF / WebP from magic numbers when Telegram does
 // not provide an explicit mime_type (PhotoSize never carries one).
 const MIME_FROM_MAGIC: Array<{ matcher: (b: Buffer) => boolean; mime: string }> = [
-  { matcher: (b) => b.length >= 3 && b[0] === 0xff && b[1] === 0xd8 && b[2] === 0xff, mime: 'image/jpeg' },
+  {
+    matcher: (b) => b.length >= 3 && b[0] === 0xff && b[1] === 0xd8 && b[2] === 0xff,
+    mime: 'image/jpeg',
+  },
   {
     matcher: (b) =>
       b.length >= 8 &&
@@ -33,7 +36,8 @@ const MIME_FROM_MAGIC: Array<{ matcher: (b: Buffer) => boolean; mime: string }> 
     mime: 'image/png',
   },
   {
-    matcher: (b) => b.length >= 4 && b[0] === 0x47 && b[1] === 0x49 && b[2] === 0x46 && b[3] === 0x38,
+    matcher: (b) =>
+      b.length >= 4 && b[0] === 0x47 && b[1] === 0x49 && b[2] === 0x46 && b[3] === 0x38,
     mime: 'image/gif',
   },
   {
@@ -127,7 +131,9 @@ export class PhotoHandler {
 }
 
 function pickLargest(photos: TelegramPhotoSize[]): TelegramPhotoSize {
-  return photos.reduce((best, cur) => (cur.width * cur.height > best.width * best.height ? cur : best));
+  return photos.reduce((best, cur) =>
+    cur.width * cur.height > best.width * best.height ? cur : best,
+  );
 }
 
 function sniffMime(bytes: Buffer): string | null {

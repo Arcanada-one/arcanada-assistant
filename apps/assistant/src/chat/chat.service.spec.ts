@@ -5,11 +5,7 @@ import type { ClaudeResult } from '../agents/claude/claude.schemas.js';
 import type { ClaudeConfig } from '../config/claude.config.js';
 import { DialogContextService } from '../orchestrator/dialog.context.js';
 
-import {
-  CLAUDE_UNAVAILABLE_REPLY,
-  ClaudeService,
-  PLACEHOLDER_REPLY,
-} from './chat.service.js';
+import { CLAUDE_UNAVAILABLE_REPLY, ClaudeService, PLACEHOLDER_REPLY } from './chat.service.js';
 
 interface ScrutatorStubOptions {
   recallResult?: { results: { content: string; score: number }[] };
@@ -40,10 +36,7 @@ interface VisionStubs {
   costWarnUsd?: number;
 }
 
-function makeServices(
-  scrutator: ReturnType<typeof makeScrutatorStub>,
-  stubs: VisionStubs = {},
-) {
+function makeServices(scrutator: ReturnType<typeof makeScrutatorStub>, stubs: VisionStubs = {}) {
   const dialogContext = new DialogContextService(
     scrutator as unknown as Parameters<typeof DialogContextService>[0] extends never
       ? never
@@ -67,10 +60,7 @@ function makeServices(
     ),
     isCircuitOpen: vi.fn().mockReturnValue(false),
   };
-  const config: Pick<
-    import('@nestjs/config').ConfigService,
-    'get' | 'getOrThrow'
-  > = {
+  const config: Pick<import('@nestjs/config').ConfigService, 'get' | 'getOrThrow'> = {
     get: vi.fn().mockImplementation((token: string) => {
       if (token === 'claude') {
         return {

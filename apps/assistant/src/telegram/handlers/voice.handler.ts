@@ -81,10 +81,7 @@ export class VoiceHandler {
         await this.replySafe(chatId, reply);
         return;
       } catch (err) {
-        this.logger.warn(
-          { err: errMsg(err), modality: 'voice' },
-          'claude turn failed after STT',
-        );
+        this.logger.warn({ err: errMsg(err), modality: 'voice' }, 'claude turn failed after STT');
         await this.replySafe(chatId, result.transcription);
         return;
       }

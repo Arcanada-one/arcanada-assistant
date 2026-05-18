@@ -13,9 +13,7 @@ export const ClaudeContentBlockSchema = z.discriminatedUnion('type', [
   z.object({
     type: z.literal('image_url'),
     image_url: z.object({
-      url: z
-        .string()
-        .regex(/^data:image\/(jpeg|png|gif|webp);base64,[A-Za-z0-9+/=]+$/),
+      url: z.string().regex(/^data:image\/(jpeg|png|gif|webp);base64,[A-Za-z0-9+/=]+$/),
       detail: z.enum(['auto', 'low', 'high']).optional(),
     }),
   }),

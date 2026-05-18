@@ -3,11 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { TelegramGateway } from '../../webhook/telegram.gateway.js';
 import type { ClaudeService } from '../../chat/chat.service.js';
 
-import {
-  DocumentHandler,
-  setPdfExtractor,
-  type TelegramDocument,
-} from './document.handler.js';
+import { DocumentHandler, setPdfExtractor, type TelegramDocument } from './document.handler.js';
 
 function makeGateway(
   overrides: Partial<TelegramGateway> = {},
@@ -59,10 +55,7 @@ describe('DocumentHandler', () => {
     );
 
     expect(chat.handleTurn).not.toHaveBeenCalled();
-    expect(gateway.sendMessage).toHaveBeenCalledWith(
-      42,
-      expect.stringMatching(/только PDF/),
-    );
+    expect(gateway.sendMessage).toHaveBeenCalledWith(42, expect.stringMatching(/только PDF/));
   });
 
   it('rejects oversize PDF (Telegram-reported size)', async () => {
@@ -70,18 +63,10 @@ describe('DocumentHandler', () => {
     const chat = makeChat();
     const handler = new DocumentHandler(gateway, chat);
 
-    await handler.handle(
-      42,
-      { ...PDF, file_size: 21 * 1024 * 1024 },
-      undefined,
-      9001,
-    );
+    await handler.handle(42, { ...PDF, file_size: 21 * 1024 * 1024 }, undefined, 9001);
 
     expect(gateway.getFileBuffer).not.toHaveBeenCalled();
-    expect(gateway.sendMessage).toHaveBeenCalledWith(
-      42,
-      expect.stringMatching(/слишком больш/),
-    );
+    expect(gateway.sendMessage).toHaveBeenCalledWith(42, expect.stringMatching(/слишком больш/));
   });
 
   it('rejects PDFs with >25 pages', async () => {
@@ -93,10 +78,7 @@ describe('DocumentHandler', () => {
     await handler.handle(42, PDF, undefined, 9001);
 
     expect(chat.handleTurn).not.toHaveBeenCalled();
-    expect(gateway.sendMessage).toHaveBeenCalledWith(
-      42,
-      expect.stringMatching(/>25 страниц/),
-    );
+    expect(gateway.sendMessage).toHaveBeenCalledWith(42, expect.stringMatching(/>25 страниц/));
   });
 
   it('rejects PDFs with >100k extracted tokens', async () => {
@@ -108,10 +90,7 @@ describe('DocumentHandler', () => {
     await handler.handle(42, PDF, undefined, 9001);
 
     expect(chat.handleTurn).not.toHaveBeenCalled();
-    expect(gateway.sendMessage).toHaveBeenCalledWith(
-      42,
-      expect.stringMatching(/>100k токенов/),
-    );
+    expect(gateway.sendMessage).toHaveBeenCalledWith(42, expect.stringMatching(/>100k токенов/));
   });
 
   it('fail-soft when PDF extract throws (encrypted/scanned)', async () => {
@@ -141,8 +120,7 @@ describe('DocumentHandler', () => {
 
     await handler.handle(42, PDF, 'Какая фраза-маркер в документе?', 9001);
 
-    const [userId, composed, options] = (chat.handleTurn as ReturnType<typeof vi.fn>).mock
-      .calls[0];
+    const [userId, composed, options] = (chat.handleTurn as ReturnType<typeof vi.fn>).mock.calls[0];
     expect(userId).toBe(9001);
     expect(options.modality).toBe('document');
     expect(composed).toContain('ARCA-0011 acceptance test marker');
