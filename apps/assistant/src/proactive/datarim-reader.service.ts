@@ -27,8 +27,14 @@ export class DatarimReaderService implements IDatarimReader {
   private readonly logger = new Logger(DatarimReaderService.name);
   private readonly root: string;
 
-  constructor(rootPath?: string) {
-    this.root = resolve(rootPath ?? process.env.DATARIM_PATH ?? '/data/datarim');
+  constructor() {
+    this.root = resolve(process.env.DATARIM_PATH ?? '/data/datarim');
+  }
+
+  static withRoot(rootPath: string): DatarimReaderService {
+    const instance = new DatarimReaderService();
+    (instance as unknown as { root: string }).root = resolve(rootPath);
+    return instance;
   }
 
   async readActiveTasks(): Promise<ActiveTask[]> {

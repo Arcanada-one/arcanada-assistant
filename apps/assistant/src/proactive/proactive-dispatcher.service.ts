@@ -42,11 +42,10 @@ export class ProactiveDispatcherService {
     @Inject(PROACTIVE_TELEGRAM_SENDER) private readonly sender: IProactiveTelegramSender,
     @Inject(OPS_BOT_CLIENT) private readonly opsBot: IOpsBotClient,
     private readonly metrics: ProactiveMetricsService,
-    options?: { fallbackPlainTextOnMdError?: boolean; selfHealThreshold?: number },
   ) {
     this.redis = redisService.client;
-    this.fallbackPlainTextOnMdError = options?.fallbackPlainTextOnMdError ?? true;
-    this.selfHealThreshold = options?.selfHealThreshold ?? 3;
+    this.fallbackPlainTextOnMdError = true;
+    this.selfHealThreshold = 3;
   }
 
   static withDeps(deps: {

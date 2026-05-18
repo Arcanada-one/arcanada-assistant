@@ -22,7 +22,7 @@ describe('DatarimReaderService', () => {
     archiveRoot = join(base, 'documentation', 'archive');
     await fs.mkdir(root, { recursive: true });
     await fs.mkdir(archiveRoot, { recursive: true });
-    svc = new DatarimReaderService(root);
+    svc = DatarimReaderService.withRoot(root);
   });
 
   afterEach(async () => {
