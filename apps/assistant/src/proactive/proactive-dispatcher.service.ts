@@ -75,14 +75,18 @@ export class ProactiveDispatcherService {
     const claim = await this.redis.set(idemKey, '1', 'EX', SETNX_TTL_SECONDS, 'NX');
     if (claim === null) {
       this.metrics.inc(input.kind, 'skipped');
-      this.logger.log(`dispatch skipped (already sent today) kind=${input.kind} run_date=${input.runDate}`);
+      this.logger.log(
+        `dispatch skipped (already sent today) kind=${input.kind} run_date=${input.runDate}`,
+      );
       return { status: 'skipped', reason: 'already-sent' };
     }
     try {
       const result = await this.attemptSend(input);
       await this.resetFailureCounter(input.kind);
       this.metrics.inc(input.kind, 'sent');
-      this.logger.log(`dispatch sent kind=${input.kind} run_date=${input.runDate} message_id=${result.messageId}`);
+      this.logger.log(
+        `dispatch sent kind=${input.kind} run_date=${input.runDate} message_id=${result.messageId}`,
+      );
       return { status: 'sent', messageId: result.messageId };
     } catch (err) {
       await this.redis.del(idemKey);
@@ -96,7 +100,9 @@ export class ProactiveDispatcherService {
     const first = await this.sender.send(input.chatId, input.text, 'MarkdownV2');
     if (first.ok) return { messageId: first.messageId };
     if (first.errorCode === 400 && this.shouldFallbackToPlain(first.description)) {
-      this.logger.warn(`markdown parse failed, retrying plain-text kind=${input.kind}: ${first.description}`);
+      this.logger.warn(
+        `markdown parse failed, retrying plain-text kind=${input.kind}: ${first.description}`,
+      );
       const fallback = await this.sender.send(input.chatId, this.toPlain(input.text), null);
       if (fallback.ok) return { messageId: fallback.messageId };
       throw this.classifyError(fallback);
@@ -113,7 +119,11 @@ export class ProactiveDispatcherService {
     return md.replace(/\\([_*[\]()~`>#+\-=|{}.!\\])/g, '$1').replace(/[*_`]/g, '');
   }
 
-  private classifyError(err: { errorCode: number; description: string; retryAfter?: number }): Error {
+  private classifyError(err: {
+    errorCode: number;
+    description: string;
+    retryAfter?: number;
+  }): Error {
     if (err.errorCode === 429) {
       return new TelegramRateLimitError(err.retryAfter ?? 60, err.description);
     }

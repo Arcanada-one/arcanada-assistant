@@ -51,7 +51,13 @@ function stubOps(snap: EcosystemSnapshot | Error): IOpsBotClient {
 }
 
 function stubReader(opts: {
-  active?: Array<{ id: string; title: string; priority: string; complexity: string; status: string }>;
+  active?: Array<{
+    id: string;
+    title: string;
+    priority: string;
+    complexity: string;
+    status: string;
+  }>;
   backlog?: Array<{ id: string; title: string; priority: string; complexity: string }>;
 }): DatarimReaderService {
   return {
@@ -73,7 +79,15 @@ describe('BriefingAggregator', () => {
     const agg = new BriefingAggregator(
       stubOps(snap),
       stubReader({
-        active: [{ id: 'ARCA-0010', title: 'Proactive', priority: 'P2', complexity: 'L2', status: 'in_progress' }],
+        active: [
+          {
+            id: 'ARCA-0010',
+            title: 'Proactive',
+            priority: 'P2',
+            complexity: 'L2',
+            status: 'in_progress',
+          },
+        ],
         backlog: [
           { id: 'INFRA-0235', title: 'A', priority: 'P0', complexity: 'L2' },
           { id: 'AUTH-0079', title: 'B', priority: 'P1', complexity: 'L3' },

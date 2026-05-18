@@ -20,10 +20,7 @@ import { PROACTIVE_QUEUE, ProactiveController } from './proactive.controller.js'
 import { ProactiveDispatcherService } from './proactive-dispatcher.service.js';
 import { ProactiveMetricsService } from './proactive-metrics.service.js';
 import { ProactiveProcessor } from './proactive.processor.js';
-import {
-  PROACTIVE_TELEGRAM_SENDER,
-  ProactiveTelegramSender,
-} from './proactive-telegram.sender.js';
+import { PROACTIVE_TELEGRAM_SENDER, ProactiveTelegramSender } from './proactive-telegram.sender.js';
 import type { ProactiveConfig, ProactiveKind } from './proactive.types.js';
 
 const QUEUE_NAME = 'proactive';
@@ -165,7 +162,9 @@ export class ProactiveModule implements OnApplicationBootstrap, OnModuleDestroy 
     const jobId = kind === 'briefing' ? BRIEFING_JOB_ID : DIGEST_JOB_ID;
     const tracked = kind === 'briefing' ? this.currentBriefingCron : this.currentDigestCron;
     if (!channel.enabled) {
-      await this.queue.removeRepeatableByKey(`${kind}:${tracked ?? channel.cron}::${tz}`).catch(() => undefined);
+      await this.queue
+        .removeRepeatableByKey(`${kind}:${tracked ?? channel.cron}::${tz}`)
+        .catch(() => undefined);
       if (kind === 'briefing') this.currentBriefingCron = null;
       else this.currentDigestCron = null;
       this.logger.log(`channel ${kind} disabled — repeatable removed`);
@@ -173,13 +172,11 @@ export class ProactiveModule implements OnApplicationBootstrap, OnModuleDestroy 
     }
     if (tracked === channel.cron && this.currentTz === tz) return;
     if (tracked) {
-      await this.queue.removeRepeatableByKey(`${kind}:${tracked}::${this.currentTz ?? tz}`).catch(() => undefined);
+      await this.queue
+        .removeRepeatableByKey(`${kind}:${tracked}::${this.currentTz ?? tz}`)
+        .catch(() => undefined);
     }
-    await this.queue.add(
-      kind,
-      { kind },
-      { repeat: { pattern: channel.cron, tz }, jobId },
-    );
+    await this.queue.add(kind, { kind }, { repeat: { pattern: channel.cron, tz }, jobId });
     if (kind === 'briefing') this.currentBriefingCron = channel.cron;
     else this.currentDigestCron = channel.cron;
     this.logger.log(`channel ${kind} scheduled — cron="${channel.cron}" tz="${tz}"`);

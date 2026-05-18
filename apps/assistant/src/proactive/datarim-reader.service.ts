@@ -43,7 +43,10 @@ export class DatarimReaderService implements IDatarimReader {
     return out;
   }
 
-  async readBacklogTopN(n: number, priorities: readonly string[] = ['P0', 'P1']): Promise<BacklogItem[]> {
+  async readBacklogTopN(
+    n: number,
+    priorities: readonly string[] = ['P0', 'P1'],
+  ): Promise<BacklogItem[]> {
     if (n <= 0) return [];
     const lines = await this.readLines('backlog.md');
     const out: BacklogItem[] = [];
@@ -106,7 +109,9 @@ export class DatarimReaderService implements IDatarimReader {
   }
 
   private parseCompletedLine(line: string, runDate: string): CompletedTask | null {
-    const tagged = line.match(/-\s+\*\*([A-Z]+-\d{4,})\*\*[^—]*—\s+(.+?)(?:\s+\((\d{4}-\d{2}-\d{2})\))?$/);
+    const tagged = line.match(
+      /-\s+\*\*([A-Z]+-\d{4,})\*\*[^—]*—\s+(.+?)(?:\s+\((\d{4}-\d{2}-\d{2})\))?$/,
+    );
     if (!tagged) return null;
     const date = tagged[3];
     if (date && date !== runDate) return null;

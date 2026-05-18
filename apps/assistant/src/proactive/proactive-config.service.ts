@@ -55,7 +55,9 @@ export class ProactiveConfigService {
     const parsedYaml = yaml.load(raw);
     const result = ProactiveConfigSchema.safeParse(parsedYaml);
     if (!result.success) {
-      const messages = result.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('; ');
+      const messages = result.error.issues
+        .map((i) => `${i.path.join('.')}: ${i.message}`)
+        .join('; ');
       throw new Error(`proactive config parse failed: ${messages}`);
     }
     return result.data;

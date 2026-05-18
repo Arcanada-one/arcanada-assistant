@@ -9,10 +9,7 @@ import {
   TelegramTransientError,
 } from './proactive-dispatcher.service.js';
 import { ProactiveMetricsService } from './proactive-metrics.service.js';
-import type {
-  IProactiveTelegramSender,
-  TelegramSendOutcome,
-} from './proactive-telegram.sender.js';
+import type { IProactiveTelegramSender, TelegramSendOutcome } from './proactive-telegram.sender.js';
 
 function buildOps(): IOpsBotClient {
   return {
@@ -80,7 +77,11 @@ describe('ProactiveDispatcherService', () => {
 
   it('falls back to plain text on 400 "can\'t parse entities"', async () => {
     const sender = buildSender([
-      { ok: false, errorCode: 400, description: "Bad Request: can't parse entities: '.' is reserved" },
+      {
+        ok: false,
+        errorCode: 400,
+        description: "Bad Request: can't parse entities: '.' is reserved",
+      },
       { ok: true, messageId: 4272 },
     ]);
     const svc = ProactiveDispatcherService.withDeps({ redis, sender, opsBot: ops, metrics });
@@ -102,9 +103,7 @@ describe('ProactiveDispatcherService', () => {
   });
 
   it('throws TelegramTransientError on 5xx (retryable)', async () => {
-    const sender = buildSender([
-      { ok: false, errorCode: 503, description: 'Service Unavailable' },
-    ]);
+    const sender = buildSender([{ ok: false, errorCode: 503, description: 'Service Unavailable' }]);
     const svc = ProactiveDispatcherService.withDeps({ redis, sender, opsBot: ops, metrics });
     await expect(svc.dispatch(baseInput)).rejects.toBeInstanceOf(TelegramTransientError);
   });

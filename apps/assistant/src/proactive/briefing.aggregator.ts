@@ -80,7 +80,8 @@ export class BriefingAggregator {
   }
 
   private renderBacklog(items: readonly BacklogItem[], requested: number): string {
-    if (items.length === 0) return `${bold(`Backlog top-${requested} P0/P1:`)} ${escapeMd('пусто')}`;
+    if (items.length === 0)
+      return `${bold(`Backlog top-${requested} P0/P1:`)} ${escapeMd('пусто')}`;
     const ids = items.map((b) => escapeMd(b.id)).join(', ');
     return `${bold(`Backlog top-${requested} P0/P1:`)} ${ids}`;
   }

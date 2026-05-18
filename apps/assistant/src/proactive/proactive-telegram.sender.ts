@@ -18,7 +18,11 @@ export type TelegramSendOutcome = TelegramSendResult | TelegramSendError;
 export const PROACTIVE_TELEGRAM_SENDER = Symbol.for('PROACTIVE_TELEGRAM_SENDER');
 
 export interface IProactiveTelegramSender {
-  send(chatId: number | string, text: string, parseMode: 'MarkdownV2' | null): Promise<TelegramSendOutcome>;
+  send(
+    chatId: number | string,
+    text: string,
+    parseMode: 'MarkdownV2' | null,
+  ): Promise<TelegramSendOutcome>;
 }
 
 @Injectable()
@@ -29,7 +33,11 @@ export class ProactiveTelegramSender implements IProactiveTelegramSender {
     this.bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN ?? '');
   }
 
-  async send(chatId: number | string, text: string, parseMode: 'MarkdownV2' | null): Promise<TelegramSendOutcome> {
+  async send(
+    chatId: number | string,
+    text: string,
+    parseMode: 'MarkdownV2' | null,
+  ): Promise<TelegramSendOutcome> {
     try {
       const message = await this.bot.telegram.sendMessage(chatId, text, {
         ...(parseMode ? { parse_mode: parseMode } : {}),
@@ -42,10 +50,21 @@ export class ProactiveTelegramSender implements IProactiveTelegramSender {
   }
 
   private adaptError(err: unknown): TelegramSendError {
-    const e = err as { response?: { error_code?: number; description?: string; parameters?: { retry_after?: number } } };
+    const e = err as {
+      response?: {
+        error_code?: number;
+        description?: string;
+        parameters?: { retry_after?: number };
+      };
+    };
     const code = e.response?.error_code ?? 500;
     const description = e.response?.description ?? (err as Error).message ?? 'unknown';
     const retryAfter = e.response?.parameters?.retry_after;
-    return { ok: false, errorCode: code, description, ...(retryAfter !== undefined ? { retryAfter } : {}) };
+    return {
+      ok: false,
+      errorCode: code,
+      description,
+      ...(retryAfter !== undefined ? { retryAfter } : {}),
+    };
   }
 }

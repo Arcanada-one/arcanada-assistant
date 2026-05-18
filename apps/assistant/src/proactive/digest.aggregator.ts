@@ -67,7 +67,10 @@ export class DigestAggregator {
     const header = bold('В очереди на завтра');
     if (items.length === 0) return `${header}\n${escapeMd('— пусто')}`;
     const body = items
-      .map((b) => `\\- ${escapeMd(b.id)} \\(${escapeMd(b.priority)}/${escapeMd(b.complexity)}\\): ${escapeMd(b.title)}`)
+      .map(
+        (b) =>
+          `\\- ${escapeMd(b.id)} \\(${escapeMd(b.priority)}/${escapeMd(b.complexity)}\\): ${escapeMd(b.title)}`,
+      )
       .join('\n');
     return `${header}\n${body}`;
   }
