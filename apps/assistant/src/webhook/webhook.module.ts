@@ -7,18 +7,21 @@ import { AgentsHandler } from '../telegram/handlers/agents.handler.js';
 import { WikiHandler } from '../telegram/handlers/wiki.handler.js';
 import { RememberHandler } from '../telegram/handlers/remember.handler.js';
 import { VoiceHandler } from '../telegram/handlers/voice.handler.js';
+import { PhotoHandler } from '../telegram/handlers/photo.handler.js';
+import { DocumentHandler } from '../telegram/handlers/document.handler.js';
 import { TaskHandler, MUNERA_DEFAULT_PROJECT_ID } from '../telegram/handlers/task.handler.js';
 import { OpsCommandHandler } from '../telegram/handlers/ops-command.handler.js';
 import { ApprovalCallbackHandler } from '../telegram/handlers/approval-callback.handler.js';
 import { OrchestratorModule } from '../orchestrator/orchestrator.module.js';
 import { ApprovalModule } from '../approval/approval.module.js';
+import { ChatModule } from '../chat/chat.module.js';
 
 import { TELEGRAM_GATEWAY, TelegrafGateway } from './telegram.gateway.js';
 import { TelegramController } from './telegram.controller.js';
 import { EchoHandler } from './echo.handler.js';
 
 @Module({
-  imports: [OrchestratorModule, ApprovalModule],
+  imports: [OrchestratorModule, ApprovalModule, ChatModule],
   controllers: [TelegramController],
   providers: [
     EchoHandler,
@@ -27,6 +30,8 @@ import { EchoHandler } from './echo.handler.js';
     WikiHandler,
     RememberHandler,
     VoiceHandler,
+    PhotoHandler,
+    DocumentHandler,
     TaskHandler,
     OpsCommandHandler,
     ApprovalCallbackHandler,

@@ -1,8 +1,11 @@
 import { describe, expect, it, vi } from 'vitest';
 
+import type { IClaudeClient } from '../agents/claude/claude.client.js';
+import type { ClaudeResult } from '../agents/claude/claude.schemas.js';
+import type { ClaudeConfig } from '../config/claude.config.js';
 import { DialogContextService } from '../orchestrator/dialog.context.js';
 
-import { ClaudeService } from './chat.service.js';
+import { CLAUDE_UNAVAILABLE_REPLY, ClaudeService, PLACEHOLDER_REPLY } from './chat.service.js';
 
 interface ScrutatorStubOptions {
   recallResult?: { results: { content: string; score: number }[] };
@@ -27,15 +30,58 @@ function makeScrutatorStub(opts: ScrutatorStubOptions = {}) {
   };
 }
 
-function makeServices(scrutator: ReturnType<typeof makeScrutatorStub>) {
+interface VisionStubs {
+  visionEnabled?: boolean;
+  claudeResult?: ClaudeResult;
+  costWarnUsd?: number;
+}
+
+function makeServices(scrutator: ReturnType<typeof makeScrutatorStub>, stubs: VisionStubs = {}) {
   const dialogContext = new DialogContextService(
     scrutator as unknown as Parameters<typeof DialogContextService>[0] extends never
       ? never
       : Parameters<typeof DialogContextService>[0],
     'assistant-test',
   );
-  const claude = new ClaudeService(dialogContext);
-  return { dialogContext, claude };
+  const claudeClient: IClaudeClient = {
+    complete: vi.fn().mockResolvedValue(
+      stubs.claudeResult ??
+        ({
+          kind: 'ok',
+          reply: 'stubbed reply',
+          model: 'anthropic/claude-sonnet-4',
+          inputTokens: 1,
+          outputTokens: 1,
+          totalTokens: 2,
+          costUsd: 0.0001,
+          latencyMs: 10,
+          requestId: 'req-1',
+        } satisfies ClaudeResult),
+    ),
+    isCircuitOpen: vi.fn().mockReturnValue(false),
+  };
+  const config: Pick<import('@nestjs/config').ConfigService, 'get' | 'getOrThrow'> = {
+    get: vi.fn().mockImplementation((token: string) => {
+      if (token === 'claude') {
+        return {
+          baseUrl: 'http://mc',
+          apiKey: 'k',
+          defaultModel: 'anthropic/claude-sonnet-4',
+          timeoutMs: 60_000,
+          costWarnUsd: stubs.costWarnUsd ?? 0.1,
+          visionEnabled: stubs.visionEnabled ?? false,
+        } satisfies ClaudeConfig;
+      }
+      return undefined;
+    }),
+    getOrThrow: vi.fn(),
+  } as unknown as import('@nestjs/config').ConfigService;
+  const claude = new ClaudeService(
+    dialogContext,
+    config as unknown as import('@nestjs/config').ConfigService,
+    claudeClient,
+  );
+  return { dialogContext, claude, claudeClient };
 }
 
 describe('ClaudeService — ARCA-0101 dialog-context wire-up', () => {
@@ -128,5 +174,102 @@ describe('ClaudeService — ARCA-0101 dialog-context wire-up', () => {
     expect(scrutator.recallLtm).toHaveBeenCalledWith(
       expect.objectContaining({ limit: 2, min_score: 0.3 }),
     );
+  });
+
+  // ARCA-0011 ---------------------------------------------------------------
+
+  it('falls back to PLACEHOLDER_REPLY when CLAUDE_VISION_ENABLED=false', async () => {
+    const scrutator = makeScrutatorStub();
+    const { claude, claudeClient } = makeServices(scrutator, { visionEnabled: false });
+    const turn = await claude.handleTurn(101, 'привет');
+    expect(turn.reply).toBe(PLACEHOLDER_REPLY);
+    expect(claudeClient.complete).not.toHaveBeenCalled();
+  });
+
+  it('routes to ClaudeClient and returns real reply when vision enabled', async () => {
+    const scrutator = makeScrutatorStub();
+    const { claude, claudeClient } = makeServices(scrutator, {
+      visionEnabled: true,
+      claudeResult: {
+        kind: 'ok',
+        reply: 'Привет! Чем могу помочь?',
+        model: 'anthropic/claude-sonnet-4',
+        inputTokens: 12,
+        outputTokens: 5,
+        totalTokens: 17,
+        costUsd: 0.0004,
+        latencyMs: 220,
+        requestId: 'req-2',
+      },
+    });
+    const turn = await claude.handleTurn(101, 'привет', { modality: 'text' });
+    expect(turn.reply).toBe('Привет! Чем могу помочь?');
+    expect(turn.meta?.model).toBe('anthropic/claude-sonnet-4');
+    expect(turn.meta?.costUsd).toBeCloseTo(0.0004, 6);
+    expect(claudeClient.complete).toHaveBeenCalledOnce();
+    const arg = (claudeClient.complete as ReturnType<typeof vi.fn>).mock.calls[0][0];
+    expect(arg.content).toBe('привет');
+    expect(arg.systemPrompt).toContain('Arcanada Assistant');
+  });
+
+  it('emits CLAUDE_UNAVAILABLE_REPLY on circuit-open / 5xx fail-soft', async () => {
+    const scrutator = makeScrutatorStub();
+    const { claude } = makeServices(scrutator, {
+      visionEnabled: true,
+      claudeResult: { kind: 'unavailable', reason: 'claude_circuit_open' },
+    });
+    const turn = await claude.handleTurn(101, 'hello', { modality: 'voice' });
+    expect(turn.reply).toBe(CLAUDE_UNAVAILABLE_REPLY);
+  });
+
+  it('forwards ContentBlock[] prompt to ClaudeClient on photo modality', async () => {
+    const scrutator = makeScrutatorStub();
+    const { claude, claudeClient } = makeServices(scrutator, { visionEnabled: true });
+    const blocks = [
+      { type: 'text' as const, text: 'Опиши это фото' },
+      {
+        type: 'image_url' as const,
+        image_url: { url: 'data:image/jpeg;base64,/9j/abc=' },
+      },
+    ];
+    await claude.handleTurn(101, blocks, { modality: 'photo' });
+    const arg = (claudeClient.complete as ReturnType<typeof vi.fn>).mock.calls[0][0];
+    expect(arg.content).toEqual(blocks);
+  });
+
+  it('extracts text from ContentBlock[] for LTM recall query', async () => {
+    const scrutator = makeScrutatorStub();
+    const { claude } = makeServices(scrutator, { visionEnabled: true });
+    await claude.handleTurn(
+      101,
+      [
+        { type: 'text', text: 'Что на фото?' },
+        { type: 'image_url', image_url: { url: 'data:image/png;base64,X' } },
+      ],
+      { modality: 'photo' },
+    );
+    expect(scrutator.recallLtm).toHaveBeenCalledWith(
+      expect.objectContaining({ query: 'Что на фото?' }),
+    );
+  });
+
+  it('buildSystemPrompt is called for each of voice/photo/document/text modalities', async () => {
+    const scrutator = makeScrutatorStub();
+    const { dialogContext, claude } = makeServices(scrutator, { visionEnabled: true });
+    const spy = vi.spyOn(dialogContext, 'buildSystemPrompt');
+    await claude.handleTurn(101, 'voice text', { modality: 'voice' });
+    await claude.handleTurn(101, [{ type: 'text', text: 'doc text' }], {
+      modality: 'document',
+    });
+    await claude.handleTurn(
+      101,
+      [
+        { type: 'text', text: 'photo caption' },
+        { type: 'image_url', image_url: { url: 'data:image/png;base64,X' } },
+      ],
+      { modality: 'photo' },
+    );
+    await claude.handleTurn(101, 'plain text', { modality: 'text' });
+    expect(spy).toHaveBeenCalledTimes(4);
   });
 });

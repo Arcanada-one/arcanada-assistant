@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { LoggerModule } from 'nestjs-pino';
 
+import claudeConfig from './config/claude.config.js';
 import dreamerConfig from './config/dreamer.config.js';
 import muneraConfig from './config/munera.config.js';
 import opsBotConfig from './config/ops-bot.config.js';
@@ -33,7 +34,14 @@ import { FatalInterceptor } from './lifecycle/fatal.interceptor.js';
     ConfigModule.forRoot({
       isGlobal: true,
       cache: true,
-      load: [opsBotConfig, scrutatorConfig, transcriberConfig, muneraConfig, dreamerConfig],
+      load: [
+        opsBotConfig,
+        scrutatorConfig,
+        transcriberConfig,
+        muneraConfig,
+        dreamerConfig,
+        claudeConfig,
+      ],
       validate: (env) => validateConfig(env),
     }),
     LoggerModule.forRoot({

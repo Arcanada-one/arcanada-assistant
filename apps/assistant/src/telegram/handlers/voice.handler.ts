@@ -1,4 +1,4 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger, Optional } from '@nestjs/common';
 
 import { TELEGRAM_GATEWAY, type TelegramGateway } from '../../webhook/telegram.gateway.js';
 import { OrchestratorService } from '../../orchestrator/orchestrator.service.js';
@@ -7,6 +7,7 @@ import {
   type SttMimeType,
   type TranscribeResult,
 } from '../../agents/transcriber/transcriber.schemas.js';
+import { ClaudeService } from '../../chat/chat.service.js';
 
 export interface TelegramVoice {
   file_id: string;
@@ -24,9 +25,10 @@ export class VoiceHandler {
   constructor(
     @Inject(TELEGRAM_GATEWAY) private readonly telegram: TelegramGateway,
     private readonly orchestrator: OrchestratorService,
+    @Optional() private readonly chat?: ClaudeService,
   ) {}
 
-  async handle(chatId: number, voice: TelegramVoice): Promise<void> {
+  async handle(chatId: number, voice: TelegramVoice, userId?: number): Promise<void> {
     const mime = (voice.mime_type ?? DEFAULT_MIME) as SttMimeType | string;
     if (!isAllowedMime(mime)) {
       await this.replySafe(chatId, `⚠️ Формат аудио "${mime}" не поддерживается транскрибатором.`);
@@ -51,6 +53,38 @@ export class VoiceHandler {
       this.logger.warn({ err: errMsg(err) }, '/transcribe orchestrator failure');
       await this.replySafe(chatId, '⚠️ Транскрибатор недоступен. Попробуй позже.');
       return;
+    }
+
+    // ARCA-0011 — when STT succeeds, route the transcription through Claude so
+    // the bot replies with a model-generated answer rather than the raw text.
+    // Fallback to the transcription verbatim if ClaudeService is not wired
+    // (e.g. CLAUDE_VISION_ENABLED=false in DEV) or when no userId is plumbed.
+    if (result.kind === 'ok' && this.chat && userId !== undefined) {
+      try {
+        const turn = await this.chat.handleTurn(userId, result.transcription, {
+          modality: 'voice',
+          requestId: result.requestId,
+        });
+        const reply = turn.reply && turn.reply.length > 0 ? turn.reply : result.transcription;
+        this.logger.log(
+          {
+            modality: 'voice',
+            file_size_bytes: voice.file_size ?? audio.byteLength,
+            success: true,
+            cost_usd: turn.meta?.costUsd,
+            model: turn.meta?.model,
+            latency_ms: turn.meta?.latencyMs,
+            request_id: result.requestId,
+          },
+          'voice download succeeded',
+        );
+        await this.replySafe(chatId, reply);
+        return;
+      } catch (err) {
+        this.logger.warn({ err: errMsg(err), modality: 'voice' }, 'claude turn failed after STT');
+        await this.replySafe(chatId, result.transcription);
+        return;
+      }
     }
     await this.replySafe(chatId, render(result));
   }
