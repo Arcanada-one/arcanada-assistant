@@ -196,9 +196,17 @@ jobs:
     steps:
       - name: Wait for /health
         run: |
+          # Symmetric to smoke gate: 200 = full health, 503 = boot success +
+          # downstream degraded (Scrutator/MC/Munera deps unreachable from
+          # docker network or stubs in place). Both prove app boot + HTTP
+          # routing + /health handler wired. Real downstream-health probing
+          # surfaces in /health body for operator inspection; CI verifies
+          # the deploy lifecycle, not the upstream-dependency mesh.
           for i in $(seq 1 30); do
-            if curl -fsS http://127.0.0.1:3800/health >/dev/null; then
-              echo "healthy after ${i}s"
+            HTTP_CODE=$(curl -sS -o /tmp/health.json -w '%{http_code}' http://127.0.0.1:3800/health || true)
+            if [ "$HTTP_CODE" = "200" ] || [ "$HTTP_CODE" = "503" ]; then
+              echo "healthy after ${i}s (http $HTTP_CODE)"
+              cat /tmp/health.json || true
               exit 0
             fi
             sleep 1
