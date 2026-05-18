@@ -8,6 +8,8 @@ import type { AgentsHandler } from './agents.handler.js';
 import type { WikiHandler } from './wiki.handler.js';
 import type { RememberHandler } from './remember.handler.js';
 import type { VoiceHandler } from './voice.handler.js';
+import type { PhotoHandler } from './photo.handler.js';
+import type { DocumentHandler } from './document.handler.js';
 import type { TaskHandler } from './task.handler.js';
 import type { OpsCommandHandler } from './ops-command.handler.js';
 import type { ApprovalCallbackHandler } from './approval-callback.handler.js';
@@ -22,6 +24,8 @@ function build() {
   const task = { handle: vi.fn() } as unknown as TaskHandler;
   const ops = { handle: vi.fn() } as unknown as OpsCommandHandler;
   const approvalCallback = { handle: vi.fn() } as unknown as ApprovalCallbackHandler;
+  const photo = { handle: vi.fn() } as unknown as PhotoHandler;
+  const document = { handle: vi.fn() } as unknown as DocumentHandler;
   return {
     echo,
     status,
@@ -32,6 +36,8 @@ function build() {
     task,
     ops,
     approvalCallback,
+    photo,
+    document,
     router: new CommandRouter(
       status,
       agents,
@@ -42,6 +48,8 @@ function build() {
       task,
       ops,
       approvalCallback,
+      photo,
+      document,
     ),
   };
 }
@@ -181,7 +189,7 @@ describe('CommandRouter', () => {
       update_id: 13,
       message: { message_id: 13, chat: { id: 5 }, voice: v },
     });
-    expect(voice.handle).toHaveBeenCalledWith(5, v);
+    expect(voice.handle).toHaveBeenCalledWith(5, v, undefined);
   });
 
   it('dispatches /task <title> to TaskHandler', async () => {
@@ -255,5 +263,84 @@ describe('CommandRouter', () => {
     });
     expect(approvalCallback.handle).toHaveBeenCalledOnce();
     expect(voice.handle).not.toHaveBeenCalled();
+  });
+
+  // ARCA-0011 ---------------------------------------------------------------
+
+  it('dispatches photo updates to PhotoHandler with caption + userId', async () => {
+    const { router, photo, echo } = build();
+    await router.handle({
+      update_id: 20,
+      message: {
+        message_id: 20,
+        chat: { id: 5 },
+        from: { id: 9001 },
+        caption: 'Что на фото?',
+        photo: [
+          { file_id: 'small', width: 90, height: 60 },
+          { file_id: 'big', width: 1280, height: 720 },
+        ],
+      },
+    });
+    expect(photo.handle).toHaveBeenCalledWith(
+      5,
+      expect.arrayContaining([expect.objectContaining({ file_id: 'big' })]),
+      'Что на фото?',
+      9001,
+    );
+    expect(echo.handle).not.toHaveBeenCalled();
+  });
+
+  it('dispatches PDF documents to DocumentHandler', async () => {
+    const { router, document } = build();
+    await router.handle({
+      update_id: 21,
+      message: {
+        message_id: 21,
+        chat: { id: 5 },
+        from: { id: 9001 },
+        document: {
+          file_id: 'doc1',
+          file_name: 'paper.pdf',
+          mime_type: 'application/pdf',
+          file_size: 12_345,
+        },
+      },
+    });
+    expect(document.handle).toHaveBeenCalledWith(
+      5,
+      expect.objectContaining({ file_name: 'paper.pdf' }),
+      undefined,
+      9001,
+    );
+  });
+
+  it('does not dispatch non-PDF documents to DocumentHandler', async () => {
+    const { router, document, echo } = build();
+    await router.handle({
+      update_id: 22,
+      message: {
+        message_id: 22,
+        chat: { id: 5 },
+        from: { id: 9001 },
+        document: { file_id: 'd', mime_type: 'text/plain', file_name: 'a.txt' },
+      },
+    });
+    expect(document.handle).not.toHaveBeenCalled();
+    expect(echo.handle).toHaveBeenCalled();
+  });
+
+  it('plumbs userId through to voice handler', async () => {
+    const { router, voice } = build();
+    await router.handle({
+      update_id: 23,
+      message: {
+        message_id: 23,
+        chat: { id: 5 },
+        from: { id: 9001 },
+        voice: { file_id: 'v', duration: 2 },
+      },
+    });
+    expect(voice.handle).toHaveBeenCalledWith(5, expect.anything(), 9001);
   });
 });
