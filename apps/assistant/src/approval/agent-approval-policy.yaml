@@ -15,13 +15,9 @@ tools:
   - tool_name: task_query
     requires_approval: conditional
     condition:
-      or:
-        - '==':
-            - var: payload.where
-            - null
-        - '==':
-            - var: payload.where
-            - {}
+      '==':
+        - var: payload.where
+        - null
     approval_timeout_ms: 300000
     idempotency_strategy: redis_nx
 
