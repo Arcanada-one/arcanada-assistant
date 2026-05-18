@@ -22,6 +22,7 @@ import { DreamerAgentModule } from './agents/dreamer/dreamer-agent.module.js';
 import { ApprovalModule } from './approval/approval.module.js';
 import { AalModule } from './aal/aal.module.js';
 import { AuthModule } from './auth/auth.module.js';
+import { ProactiveModule } from './proactive/proactive.module.js';
 import { TracingModule } from './observability/tracing.module.js';
 import { defaultTraceContext } from './observability/default-trace-context.js';
 import { pinoTraceMixin } from './observability/otel-pino-bridge.js';
@@ -74,6 +75,7 @@ import { FatalInterceptor } from './lifecycle/fatal.interceptor.js';
     ApprovalModule,
     ChatModule,
     WebhookModule,
+    ProactiveModule,
   ],
   providers: [
     {
