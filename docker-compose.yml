@@ -75,8 +75,19 @@ services:
       BRIEFING_TIMEZONE: Europe/Istanbul
       BRIEFING_MORNING_TIME: '08:00'
       BRIEFING_EVENING_TIME: '21:00'
+      # ARCA-0010 proactive config — file-backed (Vault SDK deferred per task-description § Implementation Notes #3).
+      # Module loads YAML at boot + 5-min poll; missing path ⇒ module idle.
+      PROACTIVE_CONFIG_PATH: /etc/arcanada/proactive-config.yaml
     ports:
       - '127.0.0.1:3800:3800'
+    volumes:
+      # Read-only bind for the proactive-config directory. Host dir deployed by
+      # operator (see datarim/tasks/ARCA-0010-task-description.md § Operator
+      # Handoff). Dir-bind (not file-bind) is intentional: prevents Docker from
+      # silently creating an empty directory at the file path on dev hosts
+      # where /etc/arcanada/proactive-config.yaml is absent — ProactiveModule
+      # then catches ENOENT and stays idle (graceful degradation).
+      - /etc/arcanada:/etc/arcanada:ro
 
 volumes:
   postgres-data:
