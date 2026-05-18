@@ -115,10 +115,13 @@ jobs:
       AUTH_ARCANA_JWT_AUDIENCE: arcanada-assistant
       MODEL_CONNECTOR_BASE_URL: http://stub.invalid:9999
       MODEL_CONNECTOR_DEFAULT_MODEL: anthropic/claude-haiku-4-5
+      MODEL_CONNECTOR_API_KEY: ci-stub-mc-key
       SCRUTATOR_BASE_URL: http://stub.invalid:8310
       SCRUTATOR_LTM_NAMESPACE: ci-stub-ns
       OPSBOT_BASE_URL: https://stub.invalid
       OPSBOT_API_KEY: ci-stub
+      MUNERA_BASE_URL: http://stub.invalid:3500
+      MUNERA_API_TOKEN: ci-stub-munera-token
       BRIEFING_TIMEZONE: UTC
       BRIEFING_MORNING_TIME: '08:00'
       BRIEFING_EVENING_TIME: '21:00'
