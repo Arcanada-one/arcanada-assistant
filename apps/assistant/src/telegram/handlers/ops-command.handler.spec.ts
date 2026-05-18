@@ -16,9 +16,10 @@ function makeTelegram(): TelegramGateway {
   };
 }
 
-function makeApproval(
-  proposeImpl?: ApprovalService['propose'],
-): { svc: ApprovalService; propose: ReturnType<typeof vi.fn> } {
+function makeApproval(proposeImpl?: ApprovalService['propose']): {
+  svc: ApprovalService;
+  propose: ReturnType<typeof vi.fn>;
+} {
   const propose = vi.fn(
     proposeImpl ??
       (async () => ({
@@ -34,9 +35,7 @@ function makeApproval(
   return { svc: { propose } as unknown as ApprovalService, propose };
 }
 
-function makeOrchestrator(
-  routeImpl?: OrchestratorService['route'],
-): OrchestratorService {
+function makeOrchestrator(routeImpl?: OrchestratorService['route']): OrchestratorService {
   return {
     route: vi.fn(
       routeImpl ??
@@ -91,10 +90,7 @@ describe('OpsCommandHandler.handle', () => {
     const handler = new OpsCommandHandler(telegram, approval, makeOrchestrator());
     await handler.handle(42, 'delete-everything');
     expect(propose).not.toHaveBeenCalled();
-    expect(telegram.sendMessage).toHaveBeenCalledWith(
-      42,
-      expect.stringContaining('echo-back'),
-    );
+    expect(telegram.sendMessage).toHaveBeenCalledWith(42, expect.stringContaining('echo-back'));
   });
 
   it('rejects empty command with usage hint', async () => {
@@ -108,9 +104,10 @@ describe('OpsCommandHandler.handle', () => {
 
   it('handles approval_not_required path by routing directly through orchestrator', async () => {
     const telegram = makeTelegram();
-    const { svc: approval } = makeApproval(
-      async () => ({ kind: 'approval_not_required', toolName: 'opsbot_command' }),
-    );
+    const { svc: approval } = makeApproval(async () => ({
+      kind: 'approval_not_required',
+      toolName: 'opsbot_command',
+    }));
     const orchestrator = makeOrchestrator();
     const handler = new OpsCommandHandler(telegram, approval, orchestrator);
     await handler.handle(42, 'echo-back ARCA-0009');

@@ -10,9 +10,7 @@ import type { TraceContext } from './trace-context.js';
  * Downstream consumers (Loki / Tempo / Grafana) can correlate via `trace_id`
  * once the real OTel SDK pumps spans into an exporter.
  */
-export function pinoTraceMixin(
-  traceContext: TraceContext,
-): () => Record<string, unknown> {
+export function pinoTraceMixin(traceContext: TraceContext): () => Record<string, unknown> {
   return () => {
     const span = traceContext.currentSpan();
     if (!span) return {};

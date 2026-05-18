@@ -31,11 +31,7 @@ export class AalModule {
   static forRoot(opts?: AalModuleOptions): DynamicModule {
     return {
       module: AalModule,
-      providers: [
-        scopeGuardProvider(opts),
-        BootstrapCredentialRegistry,
-        BootstrapCredentialRunner,
-      ],
+      providers: [scopeGuardProvider(opts), BootstrapCredentialRegistry, BootstrapCredentialRunner],
       exports: [ScopeGuard, BootstrapCredentialRegistry],
       global: true,
     };

@@ -1,10 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import type {
-  AuthOutcome,
-  AuthRequestSnapshot,
-  IAuthStrategy,
-} from './auth-strategy.interface.js';
+import type { AuthOutcome, AuthRequestSnapshot, IAuthStrategy } from './auth-strategy.interface.js';
 
 /**
  * Auth Arcana OIDC verifier — pluggable strategy. Disabled by default behind
@@ -21,9 +17,10 @@ import type {
  *      `human:<sub>`.
  */
 export interface AuthArcanaJwtVerifier {
-  verify(token: string): Promise<
-    | { ok: true; principal: string; claims: Record<string, unknown> }
-    | { ok: false; reason: string }
+  verify(
+    token: string,
+  ): Promise<
+    { ok: true; principal: string; claims: Record<string, unknown> } | { ok: false; reason: string }
   >;
 }
 

@@ -1,10 +1,7 @@
 import { Injectable } from '@nestjs/common';
 
 import { AgentRegistry } from '../orchestrator/agent.registry.js';
-import {
-  isAgentHealth,
-  type AgentHealthSnapshot,
-} from '../aal/agent-health.types.js';
+import { isAgentHealth, type AgentHealthSnapshot } from '../aal/agent-health.types.js';
 
 export interface MeshHealthRollup {
   status: 'ok' | 'degraded' | 'fail';

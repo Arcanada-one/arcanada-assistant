@@ -25,10 +25,7 @@ import {
 class EnvVaultApiKeyVerifier implements VaultApiKeyVerifier {
   constructor(private readonly expectedKey: string | undefined) {}
 
-  verify(key: string): Promise<
-    | { ok: true; principal: string }
-    | { ok: false; reason: string }
-  > {
+  verify(key: string): Promise<{ ok: true; principal: string } | { ok: false; reason: string }> {
     if (!this.expectedKey || this.expectedKey.length === 0) {
       return Promise.resolve({ ok: false, reason: 'no_key_configured' });
     }

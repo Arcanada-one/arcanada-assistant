@@ -54,9 +54,7 @@ export interface ScrutatorSelfHealPayload {
   readonly state: 'close';
 }
 
-export type ScrutatorSelfHealEmitter = (
-  payload: ScrutatorSelfHealPayload,
-) => void | Promise<void>;
+export type ScrutatorSelfHealEmitter = (payload: ScrutatorSelfHealPayload) => void | Promise<void>;
 
 export interface ScrutatorClientOptions {
   /**
@@ -216,7 +214,10 @@ export class ScrutatorClient implements IScrutatorClient {
   async searchWiki(req: SearchRequest): Promise<SearchResult> {
     const parsed = SearchRequestSchema.safeParse(req);
     if (!parsed.success) {
-      throw new ScrutatorClientError(`Invalid search request: ${parsed.error.message}`, parsed.error);
+      throw new ScrutatorClientError(
+        `Invalid search request: ${parsed.error.message}`,
+        parsed.error,
+      );
     }
     const result = await this.callBreaker({
       url: `${this.baseUrl}/v1/search`,
@@ -238,7 +239,10 @@ export class ScrutatorClient implements IScrutatorClient {
   async ingestLtm(req: IngestRequest): Promise<IngestResult> {
     const parsed = IngestRequestSchema.safeParse(req);
     if (!parsed.success) {
-      throw new ScrutatorClientError(`Invalid ingest request: ${parsed.error.message}`, parsed.error);
+      throw new ScrutatorClientError(
+        `Invalid ingest request: ${parsed.error.message}`,
+        parsed.error,
+      );
     }
     const result = await this.callBreaker({
       url: `${this.baseUrl}/v1/ltm/ingest`,
@@ -275,7 +279,10 @@ export class ScrutatorClient implements IScrutatorClient {
   async recallLtm(req: RecallRequest): Promise<RecallResult> {
     const parsed = RecallRequestSchema.safeParse(req);
     if (!parsed.success) {
-      throw new ScrutatorClientError(`Invalid recall request: ${parsed.error.message}`, parsed.error);
+      throw new ScrutatorClientError(
+        `Invalid recall request: ${parsed.error.message}`,
+        parsed.error,
+      );
     }
     const result = await this.callBreaker({
       url: `${this.baseUrl}/v1/ltm/recall`,
@@ -320,9 +327,7 @@ export class ScrutatorClient implements IScrutatorClient {
         await new Promise((r) => setTimeout(r, backoff));
       }
     }
-    throw lastErr instanceof Error
-      ? lastErr
-      : new ScrutatorClientError(String(lastErr));
+    throw lastErr instanceof Error ? lastErr : new ScrutatorClientError(String(lastErr));
   }
 
   private async doFetch(req: RequestPlan): Promise<HttpResult> {

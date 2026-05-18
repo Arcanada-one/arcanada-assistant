@@ -28,9 +28,7 @@ export interface AuthRequestSnapshot {
   readonly ip?: string;
 }
 
-export type AuthOutcome =
-  | { ok: true; principal: AuthPrincipal }
-  | { ok: false; reason: string };
+export type AuthOutcome = { ok: true; principal: AuthPrincipal } | { ok: false; reason: string };
 
 export interface IAuthStrategy {
   readonly name: AuthStrategyName;

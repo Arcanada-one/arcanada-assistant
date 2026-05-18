@@ -40,9 +40,7 @@ describe('MuneraClient', () => {
   const apiToken = 'munera-test-jwt';
 
   it('createTask returns ok result on 201 success envelope', async () => {
-    const fetchImpl = vi
-      .fn()
-      .mockResolvedValueOnce(jsonResponse(201, muneraTaskFixture()));
+    const fetchImpl = vi.fn().mockResolvedValueOnce(jsonResponse(201, muneraTaskFixture()));
     const client = new MuneraClient({ baseUrl, apiToken, fetchImpl: fetchImpl as never });
     const result = await client.createTask(makeCreateReq());
     expect(result.kind).toBe('ok');
@@ -61,9 +59,7 @@ describe('MuneraClient', () => {
   it('createTask maps JwtAuthGuard 401 to unavailable result', async () => {
     const fetchImpl = vi
       .fn()
-      .mockResolvedValueOnce(
-        jsonResponse(401, { statusCode: 401, message: 'Unauthorized' }),
-      );
+      .mockResolvedValueOnce(jsonResponse(401, { statusCode: 401, message: 'Unauthorized' }));
     const client = new MuneraClient({ baseUrl, apiToken, fetchImpl: fetchImpl as never });
     const result = await client.createTask(makeCreateReq());
     expect(result.kind).toBe('unavailable');
@@ -75,15 +71,13 @@ describe('MuneraClient', () => {
   });
 
   it('listTasksByProject maps ApiKeyGuard 401 envelope (different shape)', async () => {
-    const fetchImpl = vi
-      .fn()
-      .mockResolvedValueOnce(
-        jsonResponse(401, {
-          statusCode: 401,
-          error: 'Unauthorized',
-          message: 'API key required',
-        }),
-      );
+    const fetchImpl = vi.fn().mockResolvedValueOnce(
+      jsonResponse(401, {
+        statusCode: 401,
+        error: 'Unauthorized',
+        message: 'API key required',
+      }),
+    );
     const client = new MuneraClient({ baseUrl, apiToken, fetchImpl: fetchImpl as never });
     const result = await client.listTasksByProject(VALID_UUID);
     expect(result.kind).toBe('unavailable');
@@ -131,7 +125,13 @@ describe('MuneraClient', () => {
   it('updateTaskStatus retries on 500 then succeeds on second attempt', async () => {
     const fetchImpl = vi
       .fn()
-      .mockResolvedValueOnce(jsonResponse(500, { statusCode: 500, error: 'Internal Server Error', message: 'transient' }))
+      .mockResolvedValueOnce(
+        jsonResponse(500, {
+          statusCode: 500,
+          error: 'Internal Server Error',
+          message: 'transient',
+        }),
+      )
       .mockResolvedValueOnce(jsonResponse(200, muneraTaskFixture({ status: 'in_progress' })));
     const client = new MuneraClient({
       baseUrl,
@@ -142,7 +142,13 @@ describe('MuneraClient', () => {
     // update is non-retryable per client design (write op); test getTask retry instead
     const getFetch = vi
       .fn()
-      .mockResolvedValueOnce(jsonResponse(500, { statusCode: 500, error: 'Internal Server Error', message: 'transient' }))
+      .mockResolvedValueOnce(
+        jsonResponse(500, {
+          statusCode: 500,
+          error: 'Internal Server Error',
+          message: 'transient',
+        }),
+      )
       .mockResolvedValueOnce(jsonResponse(200, muneraTaskFixture()));
     const retryClient = new MuneraClient({
       baseUrl,
@@ -212,9 +218,9 @@ describe('MuneraClient', () => {
 
   it('rejects createTask with missing required projectId via Zod', async () => {
     const client = new MuneraClient({ baseUrl, apiToken });
-    await expect(
-      client.createTask({ title: 'no project' } as never),
-    ).rejects.toBeInstanceOf(MuneraClientError);
+    await expect(client.createTask({ title: 'no project' } as never)).rejects.toBeInstanceOf(
+      MuneraClientError,
+    );
   });
 
   it('rejects getTask with non-UUID taskId', async () => {

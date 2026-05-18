@@ -1,10 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import type {
-  IScrutatorClient,
-  IngestResult,
-  RecallResult,
-  SearchResult,
-} from '@arcanada/core';
+import type { IScrutatorClient, IngestResult, RecallResult, SearchResult } from '@arcanada/core';
 
 import { KnowledgeAgentService, type KnowledgeAgentResult } from './knowledge-agent.service.js';
 
@@ -170,10 +165,19 @@ describe('KnowledgeAgentService', () => {
 
     it('flags async=true when client returns soft-fail (async ingest)', async () => {
       const client = mockClient({
-        ingestLtm: vi.fn(async (): Promise<IngestResult> => ({ ok: true, async: true, warning: 'scrutator-soft-fail' })),
+        ingestLtm: vi.fn(
+          async (): Promise<IngestResult> => ({
+            ok: true,
+            async: true,
+            warning: 'scrutator-soft-fail',
+          }),
+        ),
       });
       const agent = new KnowledgeAgentService(client, 'assistant');
-      const r = (await agent.execute('/remember', { text: 'x', userId: 1 })) as KnowledgeAgentResult;
+      const r = (await agent.execute('/remember', {
+        text: 'x',
+        userId: 1,
+      })) as KnowledgeAgentResult;
       expect(r.kind).toBe('remembered');
       if (r.kind === 'remembered') expect(r.async).toBe(true);
     });
@@ -183,21 +187,30 @@ describe('KnowledgeAgentService', () => {
         ingestLtm: vi.fn(async (): Promise<IngestResult> => ({ ok: false, async: false })),
       });
       const agent = new KnowledgeAgentService(client, 'assistant');
-      const r = (await agent.execute('/remember', { text: 'x', userId: 1 })) as KnowledgeAgentResult;
+      const r = (await agent.execute('/remember', {
+        text: 'x',
+        userId: 1,
+      })) as KnowledgeAgentResult;
       expect(r.kind).toBe('unavailable');
     });
 
     it('returns text prompt on empty text', async () => {
       const client = mockClient();
       const agent = new KnowledgeAgentService(client, 'assistant');
-      const r = (await agent.execute('/remember', { text: '   ', userId: 1 })) as KnowledgeAgentResult;
+      const r = (await agent.execute('/remember', {
+        text: '   ',
+        userId: 1,
+      })) as KnowledgeAgentResult;
       expect(r.kind).toBe('text');
       expect(client.ingestLtm).not.toHaveBeenCalled();
     });
 
     it('returns unavailable on missing userId', async () => {
       const agent = new KnowledgeAgentService(mockClient(), 'assistant');
-      const r = (await agent.execute('/remember', { text: 'x', userId: NaN })) as KnowledgeAgentResult;
+      const r = (await agent.execute('/remember', {
+        text: 'x',
+        userId: NaN,
+      })) as KnowledgeAgentResult;
       expect(r.kind).toBe('unavailable');
       if (r.kind === 'unavailable') expect(r.reason).toBe('missing_user_id');
     });
@@ -209,7 +222,10 @@ describe('KnowledgeAgentService', () => {
         }),
       });
       const agent = new KnowledgeAgentService(client, 'assistant');
-      const r = (await agent.execute('/remember', { text: 't', userId: 1 })) as KnowledgeAgentResult;
+      const r = (await agent.execute('/remember', {
+        text: 't',
+        userId: 1,
+      })) as KnowledgeAgentResult;
       expect(r.kind).toBe('unavailable');
       if (r.kind === 'unavailable') expect(r.reason).toBe('scrutator_error');
     });
@@ -255,7 +271,10 @@ describe('KnowledgeAgentService', () => {
 
     it('returns unavailable on missing userId', async () => {
       const agent = new KnowledgeAgentService(mockClient(), 'assistant');
-      const r = (await agent.execute('/recall', { query: 'q', userId: NaN })) as KnowledgeAgentResult;
+      const r = (await agent.execute('/recall', {
+        query: 'q',
+        userId: NaN,
+      })) as KnowledgeAgentResult;
       expect(r.kind).toBe('unavailable');
     });
 

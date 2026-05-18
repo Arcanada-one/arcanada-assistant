@@ -8,10 +8,7 @@ import { z } from 'zod';
  * at boot and re-parsed only on explicit reload.
  */
 
-const intentSchema = z
-  .string()
-  .min(1)
-  .startsWith('/', { message: 'intent must start with /' });
+const intentSchema = z.string().min(1).startsWith('/', { message: 'intent must start with /' });
 
 const agentScopeEntrySchema = z.object({
   name: z.string().min(1),

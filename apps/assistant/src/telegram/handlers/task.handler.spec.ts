@@ -2,10 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 
 import type { TelegramGateway } from '../../webhook/telegram.gateway.js';
 import type { OrchestratorService } from '../../orchestrator/orchestrator.service.js';
-import type {
-  ApprovalProposalOutcome,
-  ApprovalService,
-} from '../../approval/approval.service.js';
+import type { ApprovalProposalOutcome, ApprovalService } from '../../approval/approval.service.js';
 import type { TaskResult } from '../../agents/munera/munera.schemas.js';
 
 import { TaskHandler } from './task.handler.js';
@@ -60,9 +57,8 @@ describe('TaskHandler', () => {
       title: 'Купить хлеб',
     });
     expect(gateway.sendMessageWithKeyboard).toHaveBeenCalledTimes(1);
-    const [chat, text, rows] = (
-      gateway.sendMessageWithKeyboard as ReturnType<typeof vi.fn>
-    ).mock.calls[0]!;
+    const [chat, text, rows] = (gateway.sendMessageWithKeyboard as ReturnType<typeof vi.fn>).mock
+      .calls[0]!;
     expect(chat).toBe(99);
     expect(text).toContain('Купить хлеб');
     expect(rows).toHaveLength(1);
@@ -156,9 +152,7 @@ describe('TaskHandler', () => {
 
   it('parses NL prefix "создай задачу" via the static helper', () => {
     expect(TaskHandler.parseNL('создай задачу Купить хлеб')).toBe('Купить хлеб');
-    expect(TaskHandler.parseNL('Создайте задачу: позвонить врачу')).toBe(
-      'позвонить врачу',
-    );
+    expect(TaskHandler.parseNL('Создайте задачу: позвонить врачу')).toBe('позвонить врачу');
     expect(TaskHandler.parseNL('запомни что я молодец')).toBeNull();
     expect(TaskHandler.parseNL('/wiki создай задачу')).toBeNull();
   });

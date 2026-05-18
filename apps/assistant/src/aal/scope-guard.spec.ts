@@ -64,17 +64,13 @@ describe('ScopeGuard', () => {
     const guard = new ScopeGuard();
     guard.load({
       version: 1,
-      scopes: [
-        { principal: 'svc:a', agents: [{ name: 'x', intents: ['/foo'] }] },
-      ],
+      scopes: [{ principal: 'svc:a', agents: [{ name: 'x', intents: ['/foo'] }] }],
     });
     expect(guard.isAllowed('svc:a', 'x', '/foo')).toBe(true);
 
     guard.load({
       version: 1,
-      scopes: [
-        { principal: 'svc:b', agents: [{ name: 'y', intents: ['/bar'] }] },
-      ],
+      scopes: [{ principal: 'svc:b', agents: [{ name: 'y', intents: ['/bar'] }] }],
     });
     expect(guard.isAllowed('svc:a', 'x', '/foo')).toBe(false);
     expect(guard.isAllowed('svc:b', 'y', '/bar')).toBe(true);

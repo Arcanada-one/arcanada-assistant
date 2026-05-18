@@ -1,14 +1,11 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import {
-  AuthArcanaJwtStrategy,
-  type AuthArcanaJwtVerifier,
-} from './auth-arcana-jwt.strategy.js';
+import { AuthArcanaJwtStrategy, type AuthArcanaJwtVerifier } from './auth-arcana-jwt.strategy.js';
 
-function makeStrategy(opts: {
-  enabled: boolean;
-  verify?: AuthArcanaJwtVerifier['verify'];
-}): { strategy: AuthArcanaJwtStrategy; verify: AuthArcanaJwtVerifier['verify'] } {
+function makeStrategy(opts: { enabled: boolean; verify?: AuthArcanaJwtVerifier['verify'] }): {
+  strategy: AuthArcanaJwtStrategy;
+  verify: AuthArcanaJwtVerifier['verify'];
+} {
   const verify = opts.verify ?? vi.fn();
   const verifier: AuthArcanaJwtVerifier = { verify };
   const strategy = new AuthArcanaJwtStrategy(verifier, { enabled: opts.enabled });

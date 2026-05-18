@@ -39,7 +39,9 @@ export function registerAuthPreflight(
   const publicPrefixes = [...opts.publicPrefixes];
   app.addHook('preHandler', async (req: FastifyRequest, reply: FastifyReply) => {
     const url = req.url || '/';
-    if (publicPrefixes.some((p) => url === p || url.startsWith(`${p}/`) || url.startsWith(`${p}?`))) {
+    if (
+      publicPrefixes.some((p) => url === p || url.startsWith(`${p}/`) || url.startsWith(`${p}?`))
+    ) {
       return;
     }
     try {

@@ -206,9 +206,7 @@ describe('ScrutatorClient', () => {
   describe('circuit breaker', () => {
     it('errorFilter: 401 propagates as ClientError but does NOT trip breaker (4xx)', async () => {
       server.use(
-        http.post(`${BASE_URL}/v1/search`, () =>
-          HttpResponse.text('unauth', { status: 401 }),
-        ),
+        http.post(`${BASE_URL}/v1/search`, () => HttpResponse.text('unauth', { status: 401 })),
       );
       const client = makeClient();
       // 5 consecutive 401s — would trip a breaker without errorFilter.
@@ -222,9 +220,7 @@ describe('ScrutatorClient', () => {
 
     it('5xx counts toward CB; opens after volumeThreshold consecutive failures', async () => {
       server.use(
-        http.post(`${BASE_URL}/v1/search`, () =>
-          HttpResponse.text('boom', { status: 500 }),
-        ),
+        http.post(`${BASE_URL}/v1/search`, () => HttpResponse.text('boom', { status: 500 })),
       );
       const client = makeClient();
       for (let i = 0; i < 5; i += 1) {
@@ -239,9 +235,7 @@ describe('ScrutatorClient', () => {
   describe('logger redaction surface', () => {
     it('warn log on non-2xx does not include request body or token-shape strings', async () => {
       server.use(
-        http.post(`${BASE_URL}/v1/search`, () =>
-          HttpResponse.text('boom', { status: 500 }),
-        ),
+        http.post(`${BASE_URL}/v1/search`, () => HttpResponse.text('boom', { status: 500 })),
       );
       const warn = vi.fn();
       const client = makeClient({ logger: { info: vi.fn(), warn, error: vi.fn() } });

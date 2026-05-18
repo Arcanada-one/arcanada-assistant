@@ -36,7 +36,12 @@ describe('AgentRegistry', () => {
     const reg = new AgentRegistry();
     reg.register(echoAgent);
     reg.register(opsAgent);
-    expect(reg.list().map((a) => a.name).sort()).toEqual(['echo', 'ops']);
+    expect(
+      reg
+        .list()
+        .map((a) => a.name)
+        .sort(),
+    ).toEqual(['echo', 'ops']);
   });
 
   it('refuses to register two agents claiming the same intent', () => {

@@ -49,10 +49,7 @@ describe('Munera live-fixture replay', () => {
     const fixture = {
       statusCode: 400,
       error: 'Bad Request',
-      message: [
-        'title must be longer than or equal to 1 characters',
-        'projectId must be a UUID',
-      ],
+      message: ['title must be longer than or equal to 1 characters', 'projectId must be a UUID'],
     };
     expect(MuneraGlobalErrorEnvelopeSchema.parse(fixture)).toEqual(fixture);
   });

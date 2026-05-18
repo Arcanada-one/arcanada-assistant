@@ -26,8 +26,8 @@ function makeDeps(routeImpl: () => Promise<unknown>) {
 
 describe('StatusHandler', () => {
   it('renders snapshot data and sends to chat', async () => {
-    const { send, orchestrator, gateway } = makeDeps(async () =>
-      ({ kind: 'status', snapshot: SNAPSHOT } satisfies OpsAgentResult),
+    const { send, orchestrator, gateway } = makeDeps(
+      async () => ({ kind: 'status', snapshot: SNAPSHOT }) satisfies OpsAgentResult,
     );
     const handler = new StatusHandler(orchestrator, gateway);
     await handler.handle(42);
@@ -41,8 +41,8 @@ describe('StatusHandler', () => {
   });
 
   it('warns when ops bot is unavailable (CB open)', async () => {
-    const { send, orchestrator, gateway } = makeDeps(async () =>
-      ({ kind: 'unavailable', reason: 'cb' } satisfies OpsAgentResult),
+    const { send, orchestrator, gateway } = makeDeps(
+      async () => ({ kind: 'unavailable', reason: 'cb' }) satisfies OpsAgentResult,
     );
     const handler = new StatusHandler(orchestrator, gateway);
     await handler.handle(7);

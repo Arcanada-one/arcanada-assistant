@@ -50,7 +50,10 @@ export function parseApprovalCallback(callbackData: string): ApprovalCallback {
   const remainder = callbackData.slice(PREFIX.length);
   const colon = remainder.indexOf(':');
   if (colon !== 1) {
-    throw new CallbackParseError('bad_decision', 'expected single-letter decision tag followed by ":"');
+    throw new CallbackParseError(
+      'bad_decision',
+      'expected single-letter decision tag followed by ":"',
+    );
   }
   const tag = remainder.charAt(0);
   if (tag !== 'a' && tag !== 'r') {
@@ -58,7 +61,10 @@ export function parseApprovalCallback(callbackData: string): ApprovalCallback {
   }
   const uuid = remainder.slice(2);
   if (!UUID_RE.test(uuid)) {
-    throw new CallbackParseError('bad_uuid', 'callback_data uuid does not match RFC 9562 UUID v1-v8 layout');
+    throw new CallbackParseError(
+      'bad_uuid',
+      'callback_data uuid does not match RFC 9562 UUID v1-v8 layout',
+    );
   }
   return { raw: callbackData, uuid, decision: VERB_BY_TAG[tag] };
 }

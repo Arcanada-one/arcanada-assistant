@@ -1,10 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 
 import type { IAgent } from '../../orchestrator/agent.registry.js';
-import type {
-  AgentHealthSnapshot,
-  IAgentHealth,
-} from '../../aal/agent-health.types.js';
+import type { AgentHealthSnapshot, IAgentHealth } from '../../aal/agent-health.types.js';
 
 import type { ITranscriberClient } from './transcriber.client.js';
 import {

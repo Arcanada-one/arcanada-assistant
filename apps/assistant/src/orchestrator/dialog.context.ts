@@ -70,10 +70,7 @@ export class DialogContextService {
         this.logger.debug({ userId, namespace }, 'rag_recall:empty');
         return null;
       }
-      this.logger.debug(
-        { userId, namespace, hits: result.results.length },
-        'rag_recall:hit',
-      );
+      this.logger.debug({ userId, namespace, hits: result.results.length }, 'rag_recall:hit');
       return formatMemoriesBlock(result.results);
     } catch (err) {
       this.logger.warn(

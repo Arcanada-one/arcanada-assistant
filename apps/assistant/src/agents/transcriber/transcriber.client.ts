@@ -57,7 +57,10 @@ export class TranscriberClientError extends Error {
   readonly cause?: unknown;
   readonly httpStatus?: number;
   readonly errorCode?: string;
-  constructor(message: string, opts?: { cause?: unknown; httpStatus?: number; errorCode?: string }) {
+  constructor(
+    message: string,
+    opts?: { cause?: unknown; httpStatus?: number; errorCode?: string },
+  ) {
     super(message);
     this.name = 'TranscriberClientError';
     this.cause = opts?.cause;
@@ -193,10 +196,10 @@ export class TranscriberClient implements ITranscriberClient {
     if (result.status >= 200 && result.status < 300) {
       const parsed = SttSuccessSchema.safeParse(result.body);
       if (!parsed.success) {
-        throw new TranscriberClientError(
-          `Invalid STT success envelope: ${parsed.error.message}`,
-          { cause: parsed.error, httpStatus: result.status },
-        );
+        throw new TranscriberClientError(`Invalid STT success envelope: ${parsed.error.message}`, {
+          cause: parsed.error,
+          httpStatus: result.status,
+        });
       }
       const env = parsed.data;
       return TranscribeResultSchema.parse({

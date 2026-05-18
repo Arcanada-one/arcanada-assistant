@@ -208,7 +208,10 @@ export class MuneraClient implements IMuneraClient {
     }
   }
 
-  private buildUnavailable(err: unknown, operationLabel: string): {
+  private buildUnavailable(
+    err: unknown,
+    operationLabel: string,
+  ): {
     kind: 'unavailable';
     reason: string;
     statusCode?: number;
@@ -251,10 +254,10 @@ export class MuneraClient implements IMuneraClient {
     if (result.status >= 200 && result.status < 300) {
       const parsed = MuneraTaskSchema.safeParse(result.body);
       if (!parsed.success) {
-        throw new MuneraClientError(
-          `Invalid Munera task envelope: ${parsed.error.message}`,
-          { cause: parsed.error, httpStatus: result.status },
-        );
+        throw new MuneraClientError(`Invalid Munera task envelope: ${parsed.error.message}`, {
+          cause: parsed.error,
+          httpStatus: result.status,
+        });
       }
       return TaskResultSchema.parse({ kind: 'ok', task: parsed.data });
     }
@@ -265,10 +268,10 @@ export class MuneraClient implements IMuneraClient {
     if (result.status >= 200 && result.status < 300) {
       const parsed = MuneraTaskListSchema.safeParse(result.body);
       if (!parsed.success) {
-        throw new MuneraClientError(
-          `Invalid Munera task list envelope: ${parsed.error.message}`,
-          { cause: parsed.error, httpStatus: result.status },
-        );
+        throw new MuneraClientError(`Invalid Munera task list envelope: ${parsed.error.message}`, {
+          cause: parsed.error,
+          httpStatus: result.status,
+        });
       }
       return TaskListResultSchema.parse({ kind: 'ok', tasks: parsed.data });
     }

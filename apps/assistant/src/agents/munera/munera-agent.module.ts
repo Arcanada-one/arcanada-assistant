@@ -51,9 +51,7 @@ export class MuneraAgentModule implements OnModuleInit {
   onModuleInit(): void {
     const ns = this.config.getOrThrow<MuneraConfig>(MUNERA_CONFIG);
     if (!ns.integrationEnabled) {
-      this.logger.warn(
-        'ECOSYSTEM_MUNERA_INTEGRATION=false — MuneraAgent not registered',
-      );
+      this.logger.warn('ECOSYSTEM_MUNERA_INTEGRATION=false — MuneraAgent not registered');
       return;
     }
     this.registry.register(this.agent);

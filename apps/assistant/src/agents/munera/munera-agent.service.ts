@@ -1,10 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 
 import type { IAgent } from '../../orchestrator/agent.registry.js';
-import type {
-  AgentHealthSnapshot,
-  IAgentHealth,
-} from '../../aal/agent-health.types.js';
+import type { AgentHealthSnapshot, IAgentHealth } from '../../aal/agent-health.types.js';
 
 import type { IMuneraClient } from './munera.client.js';
 import type {
@@ -92,10 +89,7 @@ export class MuneraAgentService implements IAgent, IAgentHealth {
 
   private async runUpdate(payload: unknown): Promise<TaskResult> {
     if (!isObject(payload) || typeof (payload as { taskId?: unknown }).taskId !== 'string') {
-      return invalidPayload(
-        'munera_invalid_update_payload',
-        'payload requires taskId (string)',
-      );
+      return invalidPayload('munera_invalid_update_payload', 'payload requires taskId (string)');
     }
     const typed = payload as unknown as TaskUpdatePayload;
     const { taskId, ...rest } = typed;

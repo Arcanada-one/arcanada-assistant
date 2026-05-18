@@ -16,10 +16,10 @@ tools:
     requires_approval: conditional
     condition:
       or:
-        - "==":
+        - '==':
             - var: payload.where
             - null
-        - "==":
+        - '==':
             - var: payload.where
             - {}
     approval_timeout_ms: 300000

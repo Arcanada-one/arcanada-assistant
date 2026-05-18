@@ -1,10 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { AgentRegistry, type IAgent } from '../orchestrator/agent.registry.js';
-import type {
-  AgentHealthSnapshot,
-  IAgentHealth,
-} from '../aal/agent-health.types.js';
+import type { AgentHealthSnapshot, IAgentHealth } from '../aal/agent-health.types.js';
 
 import { PerAgentHealthIndicator } from './per-agent.health.indicator.js';
 

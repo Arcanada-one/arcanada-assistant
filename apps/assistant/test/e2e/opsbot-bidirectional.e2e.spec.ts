@@ -287,9 +287,7 @@ describe('E2E V-AC-3 — opsbot-bidirectional', () => {
       },
     });
     const replies = telegram.sendMessage.mock.calls.map((c) => c[1] as string);
-    expect(
-      replies.some((r) => r.includes('echo-back') && r.includes('не выполнена')),
-    ).toBe(true);
+    expect(replies.some((r) => r.includes('echo-back') && r.includes('не выполнена'))).toBe(true);
     const errorAudits = audits.filter((a) => a.message === 'opsbot-command-error');
     expect(errorAudits.length).toBeGreaterThanOrEqual(1);
   });

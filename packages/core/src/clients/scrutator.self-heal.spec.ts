@@ -1,9 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import {
-  ScrutatorClient,
-  type ScrutatorSelfHealPayload,
-} from './scrutator.client.js';
+import { ScrutatorClient, type ScrutatorSelfHealPayload } from './scrutator.client.js';
 
 /**
  * ARCA-0102 / V-AC-19 regression: when the Scrutator CB transitions to

@@ -1,10 +1,6 @@
 import { Injectable } from '@nestjs/common';
 
-import type {
-  AuthOutcome,
-  AuthRequestSnapshot,
-  IAuthStrategy,
-} from './auth-strategy.interface.js';
+import type { AuthOutcome, AuthRequestSnapshot, IAuthStrategy } from './auth-strategy.interface.js';
 
 /**
  * Tailscale tailnet identity fallback. Pure source-IP gate: if the request

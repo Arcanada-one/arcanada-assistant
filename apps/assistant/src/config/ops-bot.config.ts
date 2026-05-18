@@ -12,9 +12,12 @@ import { z } from 'zod';
  * Vault хранит компоненты, не URL; consumer собирает финальные параметры здесь.
  */
 const opsBotEnvSchema = z.object({
-  OPSBOT_BASE_URL: z.string().url().refine((u) => u.startsWith('https://'), {
-    message: 'OPSBOT_BASE_URL must be https://',
-  }),
+  OPSBOT_BASE_URL: z
+    .string()
+    .url()
+    .refine((u) => u.startsWith('https://'), {
+      message: 'OPSBOT_BASE_URL must be https://',
+    }),
   OPSBOT_API_KEY: z.string().min(1, 'OPSBOT_API_KEY required'),
 });
 

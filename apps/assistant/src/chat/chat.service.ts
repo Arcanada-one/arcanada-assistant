@@ -33,8 +33,7 @@ export interface DialogTurnOptions {
   minScore?: number;
 }
 
-const PLACEHOLDER_REPLY =
-  'Принял. Полный ответ от Claude появится после ARCA-* Phase 7 wire-up.';
+const PLACEHOLDER_REPLY = 'Принял. Полный ответ от Claude появится после ARCA-* Phase 7 wire-up.';
 const DEFAULT_SYSTEM_PREFIX =
   'Ты — Arcanada Assistant. Отвечай по-русски, опирайся на воспоминания, если они релевантны.';
 

@@ -15,12 +15,13 @@ function makeDeps(routeImpl: () => Promise<unknown>) {
 
 describe('AgentsHandler', () => {
   it('reports agent count and timestamp', async () => {
-    const { send, orchestrator, gateway } = makeDeps(async () =>
-      ({
-        kind: 'agents',
-        count: 5,
-        parsed_at: '2026-05-09T22:00:00.000Z',
-      }) satisfies OpsAgentResult,
+    const { send, orchestrator, gateway } = makeDeps(
+      async () =>
+        ({
+          kind: 'agents',
+          count: 5,
+          parsed_at: '2026-05-09T22:00:00.000Z',
+        }) satisfies OpsAgentResult,
     );
     const handler = new AgentsHandler(orchestrator, gateway);
     await handler.handle(99);
@@ -29,8 +30,8 @@ describe('AgentsHandler', () => {
   });
 
   it('warns when ops bot is unavailable', async () => {
-    const { send, orchestrator, gateway } = makeDeps(async () =>
-      ({ kind: 'unavailable', reason: 'cb' }) satisfies OpsAgentResult,
+    const { send, orchestrator, gateway } = makeDeps(
+      async () => ({ kind: 'unavailable', reason: 'cb' }) satisfies OpsAgentResult,
     );
     const handler = new AgentsHandler(orchestrator, gateway);
     await handler.handle(10);

@@ -53,9 +53,10 @@ function render(result: KnowledgeAgentResult): string {
     `🔍 Поиск по вики: «${result.query}» (${result.searchTimeMs.toFixed(0)} мс)`,
     '',
     ...result.hits.map((hit, i) => {
-      const snippet = hit.content.length > SNIPPET_MAX_LEN
-        ? `${hit.content.slice(0, SNIPPET_MAX_LEN)}…`
-        : hit.content;
+      const snippet =
+        hit.content.length > SNIPPET_MAX_LEN
+          ? `${hit.content.slice(0, SNIPPET_MAX_LEN)}…`
+          : hit.content;
       const heading = hit.heading ? `\n  ↳ ${hit.heading}` : '';
       return `${i + 1}. ${snippet}${heading}\n  📎 ${hit.sourcePath} · score ${(hit.score * 100).toFixed(0)}%`;
     }),

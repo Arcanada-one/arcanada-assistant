@@ -9,9 +9,7 @@ const okScrutator = {
   ping: vi.fn().mockResolvedValue({ ok: true, latencyMs: 12, version: '0.3.0' }),
 };
 const emptyMesh = {
-  snapshot: vi
-    .fn()
-    .mockResolvedValue({ status: 'ok', agents: [] } satisfies MeshHealthRollup),
+  snapshot: vi.fn().mockResolvedValue({ status: 'ok', agents: [] } satisfies MeshHealthRollup),
 };
 
 function makeMesh(rollup: MeshHealthRollup) {
@@ -126,9 +124,7 @@ describe('HealthController', () => {
   it('downgrades to degraded when an agent is degraded but deps are ok', async () => {
     const mesh = makeMesh({
       status: 'degraded',
-      agents: [
-        { agent: 'dreamer', state: 'degraded', reason: 'skeleton', checkedAt: 'now' },
-      ],
+      agents: [{ agent: 'dreamer', state: 'degraded', reason: 'skeleton', checkedAt: 'now' }],
     });
     const ctl = new HealthController(
       okPrisma as never,
@@ -145,9 +141,7 @@ describe('HealthController', () => {
   it('reports fail (503) when an agent rolls up to unavailable', async () => {
     const mesh = makeMesh({
       status: 'fail',
-      agents: [
-        { agent: 'transcriber', state: 'unavailable', circuit: 'open', checkedAt: 'now' },
-      ],
+      agents: [{ agent: 'transcriber', state: 'unavailable', circuit: 'open', checkedAt: 'now' }],
     });
     const ctl = new HealthController(
       okPrisma as never,

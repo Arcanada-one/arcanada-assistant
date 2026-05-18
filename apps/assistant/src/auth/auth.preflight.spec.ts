@@ -6,10 +6,7 @@ import type { IAuthStrategy } from './auth-strategy.interface.js';
 import { registerAuthPreflight } from './auth.preflight.js';
 import { TailscaleStrategy } from './tailscale.strategy.js';
 import { VaultApiKeyStrategy, type VaultApiKeyVerifier } from './vault-api-key.strategy.js';
-import {
-  AuthArcanaJwtStrategy,
-  type AuthArcanaJwtVerifier,
-} from './auth-arcana-jwt.strategy.js';
+import { AuthArcanaJwtStrategy, type AuthArcanaJwtVerifier } from './auth-arcana-jwt.strategy.js';
 
 function vaultVerifier(expected: string): VaultApiKeyVerifier {
   return {

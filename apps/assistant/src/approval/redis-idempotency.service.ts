@@ -79,7 +79,7 @@ export class RedisIdempotencyService {
     ];
     // Use EVALSHA on hot path; lazily load script on first call.
     if (!this.claimSha) {
-      this.claimSha = await this.redis.script('LOAD', CLAIM_LUA) as string;
+      this.claimSha = (await this.redis.script('LOAD', CLAIM_LUA)) as string;
     }
     try {
       const result = await this.redis.evalsha(
@@ -95,7 +95,7 @@ export class RedisIdempotencyService {
     } catch (err) {
       if (err instanceof Error && err.message.includes('NOSCRIPT')) {
         // Script flushed (e.g. SCRIPT FLUSH between calls). Reload + retry once.
-        this.claimSha = await this.redis.script('LOAD', CLAIM_LUA) as string;
+        this.claimSha = (await this.redis.script('LOAD', CLAIM_LUA)) as string;
         const result = await this.redis.evalsha(
           this.claimSha,
           2,

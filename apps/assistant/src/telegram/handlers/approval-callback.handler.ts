@@ -51,11 +51,7 @@ export class ApprovalCallbackHandler {
       return;
     }
     try {
-      const result = await this.approval.claim(
-        pendingId,
-        decision,
-        String(query.from.id),
-      );
+      const result = await this.approval.claim(pendingId, decision, String(query.from.id));
       await this.dispatch(query, chatId, decision, result);
     } catch (err) {
       this.logger.warn(
@@ -100,7 +96,10 @@ export class ApprovalCallbackHandler {
     const intent = lookupIntent(result.envelope);
     const payload = lookupPayload(result.envelope);
     if (!intent || payload === undefined) {
-      this.logger.warn({ envelope: result.envelope }, 'approved envelope missing tool_name/payload');
+      this.logger.warn(
+        { envelope: result.envelope },
+        'approved envelope missing tool_name/payload',
+      );
       if (chatId !== undefined) {
         await this.replySafe(chatId, '⚠️ Не удалось выполнить действие (нет данных).');
       }

@@ -33,7 +33,7 @@ describe('runProbe', () => {
   it('returns fail with stringified non-Error throwable', async () => {
     const probe: DepProbe = {
       name: 'odd',
-       
+
       async check() {
         throw 'string-thrown';
       },

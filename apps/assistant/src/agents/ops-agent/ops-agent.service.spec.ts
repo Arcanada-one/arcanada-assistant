@@ -1,9 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import type {
-  EcosystemSnapshot,
-  ExecuteCommandResponse,
-  IOpsBotClient,
-} from '@arcanada/core';
+import type { EcosystemSnapshot, ExecuteCommandResponse, IOpsBotClient } from '@arcanada/core';
 
 import { OpsAgentService, OpsAgentResult } from './ops-agent.service.js';
 

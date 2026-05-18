@@ -12,12 +12,7 @@
  * guard + auth middleware throw `AgentError` subclasses, never bare `Error`.
  */
 
-export type AgentErrorKind =
-  | 'auth'
-  | 'timeout'
-  | 'soft_fail'
-  | 'validation'
-  | 'scope';
+export type AgentErrorKind = 'auth' | 'timeout' | 'soft_fail' | 'validation' | 'scope';
 
 export interface AgentErrorOptions {
   agent?: string;

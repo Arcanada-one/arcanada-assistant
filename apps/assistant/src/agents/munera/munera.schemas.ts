@@ -9,12 +9,7 @@ export const MUNERA_TASK_STATUSES = [
   'cancelled',
 ] as const;
 
-export const MUNERA_TASK_PRIORITIES = [
-  'critical',
-  'high',
-  'medium',
-  'low',
-] as const;
+export const MUNERA_TASK_PRIORITIES = ['critical', 'high', 'medium', 'low'] as const;
 
 export type MuneraTaskStatus = (typeof MUNERA_TASK_STATUSES)[number];
 export type MuneraTaskPriority = (typeof MUNERA_TASK_PRIORITIES)[number];

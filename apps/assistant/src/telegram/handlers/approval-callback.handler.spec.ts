@@ -2,10 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 
 import type { TelegramGateway } from '../../webhook/telegram.gateway.js';
 import type { OrchestratorService } from '../../orchestrator/orchestrator.service.js';
-import type {
-  ApprovalClaimResult,
-  ApprovalService,
-} from '../../approval/approval.service.js';
+import type { ApprovalClaimResult, ApprovalService } from '../../approval/approval.service.js';
 import type { TaskResult } from '../../agents/munera/munera.schemas.js';
 
 import {
@@ -77,7 +74,9 @@ describe('ApprovalCallbackHandler', () => {
     expect(orchestrator.route).toHaveBeenCalledWith('/task_create', envelope.payload);
     expect(gateway.answerCallbackQuery).toHaveBeenCalledWith('cbq-1', 'Принято');
     expect(gateway.sendMessage).toHaveBeenCalledTimes(1);
-    expect((gateway.sendMessage as ReturnType<typeof vi.fn>).mock.calls[0]?.[1]).toContain('создана');
+    expect((gateway.sendMessage as ReturnType<typeof vi.fn>).mock.calls[0]?.[1]).toContain(
+      'создана',
+    );
   });
 
   it('does NOT execute orchestrator on reject and posts rejection note', async () => {

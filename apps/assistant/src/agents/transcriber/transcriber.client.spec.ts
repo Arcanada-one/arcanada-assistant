@@ -131,15 +131,13 @@ describe('TranscriberClient', () => {
   });
 
   it('opens circuit after volumeThreshold consecutive 500s and returns circuit_open', async () => {
-    const fetchImpl = vi
-      .fn()
-      .mockResolvedValue(
-        jsonResponse(500, {
-          statusCode: 500,
-          error_code: 'stt_provider_failed',
-          message: 'down',
-        }),
-      );
+    const fetchImpl = vi.fn().mockResolvedValue(
+      jsonResponse(500, {
+        statusCode: 500,
+        error_code: 'stt_provider_failed',
+        message: 'down',
+      }),
+    );
     const client = new TranscriberClient({
       baseUrl,
       apiKey,

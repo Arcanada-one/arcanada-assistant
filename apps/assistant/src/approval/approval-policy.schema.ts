@@ -22,10 +22,10 @@ export const ApprovalPolicyEntrySchema = z
     approve_requires: z.array(z.string().min(1)).default([]),
   })
   .strict()
-  .refine(
-    (entry) => entry.requires_approval !== 'conditional' || entry.condition !== undefined,
-    { message: 'conditional requires non-empty condition', path: ['condition'] },
-  );
+  .refine((entry) => entry.requires_approval !== 'conditional' || entry.condition !== undefined, {
+    message: 'conditional requires non-empty condition',
+    path: ['condition'],
+  });
 
 export type ApprovalPolicyEntry = z.infer<typeof ApprovalPolicyEntrySchema>;
 
@@ -35,10 +35,10 @@ export const ApprovalPolicySchema = z
     tools: z.array(ApprovalPolicyEntrySchema).min(1, 'policy must declare ≥1 tool'),
   })
   .strict()
-  .refine(
-    (policy) => new Set(policy.tools.map((t) => t.tool_name)).size === policy.tools.length,
-    { message: 'duplicate tool_name forbidden', path: ['tools'] },
-  );
+  .refine((policy) => new Set(policy.tools.map((t) => t.tool_name)).size === policy.tools.length, {
+    message: 'duplicate tool_name forbidden',
+    path: ['tools'],
+  });
 
 export type ApprovalPolicy = z.infer<typeof ApprovalPolicySchema>;
 

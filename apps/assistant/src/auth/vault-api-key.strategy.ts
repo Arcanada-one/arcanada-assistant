@@ -1,10 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import type {
-  AuthOutcome,
-  AuthRequestSnapshot,
-  IAuthStrategy,
-} from './auth-strategy.interface.js';
+import type { AuthOutcome, AuthRequestSnapshot, IAuthStrategy } from './auth-strategy.interface.js';
 
 /**
  * Vault-AppRole-issued API key verifier. The header carries an opaque token
@@ -16,9 +12,10 @@ export interface VaultApiKeyVerifier {
    * Maps a presented key string to a principal id or rejection reason.
    * Implementations are expected to be cheap (cache the Vault response).
    */
-  verify(key: string): Promise<
-    | { ok: true; principal: string; scopes?: readonly string[] }
-    | { ok: false; reason: string }
+  verify(
+    key: string,
+  ): Promise<
+    { ok: true; principal: string; scopes?: readonly string[] } | { ok: false; reason: string }
   >;
 }
 

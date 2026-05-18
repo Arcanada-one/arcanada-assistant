@@ -275,7 +275,10 @@ describe('OpsBotClient.executeCommand (ARCA-0009 M3, V-AC-3)', () => {
   function commandsServer(): {
     cmdCalls: { authorization: string | null; bodies: Record<string, unknown>[] };
   } {
-    const cmdCalls = { authorization: null as string | null, bodies: [] as Record<string, unknown>[] };
+    const cmdCalls = {
+      authorization: null as string | null,
+      bodies: [] as Record<string, unknown>[],
+    };
     server.use(
       http.post(`${BASE_URL}/commands`, async ({ request }) => {
         cmdCalls.authorization = request.headers.get('authorization');

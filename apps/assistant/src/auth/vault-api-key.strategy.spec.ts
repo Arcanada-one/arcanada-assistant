@@ -1,9 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import {
-  VaultApiKeyStrategy,
-  type VaultApiKeyVerifier,
-} from './vault-api-key.strategy.js';
+import { VaultApiKeyStrategy, type VaultApiKeyVerifier } from './vault-api-key.strategy.js';
 
 function makeStrategy(verifier: VaultApiKeyVerifier): VaultApiKeyStrategy {
   return new VaultApiKeyStrategy(verifier);

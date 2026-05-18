@@ -227,10 +227,7 @@ export class OpsBotClient implements IOpsBotClient {
       });
       const ack = ExecuteCommandResponseSchema.safeParse(result.json);
       if (!ack.success) {
-        throw new OpsBotClientError(
-          `Invalid /commands response: ${ack.error.message}`,
-          ack.error,
-        );
+        throw new OpsBotClientError(`Invalid /commands response: ${ack.error.message}`, ack.error);
       }
       response = ack.data;
     } catch (err) {
@@ -299,9 +296,7 @@ export class OpsBotClient implements IOpsBotClient {
         await new Promise((r) => setTimeout(r, backoff));
       }
     }
-    throw lastErr instanceof Error
-      ? lastErr
-      : new OpsBotClientError(String(lastErr));
+    throw lastErr instanceof Error ? lastErr : new OpsBotClientError(String(lastErr));
   }
 
   private async doFetch(req: RequestPlan): Promise<HttpResult> {

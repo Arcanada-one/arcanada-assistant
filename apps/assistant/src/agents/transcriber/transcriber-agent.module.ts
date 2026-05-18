@@ -6,7 +6,11 @@ import { TRANSCRIBER_CONFIG, type TranscriberConfig } from '../../config/transcr
 import { AgentRegistry } from '../../orchestrator/agent.registry.js';
 import { OrchestratorModule } from '../../orchestrator/orchestrator.module.js';
 
-import { TranscriberClient, type ITranscriberClient, type TranscriberLogger } from './transcriber.client.js';
+import {
+  TranscriberClient,
+  type ITranscriberClient,
+  type TranscriberLogger,
+} from './transcriber.client.js';
 import { TRANSCRIBER_CLIENT, TranscriberAgentService } from './transcriber-agent.service.js';
 
 function adaptLogger(pino: PinoLogger): TranscriberLogger {
@@ -52,9 +56,7 @@ export class TranscriberAgentModule implements OnModuleInit {
   onModuleInit(): void {
     const ns = this.config.getOrThrow<TranscriberConfig>(TRANSCRIBER_CONFIG);
     if (!ns.integrationEnabled) {
-      this.logger.warn(
-        'ECOSYSTEM_TRANSCRIBER_INTEGRATION=false — TranscriberAgent not registered',
-      );
+      this.logger.warn('ECOSYSTEM_TRANSCRIBER_INTEGRATION=false — TranscriberAgent not registered');
       return;
     }
     this.registry.register(this.agent);

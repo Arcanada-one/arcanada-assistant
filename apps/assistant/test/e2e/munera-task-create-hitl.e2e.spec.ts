@@ -147,25 +147,10 @@ function wire(createImpl?: IMuneraClient['createTask']): Wiring {
   const policy = parseApprovalPolicy(POLICY_YAML);
   const approval = ApprovalService.withDeps(policy, idempotency);
 
-  const task = new TaskHandler(
-    telegram,
-    approval,
-    orchestrator,
-    PROJECT_ID as unknown as string,
-  );
+  const task = new TaskHandler(telegram, approval, orchestrator, PROJECT_ID as unknown as string);
   const callback = new ApprovalCallbackHandler(telegram, approval, orchestrator);
   const noop = { handle: vi.fn() } as unknown as never;
-  const router = new CommandRouter(
-    noop,
-    noop,
-    noop,
-    noop,
-    noop,
-    noop,
-    task,
-    noop,
-    callback,
-  );
+  const router = new CommandRouter(noop, noop, noop, noop, noop, noop, task, noop, callback);
   return { router, telegram, munera };
 }
 

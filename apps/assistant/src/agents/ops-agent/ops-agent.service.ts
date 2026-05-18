@@ -34,11 +34,7 @@ export type OpsAgentResult =
 @Injectable()
 export class OpsAgentService implements IAgent {
   readonly name = 'ops';
-  readonly intents = [
-    OPS_INTENT_STATUS,
-    OPS_INTENT_AGENTS,
-    OPS_INTENT_OPSBOT_COMMAND,
-  ] as const;
+  readonly intents = [OPS_INTENT_STATUS, OPS_INTENT_AGENTS, OPS_INTENT_OPSBOT_COMMAND] as const;
 
   constructor(@Inject(OPS_BOT_CLIENT) private readonly client: IOpsBotClient) {}
 

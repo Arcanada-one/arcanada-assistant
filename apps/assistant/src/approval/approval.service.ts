@@ -4,10 +4,7 @@ import { Injectable } from '@nestjs/common';
 import { v7 as uuidv7 } from 'uuid';
 
 import { decideApproval } from './approval-policy.loader.js';
-import type {
-  ApprovalPolicy,
-  ApprovalPolicyEntry,
-} from './approval-policy.schema.js';
+import type { ApprovalPolicy, ApprovalPolicyEntry } from './approval-policy.schema.js';
 import { encodeApprovalCallback } from './telegram-callback.parser.js';
 import { RedisIdempotencyService, type ClaimOutcome } from './redis-idempotency.service.js';
 
@@ -44,10 +41,7 @@ export class ApprovalService {
   ) {}
 
   /** Static factory used in tests and the DI factory. */
-  static withDeps(
-    policy: ApprovalPolicy,
-    redis: RedisIdempotencyService,
-  ): ApprovalService {
+  static withDeps(policy: ApprovalPolicy, redis: RedisIdempotencyService): ApprovalService {
     return new ApprovalService(policy, redis);
   }
 

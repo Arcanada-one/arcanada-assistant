@@ -29,10 +29,7 @@ export class VoiceHandler {
   async handle(chatId: number, voice: TelegramVoice): Promise<void> {
     const mime = (voice.mime_type ?? DEFAULT_MIME) as SttMimeType | string;
     if (!isAllowedMime(mime)) {
-      await this.replySafe(
-        chatId,
-        `⚠️ Формат аудио "${mime}" не поддерживается транскрибатором.`,
-      );
+      await this.replySafe(chatId, `⚠️ Формат аудио "${mime}" не поддерживается транскрибатором.`);
       return;
     }
     let audio: Buffer;

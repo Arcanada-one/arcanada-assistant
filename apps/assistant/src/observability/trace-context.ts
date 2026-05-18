@@ -87,10 +87,7 @@ class SimpleSpan implements TraceSpan {
  */
 export class NoopTraceContext implements TraceContext {
   private stack: SpanFrame[] = [];
-  startSpan(
-    name: string,
-    attributes?: Record<string, string | number | boolean>,
-  ): TraceSpan {
+  startSpan(name: string, attributes?: Record<string, string | number | boolean>): TraceSpan {
     const parent = this.stack[this.stack.length - 1];
     const traceId = parent?.span.traceId ?? hex(16);
     const spanId = hex(8);

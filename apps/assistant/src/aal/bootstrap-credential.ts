@@ -53,7 +53,9 @@ export class BootstrapCredentialRegistry {
     return [...this.probes];
   }
 
-  async runAll(): Promise<ReadonlyArray<{ probe: CredentialProbe; outcome: CredentialProbeOutcome }>> {
+  async runAll(): Promise<
+    ReadonlyArray<{ probe: CredentialProbe; outcome: CredentialProbeOutcome }>
+  > {
     const results: { probe: CredentialProbe; outcome: CredentialProbeOutcome }[] = [];
     for (const probe of this.probes) {
       const outcome = await this.runOne(probe);
@@ -66,7 +68,9 @@ export class BootstrapCredentialRegistry {
     try {
       const outcome = await probe.probe();
       if (outcome.ok) {
-        this.logger.log(`probe "${probe.name}" → ok${outcome.detail ? ` (${outcome.detail})` : ''}`);
+        this.logger.log(
+          `probe "${probe.name}" → ok${outcome.detail ? ` (${outcome.detail})` : ''}`,
+        );
         return outcome;
       }
       if (outcome.kind === 'missing_config') {

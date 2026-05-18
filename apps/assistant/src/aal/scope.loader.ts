@@ -35,9 +35,7 @@ export function parseScopeManifest(yaml: string): ScopeManifest {
   }
   const parsed = ScopeManifestSchema.safeParse(doc);
   if (!parsed.success) {
-    const issues = parsed.error.issues
-      .map((i) => `${i.path.join('.')}: ${i.message}`)
-      .join('; ');
+    const issues = parsed.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('; ');
     throw new ScopeManifestLoadError(`scope manifest invalid: ${issues}`, parsed.error);
   }
   return parsed.data;
