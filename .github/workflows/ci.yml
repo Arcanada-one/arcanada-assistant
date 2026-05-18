@@ -145,9 +145,15 @@ jobs:
           cd apps/assistant
           node dist/main.js > /tmp/assistant.log 2>&1 &
           APP_PID=$!
+          # ARCA-0033 intent: verify the app boots, not that all upstreams
+          # are reachable (Scrutator/MC/OpsBot stubs intentionally point at
+          # invalid hosts in CI). Treat any HTTP response from /health as
+          # boot success — only TCP-refused / no-response within 30 s fails.
           for i in $(seq 1 30); do
-            if curl -fsS http://localhost:3800/health >/dev/null; then
-              echo "smoke healthy after ${i}s"
+            HTTP_CODE=$(curl -sS -o /tmp/health.json -w '%{http_code}' http://localhost:3800/health || true)
+            if [ "$HTTP_CODE" = "200" ] || [ "$HTTP_CODE" = "503" ]; then
+              echo "smoke responded http=${HTTP_CODE} after ${i}s"
+              cat /tmp/health.json
               kill $APP_PID || true
               exit 0
             fi
