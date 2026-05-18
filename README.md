@@ -14,7 +14,7 @@
 **current_aal:** `L1` (scaffold + Docker + CI/CD)
 **target_aal:** `L4` (cost circuit breakers, fallback chain, self-heal events)
 
-Roadmap → ARCA-0007 (L2) → ARCA-0009 (L3) → ARCA-0010..0012 (L4). См. [`Areas/Architecture/AAL-Classification.md`](../../../../Areas/Architecture/AAL-Classification.md).
+Roadmap → ARCA-0007 (L2) → ARCA-0009 (L3) → ARCA-0010..0012 (L4). См. [`documentation/architecture/AAL-Classification.md`](../../../../documentation/architecture/AAL-Classification.md).
 
 ## Architecture
 
