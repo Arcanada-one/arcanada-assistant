@@ -50,14 +50,14 @@ export class DreamerAgentModule implements OnModuleInit {
 
   onModuleInit(): void {
     const ns = this.config.getOrThrow<DreamerConfig>(DREAMER_CONFIG);
-    this.registry.register(this.agent);
-    if (!ns.live) {
+    if (ns.live) {
+      this.registry.register(this.agent);
       this.logger.warn(
-        'ECOSYSTEM_DREAMER_LIVE=false — DreamerAgent registered as skeleton; calls return unavailable:dreamer_not_migrated until ARCA-* Phase 6b lands',
+        'ECOSYSTEM_DREAMER_LIVE=true requested but live HTTP path is unimplemented — skeleton fallback active until ARCA-* Phase 6b ships',
       );
     } else {
       this.logger.warn(
-        'ECOSYSTEM_DREAMER_LIVE=true requested but live HTTP path is unimplemented — skeleton fallback active until ARCA-* Phase 6b ships',
+        'ECOSYSTEM_DREAMER_LIVE=false — DreamerAgent NOT registered in mesh registry (skeleton mode); flip env var to true after AGENT-0062 lands',
       );
     }
   }
