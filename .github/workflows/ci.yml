@@ -31,7 +31,7 @@ jobs:
       - run: pnpm -r lint
 
   test:
-    runs-on: [self-hosted, Linux, X64]
+    runs-on: [self-hosted, Linux, X64, arcana-ai]
     services:
       postgres:
         image: postgres:17-alpine
@@ -83,7 +83,7 @@ jobs:
 
   smoke:
     needs: [lint, test, audit]
-    runs-on: [self-hosted, Linux, X64]
+    runs-on: [self-hosted, Linux, X64, arcana-ai]
     services:
       postgres:
         image: postgres:17-alpine
