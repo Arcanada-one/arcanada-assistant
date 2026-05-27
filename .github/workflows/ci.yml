@@ -16,7 +16,7 @@ env:
 
 jobs:
   lint:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Linux, X64]
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -31,7 +31,7 @@ jobs:
       - run: pnpm -r lint
 
   test:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Linux, X64]
     services:
       postgres:
         image: postgres:17-alpine
@@ -68,7 +68,7 @@ jobs:
       - run: pnpm -r test:coverage
 
   audit:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Linux, X64]
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -83,7 +83,7 @@ jobs:
 
   smoke:
     needs: [lint, test, audit]
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Linux, X64]
     services:
       postgres:
         image: postgres:17-alpine
@@ -225,7 +225,7 @@ jobs:
   notify-on-fail:
     needs: [lint, test, audit, smoke, deploy, verify]
     if: failure() && github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Linux, X64]
     steps:
       - name: Notify Ops Bot
         run: |
