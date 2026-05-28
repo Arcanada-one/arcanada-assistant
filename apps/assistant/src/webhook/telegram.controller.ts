@@ -6,8 +6,6 @@ import { ApiTags } from '@nestjs/swagger';
 
 import { CommandRouter, type IncomingUpdate } from '../telegram/handlers/command-router.handler.js';
 
-const SECRET_HEADER = 'x-telegram-bot-api-secret-token';
-
 function safeEq(a: string, b: string): boolean {
   const ab = Buffer.from(a, 'utf8');
   const bb = Buffer.from(b, 'utf8');
@@ -29,7 +27,7 @@ export class TelegramController {
   @HttpCode(200)
   async handle(
     @Body() update: IncomingUpdate,
-    @Headers(SECRET_HEADER) secret?: string,
+    @Headers('x-telegram-bot-api-secret-token') secret?: string,
   ): Promise<{ ok: true }> {
     const expected = this.config.get<string>('TELEGRAM_WEBHOOK_SECRET') ?? '';
     if (!secret || !expected || !safeEq(secret, expected)) {
