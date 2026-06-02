@@ -133,4 +133,23 @@ describe('DatarimReaderService', () => {
       expect(items.map((c) => c.id)).toContain('ARCA-0009');
     });
   });
+
+  // ARCA-0154: distinguish a broken source (DATARIM_PATH unmounted / ENOENT)
+  // from an honestly-empty one (mounted, but no matching entries today).
+  describe('sourceAvailable', () => {
+    it('returns true when the datarim root exists and is readable', async () => {
+      expect(await svc.sourceAvailable()).toBe(true);
+    });
+
+    it('returns false when the datarim root does not exist (unmounted)', async () => {
+      const orphan = DatarimReaderService.withRoot(join(root, 'does', 'not', 'exist'));
+      expect(await orphan.sourceAvailable()).toBe(false);
+    });
+
+    it('returns true even when tasks.md is absent but the root is mounted (honest-empty)', async () => {
+      // root exists (mounted) but no tasks.md yet — this is idle, not broken.
+      expect(await svc.sourceAvailable()).toBe(true);
+      expect(await svc.readActiveTasks()).toEqual([]);
+    });
+  });
 });

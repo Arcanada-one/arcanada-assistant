@@ -27,10 +27,17 @@ describe('opsBot config namespace', () => {
     expect(cfg).toEqual({ baseUrl: 'https://ops.test/', apiKey: 'key-123' });
   });
 
-  it('throws when OPSBOT_BASE_URL is non-https', () => {
+  it('throws when OPSBOT_BASE_URL is public http (dotted host)', () => {
     process.env.OPSBOT_BASE_URL = 'http://insecure.test/';
     process.env.OPSBOT_API_KEY = 'key-123';
     expect(() => opsBotConfig()).toThrow(/Invalid OpsBot configuration/);
+  });
+
+  it('accepts internal http OPSBOT_BASE_URL (docker service name)', () => {
+    process.env.OPSBOT_BASE_URL = 'http://opsbot:3600';
+    process.env.OPSBOT_API_KEY = 'key-123';
+    const cfg = opsBotConfig();
+    expect(cfg).toEqual({ baseUrl: 'http://opsbot:3600', apiKey: 'key-123' });
   });
 
   it('throws when OPSBOT_API_KEY is missing', () => {

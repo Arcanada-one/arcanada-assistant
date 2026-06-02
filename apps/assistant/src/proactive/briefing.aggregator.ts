@@ -39,18 +39,25 @@ export class BriefingAggregator {
       lines.push(this.renderSnapshot(snap));
     }
 
+    // ARCA-0154: probe datarim source once. When unmounted/ENOENT every
+    // section renders a degraded marker rather than an honest-empty "нет".
+    const datarimAvailable =
+      ch.include_active_tasks || ch.include_backlog_top_n > 0
+        ? await this.datarim.sourceAvailable()
+        : true;
+
     if (ch.include_active_tasks) {
       const tasks = await this.datarim.readActiveTasks();
       sections.push('active_tasks');
       lines.push('');
-      lines.push(this.renderActiveTasks(tasks));
+      lines.push(this.renderActiveTasks(tasks, datarimAvailable));
     }
 
     if (ch.include_backlog_top_n > 0) {
       const top = await this.datarim.readBacklogTopN(ch.include_backlog_top_n);
       sections.push('backlog_top_n');
       lines.push('');
-      lines.push(this.renderBacklog(top, ch.include_backlog_top_n));
+      lines.push(this.renderBacklog(top, ch.include_backlog_top_n, datarimAvailable));
     }
 
     return { text: lines.join('\n'), sections };
@@ -66,20 +73,28 @@ export class BriefingAggregator {
   }
 
   private renderSnapshot(snap: EcosystemSnapshot | null): string {
-    if (!snap) return `${bold('Сервисы:')} ${escapeMd('snapshot недоступен')}`;
+    if (!snap) return `${bold('Сервисы:')} ${escapeMd('⚠️ snapshot недоступен')}`;
     const events = String(snap.events_total);
     return [
       `${bold('Сервисы:')} ${escapeMd(`${snap.agents_total} агентов, ${events} событий, approvals ${snap.approvals_pending}`)}`,
     ].join('\n');
   }
 
-  private renderActiveTasks(tasks: readonly ActiveTask[]): string {
+  private renderActiveTasks(tasks: readonly ActiveTask[], sourceAvailable: boolean): string {
+    if (!sourceAvailable)
+      return `${bold('Активные задачи:')} ${escapeMd('⚠️ источник недоступен')}`;
     if (tasks.length === 0) return `${bold('Активные задачи:')} ${escapeMd('нет')}`;
     const ids = tasks.map((t) => escapeMd(t.id)).join(', ');
     return `${bold('Активные задачи:')} ${escapeMd(`${tasks.length}`)} \\(${ids}\\)`;
   }
 
-  private renderBacklog(items: readonly BacklogItem[], requested: number): string {
+  private renderBacklog(
+    items: readonly BacklogItem[],
+    requested: number,
+    sourceAvailable: boolean,
+  ): string {
+    if (!sourceAvailable)
+      return `${bold(`Backlog top-${requested} P0/P1:`)} ${escapeMd('⚠️ источник недоступен')}`;
     if (items.length === 0)
       return `${bold(`Backlog top-${requested} P0/P1:`)} ${escapeMd('пусто')}`;
     const ids = items.map((b) => escapeMd(b.id)).join(', ');
