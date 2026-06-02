@@ -69,7 +69,13 @@ services:
       # INFRA-0240: hostname `arcana-db` not resolvable inside docker (no MagicDNS); fall back to Tailscale IP for arcana-db. Override via .env on hosts с разной топологией.
       SCRUTATOR_BASE_URL: ${SCRUTATOR_BASE_URL:-http://100.70.137.104:8310}
       SCRUTATOR_LTM_NAMESPACE: assistant-ltm-pavel
-      OPSBOT_BASE_URL: https://ops.arcanada.one
+      # ARCA-0154: reach OpsBot /metrics over the internal docker network
+      # (opsbot_default). The public https://ops.arcanada.one/metrics returns
+      # 403 (nginx allowlist) even with a valid Bearer; the internal endpoint
+      # returns 200. Zod relaxed to allow http:// only for docker-internal /
+      # loopback hosts (see apps/assistant/src/config/url-schemas.ts). Override
+      # via .env on hosts that are not joined to opsbot_default.
+      OPSBOT_BASE_URL: ${OPSBOT_BASE_URL:-http://opsbot:3600}
       OPSBOT_API_KEY: ${OPSBOT_API_KEY:-changeme}
       MUNERA_BASE_URL: ${MUNERA_BASE_URL:-https://muneral.com}
       MUNERA_API_TOKEN: ${MUNERA_API_TOKEN:-changeme}
@@ -81,8 +87,19 @@ services:
       # ARCA-0010 proactive config — file-backed (Vault SDK deferred per task-description § Implementation Notes #3).
       # Module loads YAML at boot + 5-min poll; missing path ⇒ module idle.
       PROACTIVE_CONFIG_PATH: /etc/arcanada/proactive-config.yaml
+      # ARCA-0154: datarim KB root delivered to the host by rsync (see
+      # task-description § Deploy-runbook). DatarimReaderService resolves
+      # DATARIM_PATH; readArchivedToday climbs to <root>/../documentation/archive,
+      # so the bind below mounts the KB ROOT (/data/arcanada-kb), not just datarim/.
+      # Missing host dir ⇒ sourceAvailable()=false ⇒ degraded marker (not silent empty).
+      DATARIM_PATH: ${DATARIM_PATH:-/data/arcanada-kb/datarim}
     ports:
       - '127.0.0.1:3800:3800'
+    networks:
+      - default
+      # ARCA-0154: join the existing OpsBot docker network so http://opsbot:3600
+      # resolves (container-to-container, Tier 0; no host port published).
+      - opsbot_default
     volumes:
       # Read-only bind for the proactive-config directory. Host dir deployed by
       # operator (see datarim/tasks/ARCA-0010-task-description.md § Operator
@@ -91,6 +108,17 @@ services:
       # where /etc/arcanada/proactive-config.yaml is absent — ProactiveModule
       # then catches ENOENT and stays idle (graceful degradation).
       - /etc/arcanada:/etc/arcanada:ro
+      # ARCA-0154: read-only KB root (datarim/ + documentation/archive/). Same
+      # dir-bind rationale as above: a missing host dir degrades gracefully
+      # (sourceAvailable()=false) rather than creating an empty masking dir.
+      - /data/arcanada-kb:/data/arcanada-kb:ro
+
+networks:
+  default: {}
+  # ARCA-0154: external — created by the OpsBot compose project (opsbot_default).
+  # assistant joins it read-only for /metrics; it is NOT created here.
+  opsbot_default:
+    external: true
 
 volumes:
   postgres-data:

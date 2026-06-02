@@ -1,6 +1,8 @@
 import { registerAs } from '@nestjs/config';
 import { z } from 'zod';
 
+import { internalHttpOrHttpsUrl } from './url-schemas.js';
+
 /**
  * Namespace «opsBot» внутри ConfigService. Источник:
  *   - dev/CI:    `.env` / process.env (см. .env.example).
@@ -12,12 +14,9 @@ import { z } from 'zod';
  * Vault хранит компоненты, не URL; consumer собирает финальные параметры здесь.
  */
 const opsBotEnvSchema = z.object({
-  OPSBOT_BASE_URL: z
-    .string()
-    .url()
-    .refine((u) => u.startsWith('https://'), {
-      message: 'OPSBOT_BASE_URL must be https://',
-    }),
+  // ARCA-0154: разрешён internal http://opsbot:3600 (docker mesh) в обход
+  // публичного 403; публичные хосты по-прежнему требуют https. См. url-schemas.ts.
+  OPSBOT_BASE_URL: internalHttpOrHttpsUrl,
   OPSBOT_API_KEY: z.string().min(1, 'OPSBOT_API_KEY required'),
 });
 

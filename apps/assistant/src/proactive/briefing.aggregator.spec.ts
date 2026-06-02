@@ -58,12 +58,14 @@ function stubReader(opts: {
     status: string;
   }>;
   backlog?: Array<{ id: string; title: string; priority: string; complexity: string }>;
+  sourceAvailable?: boolean;
 }): DatarimReaderService {
   return {
     readActiveTasks: vi.fn().mockResolvedValue(opts.active ?? []),
     readBacklogTopN: vi.fn().mockResolvedValue(opts.backlog ?? []),
     readCompletedToday: vi.fn().mockResolvedValue([]),
     readArchivedToday: vi.fn().mockResolvedValue([]),
+    sourceAvailable: vi.fn().mockResolvedValue(opts.sourceAvailable ?? true),
   } as unknown as DatarimReaderService;
 }
 
@@ -128,15 +130,38 @@ describe('BriefingAggregator', () => {
     expect(out.sections).toEqual([]);
   });
 
-  it('renders "нет" when no active tasks', async () => {
+  it('renders "нет" when no active tasks but source is available (honest-empty)', async () => {
     const snap: EcosystemSnapshot = {
       agents_total: 0,
       events_total: 0,
       approvals_pending: 0,
       parsed_at: '2026-05-18T08:00:00Z',
     };
-    const agg = new BriefingAggregator(stubOps(snap), stubReader({ active: [], backlog: [] }));
+    const agg = new BriefingAggregator(
+      stubOps(snap),
+      stubReader({ active: [], backlog: [], sourceAvailable: true }),
+    );
     const out = await agg.compose({ runDate: '2026-05-18', config: baseConfig });
     expect(out.text).toContain('нет');
+    expect(out.text).not.toContain('источник недоступен');
+  });
+
+  // ARCA-0154 wish #4: a broken datarim source must read "источник недоступен",
+  // never the same "нет/пусто" as an honestly-empty source.
+  it('renders degraded marker for datarim sections when source unavailable', async () => {
+    const snap: EcosystemSnapshot = {
+      agents_total: 3,
+      events_total: 10,
+      approvals_pending: 0,
+      parsed_at: '2026-05-18T08:00:00Z',
+    };
+    const agg = new BriefingAggregator(
+      stubOps(snap),
+      stubReader({ active: [], backlog: [], sourceAvailable: false }),
+    );
+    const out = await agg.compose({ runDate: '2026-05-18', config: baseConfig });
+    expect(out.text).toContain('источник недоступен');
+    // honest-empty wording must NOT be used for the broken datarim sections
+    expect(out.text).not.toMatch(/Активные задачи:\*\* нет/);
   });
 });

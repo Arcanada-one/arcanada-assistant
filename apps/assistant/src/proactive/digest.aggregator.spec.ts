@@ -39,12 +39,14 @@ function stubReader(opts: {
   completed?: Array<{ id: string; title: string }>;
   archived?: Array<{ id: string; subdir: string; mtime: Date }>;
   backlog?: Array<{ id: string; title: string; priority: string; complexity: string }>;
+  sourceAvailable?: boolean;
 }): DatarimReaderService {
   return {
     readActiveTasks: vi.fn().mockResolvedValue([]),
     readBacklogTopN: vi.fn().mockResolvedValue(opts.backlog ?? []),
     readCompletedToday: vi.fn().mockResolvedValue(opts.completed ?? []),
     readArchivedToday: vi.fn().mockResolvedValue(opts.archived ?? []),
+    sourceAvailable: vi.fn().mockResolvedValue(opts.sourceAvailable ?? true),
   } as unknown as DatarimReaderService;
 }
 
@@ -64,11 +66,19 @@ describe('DigestAggregator', () => {
     expect(out.sections).toEqual(['completed_today', 'archived_today', 'backlog_tomorrow']);
   });
 
-  it('renders "— нет" / "— пусто" placeholders when sections empty', async () => {
-    const agg = new DigestAggregator(stubReader({}));
+  it('renders "— нет" / "— пусто" placeholders when sections empty but source available', async () => {
+    const agg = new DigestAggregator(stubReader({ sourceAvailable: true }));
     const out = await agg.compose({ runDate: '2026-05-18', config: baseConfig });
     expect(out.text).toContain('— нет');
     expect(out.text).toContain('— пусто');
+    expect(out.text).not.toContain('источник недоступен');
+  });
+
+  // ARCA-0154 wish #4: broken datarim source → degraded marker, not "— нет".
+  it('renders degraded marker for datarim sections when source unavailable', async () => {
+    const agg = new DigestAggregator(stubReader({ sourceAvailable: false }));
+    const out = await agg.compose({ runDate: '2026-05-18', config: baseConfig });
+    expect(out.text).toContain('источник недоступен');
   });
 
   it('escapes task IDs in MarkdownV2', async () => {

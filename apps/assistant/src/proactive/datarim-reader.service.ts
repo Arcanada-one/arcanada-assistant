@@ -12,6 +12,7 @@ export interface IDatarimReader {
   readBacklogTopN(n: number, priorities?: readonly string[]): Promise<BacklogItem[]>;
   readCompletedToday(runDate: string): Promise<CompletedTask[]>;
   readArchivedToday(runDate: string): Promise<ArchivedItem[]>;
+  sourceAvailable(): Promise<boolean>;
 }
 
 /**
@@ -35,6 +36,23 @@ export class DatarimReaderService implements IDatarimReader {
     const instance = new DatarimReaderService();
     (instance as unknown as { root: string }).root = resolve(rootPath);
     return instance;
+  }
+
+  /**
+   * ARCA-0154: true when the datarim root directory is mounted and readable.
+   * Lets aggregators distinguish a broken source (DATARIM_PATH unmounted →
+   * every section ENOENT) from an honestly-empty one (mounted, no entries
+   * today). A missing root → degraded marker; a present root with empty files
+   * → honest «нет/пусто».
+   */
+  async sourceAvailable(): Promise<boolean> {
+    try {
+      const stat = await fs.stat(this.root);
+      return stat.isDirectory();
+    } catch (err) {
+      this.logger.warn(`datarim source unavailable at ${this.root}: ${(err as Error).message}`);
+      return false;
+    }
   }
 
   async readActiveTasks(): Promise<ActiveTask[]> {

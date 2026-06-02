@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+import { internalHttpOrHttpsUrl } from './url-schemas.js';
+
 const httpsUrl = z
   .string()
   .url()
@@ -41,7 +43,9 @@ export const configurationSchema = z.object({
   SCRUTATOR_BASE_URL: httpOrHttpsUrl,
   SCRUTATOR_LTM_NAMESPACE: z.string().min(1),
 
-  OPSBOT_BASE_URL: httpsUrl,
+  // ARCA-0154: relaxed to allow internal http://opsbot:3600 (docker mesh);
+  // public hosts still require https. See url-schemas.ts.
+  OPSBOT_BASE_URL: internalHttpOrHttpsUrl,
   OPSBOT_API_KEY: z.string().min(1),
   // ARCA-0007 feature flag: when 'false', OpsAgent is не регистрируется в orchestrator,
   // /status и /agents отвечают «команда временно отключена» через NoAgentForIntentError.

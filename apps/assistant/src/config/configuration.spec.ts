@@ -63,6 +63,17 @@ describe('configuration', () => {
     ).toThrow();
   });
 
+  it('accepts internal http:// OPSBOT_BASE_URL (docker service name)', () => {
+    const cfg = validateConfig({ ...minimalValid, OPSBOT_BASE_URL: 'http://opsbot:3600' });
+    expect(cfg.OPSBOT_BASE_URL).toBe('http://opsbot:3600');
+  });
+
+  it('rejects public http:// OPSBOT_BASE_URL (dotted host)', () => {
+    expect(() =>
+      validateConfig({ ...minimalValid, OPSBOT_BASE_URL: 'http://ops.arcanada.one/metrics' }),
+    ).toThrow(/OPSBOT_BASE_URL/);
+  });
+
   it('exports schema for direct introspection', () => {
     expect(configurationSchema).toBeDefined();
   });
