@@ -79,7 +79,9 @@ describe('HealthController', () => {
   });
 
   it('REPORTED-ONLY: opsBot down → opsBot.status=fail, HTTP 200, degraded', async () => {
-    const failOps = { ping: vi.fn().mockResolvedValue({ ok: false, latencyMs: 2000, error: 'down' }) };
+    const failOps = {
+      ping: vi.fn().mockResolvedValue({ ok: false, latencyMs: 2000, error: 'down' }),
+    };
     const result = await makeController({ opsBot: failOps }).check();
     expect(result.body.dependencies.opsBot.status).toBe('fail');
     expect(result.statusCode).toBe(200);
@@ -87,7 +89,9 @@ describe('HealthController', () => {
   });
 
   it('REPORTED-ONLY: authArcana down → authArcana.status=fail, HTTP 200, degraded', async () => {
-    const failAuth = { ping: vi.fn().mockResolvedValue({ ok: false, latencyMs: 2000, error: 'tls' }) };
+    const failAuth = {
+      ping: vi.fn().mockResolvedValue({ ok: false, latencyMs: 2000, error: 'tls' }),
+    };
     const result = await makeController({ auth: failAuth }).check();
     expect(result.body.dependencies.authArcana.status).toBe('fail');
     expect(result.statusCode).toBe(200);

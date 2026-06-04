@@ -15,9 +15,7 @@ afterAll(() => server.close());
 describe('HttpHealthClient', () => {
   it('returns ok with version when /health responds {status:"ok",version}', async () => {
     server.use(
-      http.get(`${BASE_URL}/health`, () =>
-        HttpResponse.json({ status: 'ok', version: '0.3.0' }),
-      ),
+      http.get(`${BASE_URL}/health`, () => HttpResponse.json({ status: 'ok', version: '0.3.0' })),
     );
     const client = new HttpHealthClient({ baseUrl: BASE_URL });
     const result = await client.ping();
@@ -36,9 +34,7 @@ describe('HttpHealthClient', () => {
   });
 
   it('returns ok=false when status field is not "ok"', async () => {
-    server.use(
-      http.get(`${BASE_URL}/health`, () => HttpResponse.json({ status: 'degraded' })),
-    );
+    server.use(http.get(`${BASE_URL}/health`, () => HttpResponse.json({ status: 'degraded' })));
     const client = new HttpHealthClient({ baseUrl: BASE_URL });
     const result = await client.ping();
     expect(result.ok).toBe(false);
@@ -85,9 +81,7 @@ describe('HttpHealthClient', () => {
   });
 
   it('honours a custom healthPath', async () => {
-    server.use(
-      http.get(`${BASE_URL}/health/ready`, () => HttpResponse.json({ status: 'ok' })),
-    );
+    server.use(http.get(`${BASE_URL}/health/ready`, () => HttpResponse.json({ status: 'ok' })));
     const result = await new HttpHealthClient({
       baseUrl: BASE_URL,
       healthPath: '/health/ready',

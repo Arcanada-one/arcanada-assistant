@@ -291,7 +291,9 @@ describe('OpsBotClient.ping (ARCA-0127)', () => {
 
   it('returns ok=false with error on 5xx (never throws)', async () => {
     server.use(
-      http.get(`${BASE_URL}/health/ready`, () => HttpResponse.json({ status: 'fail' }, { status: 503 })),
+      http.get(`${BASE_URL}/health/ready`, () =>
+        HttpResponse.json({ status: 'fail' }, { status: 503 }),
+      ),
     );
     const client = makeClient();
     const result = await client.ping();

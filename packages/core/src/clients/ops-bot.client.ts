@@ -295,8 +295,14 @@ export class OpsBotClient implements IOpsBotClient {
       // mirror Scrutator's `status === 'ok'` check but fall back to the HTTP
       // code when the body is absent/un-shaped.
       const parsed = HealthResponseSchema.safeParse(result.json);
-      const ok = parsed.success ? parsed.data.status === 'ok' : result.status >= 200 && result.status < 300;
-      return { ok, latencyMs, ...(parsed.success && parsed.data.version ? { version: parsed.data.version } : {}) };
+      const ok = parsed.success
+        ? parsed.data.status === 'ok'
+        : result.status >= 200 && result.status < 300;
+      return {
+        ok,
+        latencyMs,
+        ...(parsed.success && parsed.data.version ? { version: parsed.data.version } : {}),
+      };
     } catch (err) {
       return {
         ok: false,

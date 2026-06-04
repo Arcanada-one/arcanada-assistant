@@ -9,10 +9,7 @@ import { OrchestratorModule } from '../orchestrator/orchestrator.module.js';
 import { AgentPingController } from './agent-ping.controller.js';
 import { HealthController } from './health.controller.js';
 import { PerAgentHealthIndicator } from './per-agent.health.indicator.js';
-import {
-  AUTH_ARCANA_HEALTH_CLIENT,
-  MODEL_CONNECTOR_HEALTH_CLIENT,
-} from './health.tokens.js';
+import { AUTH_ARCANA_HEALTH_CLIENT, MODEL_CONNECTOR_HEALTH_CLIENT } from './health.tokens.js';
 
 @Module({
   // OpsAgentModule exports OPS_BOT_CLIENT (consumed by HealthController for the

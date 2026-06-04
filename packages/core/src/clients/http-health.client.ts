@@ -64,7 +64,11 @@ export class HttpHealthClient implements IHttpHealthClient {
       // 2xx with a parseable body → trust the `status` field; 2xx without a
       // JSON body still counts as live (some health endpoints return text).
       const ok = parsed.success ? parsed.data.status === 'ok' : true;
-      return { ok, latencyMs, ...(parsed.success && parsed.data.version ? { version: parsed.data.version } : {}) };
+      return {
+        ok,
+        latencyMs,
+        ...(parsed.success && parsed.data.version ? { version: parsed.data.version } : {}),
+      };
     } catch (err) {
       return {
         ok: false,

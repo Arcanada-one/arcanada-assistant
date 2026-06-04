@@ -15,10 +15,7 @@ import { OPS_BOT_CLIENT } from '../agents/ops-agent/ops-agent.service.js';
 import type { AgentHealthSnapshot } from '../aal/agent-health.types.js';
 
 import { PerAgentHealthIndicator } from './per-agent.health.indicator.js';
-import {
-  AUTH_ARCANA_HEALTH_CLIENT,
-  MODEL_CONNECTOR_HEALTH_CLIENT,
-} from './health.tokens.js';
+import { AUTH_ARCANA_HEALTH_CLIENT, MODEL_CONNECTOR_HEALTH_CLIENT } from './health.tokens.js';
 
 const APP_VERSION = '0.1.0';
 
