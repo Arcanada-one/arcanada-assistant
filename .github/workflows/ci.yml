@@ -114,6 +114,7 @@ jobs:
       AUTH_ARCANA_JWT_ISSUER: https://auth.arcanada.one
       AUTH_ARCANA_JWT_AUDIENCE: arcanada-assistant
       MODEL_CONNECTOR_BASE_URL: http://stub.invalid:9999
+      MODEL_CONNECTOR_HEALTH_URL: https://stub.invalid
       MODEL_CONNECTOR_DEFAULT_MODEL: anthropic/claude-haiku-4-5
       MODEL_CONNECTOR_API_KEY: ci-stub-mc-key
       SCRUTATOR_BASE_URL: http://stub.invalid:8310

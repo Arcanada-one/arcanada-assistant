@@ -64,6 +64,9 @@ services:
       AUTH_ARCANA_JWT_ISSUER: https://auth.arcanada.one
       AUTH_ARCANA_JWT_AUDIENCE: arcanada-assistant
       MODEL_CONNECTOR_BASE_URL: http://connector.arcanada.one:3900
+      # /health probe target — the mesh :3900 port is unreachable from this
+      # container's network, so probe the public nginx surface (no auth).
+      MODEL_CONNECTOR_HEALTH_URL: ${MODEL_CONNECTOR_HEALTH_URL:-https://connector.arcanada.one}
       MODEL_CONNECTOR_DEFAULT_MODEL: anthropic/claude-haiku-4-5
       MODEL_CONNECTOR_API_KEY: ${MODEL_CONNECTOR_API_KEY:-changeme}
       # INFRA-0240: hostname `arcana-db` not resolvable inside docker (no MagicDNS); fall back to Tailscale IP for arcana-db. Override via .env on hosts с разной топологией.
