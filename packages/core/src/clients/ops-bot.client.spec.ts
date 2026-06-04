@@ -268,6 +268,53 @@ describe('OpsBotClient.healthReady', () => {
   });
 });
 
+describe('OpsBotClient.ping (ARCA-0127)', () => {
+  it('returns ok with latency on a 2xx /health/ready', async () => {
+    const client = makeClient();
+    const result = await client.ping();
+    expect(result.ok).toBe(true);
+    expect(result.latencyMs).toBeGreaterThanOrEqual(0);
+    expect(result.error).toBeUndefined();
+  });
+
+  it('surfaces version when /health/ready returns {status:"ok",version}', async () => {
+    server.use(
+      http.get(`${BASE_URL}/health/ready`, () =>
+        HttpResponse.json({ status: 'ok', version: '1.2.3' }),
+      ),
+    );
+    const client = makeClient();
+    const result = await client.ping();
+    expect(result.ok).toBe(true);
+    expect(result.version).toBe('1.2.3');
+  });
+
+  it('returns ok=false with error on 5xx (never throws)', async () => {
+    server.use(
+      http.get(`${BASE_URL}/health/ready`, () =>
+        HttpResponse.json({ status: 'fail' }, { status: 503 }),
+      ),
+    );
+    const client = makeClient();
+    const result = await client.ping();
+    expect(result.ok).toBe(false);
+    expect(result.error).toBeTruthy();
+  });
+
+  it('returns ok=false on timeout (never throws)', async () => {
+    server.use(
+      http.get(`${BASE_URL}/health/ready`, async () => {
+        await new Promise((r) => setTimeout(r, 400));
+        return HttpResponse.json({ status: 'ok' });
+      }),
+    );
+    const client = makeClient();
+    const result = await client.ping();
+    expect(result.ok).toBe(false);
+    expect(result.error).toBeTruthy();
+  });
+});
+
 describe('OpsBotClient.executeCommand (ARCA-0009 M3, V-AC-3)', () => {
   const CMD_ID = '01J3K9Q2V4ZAB6X8Y0R2M5N7P9';
   const IDEMPOTENCY_KEY = '018f8e2a-1c2d-7000-9000-000000000001';

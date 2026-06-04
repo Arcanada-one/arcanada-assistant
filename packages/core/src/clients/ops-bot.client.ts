@@ -14,6 +14,7 @@ import {
   type ExecuteCommandResponse,
 } from './ops-bot.types.js';
 import { parsePrometheusSnapshot } from './prometheus-parse.js';
+import { HealthResponseSchema, type PingResult } from './scrutator.types.js';
 
 export interface OpsBotLogger {
   info(obj: Record<string, unknown>, msg?: string): void;
@@ -59,6 +60,14 @@ export interface IOpsBotClient {
   emitEvent(input: EmitEventInput): Promise<EmitEventResponse>;
   getEcosystemSnapshot(): Promise<EcosystemSnapshot>;
   healthReady(): Promise<boolean>;
+  /**
+   * Structured liveness probe for the `/health` aggregation surface.
+   * Wraps `GET /health/ready` and returns the canonical `PingResult` shape
+   * (parity with `IScrutatorClient.ping`) so the assistant health controller can
+   * report `latencyMs` / `error` rather than a bare boolean. Never throws — a
+   * transport fault or non-2xx becomes `{ ok: false, latencyMs, error }`.
+   */
+  ping(): Promise<PingResult>;
   isCircuitOpen(): boolean;
   /**
    * Bidirectional command issue (ARCA-0009 M3, PRD V-AC-3). Emits pre-execute
@@ -267,6 +276,39 @@ export class OpsBotClient implements IOpsBotClient {
       return result.status >= 200 && result.status < 300;
     } catch {
       return false;
+    }
+  }
+
+  async ping(): Promise<PingResult> {
+    const start = Date.now();
+    try {
+      const result = await this.executeRequest({
+        url: `${this.baseUrl}/health/ready`,
+        method: 'GET',
+        body: null,
+        retryable: false,
+        timeoutMs: this.healthTimeoutMs,
+      });
+      const latencyMs = Date.now() - start;
+      // `/health/ready` returns `{ status, db, redis }`; a 2xx with no JSON body
+      // (or a non-`ok` status field) is still a successful liveness signal —
+      // mirror Scrutator's `status === 'ok'` check but fall back to the HTTP
+      // code when the body is absent/un-shaped.
+      const parsed = HealthResponseSchema.safeParse(result.json);
+      const ok = parsed.success
+        ? parsed.data.status === 'ok'
+        : result.status >= 200 && result.status < 300;
+      return {
+        ok,
+        latencyMs,
+        ...(parsed.success && parsed.data.version ? { version: parsed.data.version } : {}),
+      };
+    } catch (err) {
+      return {
+        ok: false,
+        latencyMs: Date.now() - start,
+        error: err instanceof Error ? err.message : String(err),
+      };
     }
   }
 
