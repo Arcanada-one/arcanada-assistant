@@ -17,7 +17,7 @@ import {
 @Module({
   // OpsAgentModule exports OPS_BOT_CLIENT (consumed by HealthController for the
   // structured ping). Model Connector + Auth Arcana liveness clients are
-  // provided locally below as plain HttpHealthClient probes (ARCA-0127).
+  // provided locally below as plain HttpHealthClient probes.
   imports: [KnowledgeAgentModule, OpsAgentModule, OrchestratorModule],
   controllers: [HealthController, AgentPingController],
   providers: [

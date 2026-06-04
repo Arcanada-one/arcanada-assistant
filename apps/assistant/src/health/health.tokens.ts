@@ -2,7 +2,7 @@ import type { IHttpHealthClient } from '@arcanada/core';
 
 /**
  * DI tokens for the upstream liveness-probe clients consumed by
- * {@link HealthController} (ARCA-0127). Both resolve to `IHttpHealthClient`
+ * {@link HealthController}. Both resolve to `IHttpHealthClient`
  * instances configured against the respective upstream's public `/health`
  * surface. OpsBot reuses the existing `OPS_BOT_CLIENT` token (it already has a
  * structured `ping()`), so only Model Connector and Auth Arcana need new tokens.

@@ -2,7 +2,7 @@ import { HealthResponseSchema, type PingResult } from './scrutator.types.js';
 
 /**
  * Minimal, dependency-free liveness probe for upstreams that expose a
- * `GET {baseUrl}/health` endpoint returning `{ status, version? }` (ARCA-0127).
+ * `GET {baseUrl}/health` endpoint returning `{ status, version? }`.
  *
  * Unlike `ScrutatorClient` / `OpsBotClient` this carries no circuit breaker and
  * no retry — a health probe must be cheap, single-shot and fail-soft. It is the

@@ -61,7 +61,7 @@ export interface IOpsBotClient {
   getEcosystemSnapshot(): Promise<EcosystemSnapshot>;
   healthReady(): Promise<boolean>;
   /**
-   * Structured liveness probe for the `/health` aggregation surface (ARCA-0127).
+   * Structured liveness probe for the `/health` aggregation surface.
    * Wraps `GET /health/ready` and returns the canonical `PingResult` shape
    * (parity with `IScrutatorClient.ping`) so the assistant health controller can
    * report `latencyMs` / `error` rather than a bare boolean. Never throws — a

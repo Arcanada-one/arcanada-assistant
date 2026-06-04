@@ -31,7 +31,7 @@ export const configurationSchema = z.object({
   AUTH_ARCANA_JWT_AUDIENCE: z.string().min(1),
 
   MODEL_CONNECTOR_BASE_URL: httpOrHttpsUrl,
-  // ARCA-0127: liveness-probe target for the /health aggregation surface. The
+  // Liveness-probe target for the /health aggregation surface. The
   // functional MODEL_CONNECTOR_BASE_URL points at the mesh `:3900` port which is
   // not reachable from the assistant container's network; the public nginx
   // surface (no Authorization needed) is used purely for the GET /health probe.

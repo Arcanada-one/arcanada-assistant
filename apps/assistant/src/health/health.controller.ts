@@ -84,16 +84,16 @@ export class HealthController {
       this.prisma.ping(),
       this.redis.ping(),
       this.scrutator.ping().catch(failPing),
-      // ARCA-0127: real liveness probes. REPORTED-ONLY — these never gate 503.
+      // Real liveness probes. REPORTED-ONLY — these never gate 503.
       this.modelConnector.ping().catch(failPing),
       this.opsBot.ping().catch(failPing),
       this.authArcana.ping().catch(failPing),
       this.perAgentHealth.snapshot(),
     ]);
 
-    // ARCA-0127 (D5): project munera's circuit state from the mesh rollup into
-    // .dependencies (no separate HTTP probe — munera is a consumer-agent whose
-    // functional path is owned by the MUN-* tasks). Absent agent → fail (honest).
+    // Project munera's circuit state from the mesh rollup into .dependencies
+    // (no separate HTTP probe — munera is a consumer-agent whose functional path
+    // is owned elsewhere). Absent agent → fail (honest, not silently ok).
     const muneraSnapshot = mesh.agents.find((a) => a.agent === 'munera');
     const muneraDep: DepStatus = muneraSnapshot
       ? {
@@ -129,7 +129,7 @@ export class HealthController {
       munera: muneraDep,
     };
 
-    // 503 gate is UNCHANGED (D3 REPORTED-ONLY): only the assistant's own hard
+    // 503 gate is UNCHANGED (REPORTED-ONLY): only the assistant's own hard
     // dependencies (its Postgres, its Redis, and Scrutator) flip 200 ⇄ 503.
     const depsOk = pg.ok && rd.ok && sc.ok;
     // Aux upstreams + munera are REPORTED-ONLY: a fault downgrades the top-level
