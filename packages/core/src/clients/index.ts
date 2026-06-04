@@ -26,6 +26,11 @@ export {
 } from './ops-bot.types.js';
 export { parsePrometheusSnapshot } from './prometheus-parse.js';
 export {
+  HttpHealthClient,
+  type IHttpHealthClient,
+  type HttpHealthClientOptions,
+} from './http-health.client.js';
+export {
   ScrutatorClient,
   ScrutatorClientError,
   type IScrutatorClient,
