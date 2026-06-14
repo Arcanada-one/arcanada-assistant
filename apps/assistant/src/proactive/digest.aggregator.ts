@@ -29,6 +29,26 @@ export class DigestAggregator {
     // for every section instead of an honest-empty "— нет".
     const sourceAvailable = await this.datarim.sourceAvailable();
 
+    // ARCA-0163: KB staleness guard. Warn when rsync gap has left KB stale.
+    // Does not replace the degraded marker for a missing mount — it is an
+    // additional check for a present-but-stale source.
+    if (sourceAvailable) {
+      const freshness = await this.datarim.kbFreshness();
+      if (freshness.stale) {
+        const lastTime = new Date(freshness.lastSyncIso).toLocaleTimeString('ru-RU', {
+          hour: '2-digit',
+          minute: '2-digit',
+          timeZone: 'Europe/Istanbul',
+        });
+        const ageStr =
+          freshness.ageHours === Infinity
+            ? 'неизвестно'
+            : `${Math.round(freshness.ageHours)}ч`;
+        lines.push('');
+        lines.push(escapeMd(`⚠️ KB устарел (last sync ${lastTime}, ${ageStr} назад)`));
+      }
+    }
+
     if (ch.include_completed_tasks) {
       const completed = await this.datarim.readCompletedToday(runDate);
       sections.push('completed_today');
