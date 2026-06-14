@@ -168,14 +168,9 @@ describe('DatarimReaderService', () => {
       const filePath = join(arcDir, 'archive-ARCA-0099.md');
       await fs.writeFile(
         filePath,
-        [
-          '---',
-          'id: ARCA-0099',
-          'title: Cancelled task',
-          'status: cancelled',
-          '---',
-          '',
-        ].join('\n'),
+        ['---', 'id: ARCA-0099', 'title: Cancelled task', 'status: cancelled', '---', ''].join(
+          '\n',
+        ),
         'utf-8',
       );
       const today = new Intl.DateTimeFormat('en-CA', {

@@ -41,9 +41,7 @@ export class DigestAggregator {
           timeZone: 'Europe/Istanbul',
         });
         const ageStr =
-          freshness.ageHours === Infinity
-            ? 'неизвестно'
-            : `${Math.round(freshness.ageHours)}ч`;
+          freshness.ageHours === Infinity ? 'неизвестно' : `${Math.round(freshness.ageHours)}ч`;
         lines.push('');
         lines.push(escapeMd(`⚠️ KB устарел (last sync ${lastTime}, ${ageStr} назад)`));
       }

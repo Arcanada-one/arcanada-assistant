@@ -48,9 +48,11 @@ function stubReader(opts: {
     readCompletedToday: vi.fn().mockResolvedValue(opts.completed ?? []),
     readArchivedToday: vi.fn().mockResolvedValue(opts.archived ?? []),
     sourceAvailable: vi.fn().mockResolvedValue(opts.sourceAvailable ?? true),
-    kbFreshness: vi.fn().mockResolvedValue(
-      opts.kbFreshness ?? { stale: false, lastSyncIso: new Date().toISOString(), ageHours: 0.1 },
-    ),
+    kbFreshness: vi
+      .fn()
+      .mockResolvedValue(
+        opts.kbFreshness ?? { stale: false, lastSyncIso: new Date().toISOString(), ageHours: 0.1 },
+      ),
   } as unknown as DatarimReaderService;
 }
 
@@ -124,7 +126,9 @@ describe('DigestAggregator', () => {
     });
 
     it('does not call kbFreshness when source is unavailable (degraded mode)', async () => {
-      const mockFreshness = vi.fn().mockResolvedValue({ stale: true, lastSyncIso: '', ageHours: 99 });
+      const mockFreshness = vi
+        .fn()
+        .mockResolvedValue({ stale: true, lastSyncIso: '', ageHours: 99 });
       const reader = {
         ...stubReader({ sourceAvailable: false }),
         kbFreshness: mockFreshness,
