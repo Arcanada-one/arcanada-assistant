@@ -40,6 +40,7 @@ function stubReader(opts: {
   archived?: Array<{ id: string; subdir: string; mtime: Date }>;
   backlog?: Array<{ id: string; title: string; priority: string; complexity: string }>;
   sourceAvailable?: boolean;
+  kbFreshness?: { stale: boolean; lastSyncIso: string; ageHours: number };
 }): DatarimReaderService {
   return {
     readActiveTasks: vi.fn().mockResolvedValue([]),
@@ -47,6 +48,11 @@ function stubReader(opts: {
     readCompletedToday: vi.fn().mockResolvedValue(opts.completed ?? []),
     readArchivedToday: vi.fn().mockResolvedValue(opts.archived ?? []),
     sourceAvailable: vi.fn().mockResolvedValue(opts.sourceAvailable ?? true),
+    kbFreshness: vi
+      .fn()
+      .mockResolvedValue(
+        opts.kbFreshness ?? { stale: false, lastSyncIso: new Date().toISOString(), ageHours: 0.1 },
+      ),
   } as unknown as DatarimReaderService;
 }
 
@@ -89,5 +95,48 @@ describe('DigestAggregator', () => {
     );
     const out = await agg.compose({ runDate: '2026-05-18', config: baseConfig });
     expect(out.text).toContain('ARCA\\-0009');
+  });
+
+  // ARCA-0163: KB staleness banner
+  describe('kbFreshness banner', () => {
+    it('does not add staleness banner when KB is fresh', async () => {
+      const agg = new DigestAggregator(
+        stubReader({
+          kbFreshness: { stale: false, lastSyncIso: new Date().toISOString(), ageHours: 0.5 },
+        }),
+      );
+      const out = await agg.compose({ runDate: '2026-05-18', config: baseConfig });
+      expect(out.text).not.toContain('KB устарел');
+    });
+
+    it('prepends staleness banner when KB is stale', async () => {
+      const fiveHoursAgo = new Date(Date.now() - 5 * 60 * 60 * 1000);
+      const agg = new DigestAggregator(
+        stubReader({
+          kbFreshness: {
+            stale: true,
+            lastSyncIso: fiveHoursAgo.toISOString(),
+            ageHours: 5,
+          },
+        }),
+      );
+      const out = await agg.compose({ runDate: '2026-05-18', config: baseConfig });
+      expect(out.text).toContain('KB устарел');
+      expect(out.text).toContain('5ч назад');
+    });
+
+    it('does not call kbFreshness when source is unavailable (degraded mode)', async () => {
+      const mockFreshness = vi
+        .fn()
+        .mockResolvedValue({ stale: true, lastSyncIso: '', ageHours: 99 });
+      const reader = {
+        ...stubReader({ sourceAvailable: false }),
+        kbFreshness: mockFreshness,
+      } as unknown as DatarimReaderService;
+      const agg = new DigestAggregator(reader);
+      await agg.compose({ runDate: '2026-05-18', config: baseConfig });
+      // kbFreshness should not have been called since source is unavailable
+      expect(mockFreshness).not.toHaveBeenCalled();
+    });
   });
 });

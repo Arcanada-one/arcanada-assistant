@@ -118,19 +118,83 @@ describe('DatarimReaderService', () => {
     });
   });
 
+  // ARCA-0162: readCompletedToday now reads from the archive dir (same source
+  // as readArchivedToday) because the "Последние завершённые" section in
+  // activeContext.md was removed by the thin-one-liner schema migration.
+  // Each completed entry carries the title from the archive frontmatter.
   describe('readCompletedToday', () => {
-    it('parses activeContext.md "Последние завершённые" lines', async () => {
-      await writeFile(
-        root,
-        'activeContext.md',
-        [
-          '## Последние завершённые',
-          '- **ARCA-0009** — Agent Mesh archived (2026-05-18)',
-          '- **TRANS-0060** — Transcribator artifact flip',
-        ].join('\n'),
+    it('returns archived-today items with title from YAML frontmatter', async () => {
+      const arcDir = join(archiveRoot, 'arcanada-ecosystem');
+      await fs.mkdir(arcDir, { recursive: true });
+      const filePath = join(arcDir, 'archive-ARCA-0009.md');
+      await fs.writeFile(
+        filePath,
+        ['---', 'id: ARCA-0009', 'title: Agent Mesh archived', 'status: archived', '---', ''].join(
+          '\n',
+        ),
+        'utf-8',
       );
-      const items = await svc.readCompletedToday('2026-05-18');
+      const today = new Intl.DateTimeFormat('en-CA', {
+        timeZone: 'Europe/Istanbul',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+      }).format(new Date());
+      const items = await svc.readCompletedToday(today);
       expect(items.map((c) => c.id)).toContain('ARCA-0009');
+      const item = items.find((c) => c.id === 'ARCA-0009');
+      expect(item?.title).toBe('Agent Mesh archived');
+    });
+
+    it('falls back to first markdown heading when frontmatter has no title', async () => {
+      const arcDir = join(archiveRoot, 'transcribator');
+      await fs.mkdir(arcDir, { recursive: true });
+      const filePath = join(arcDir, 'archive-TRANS-0060.md');
+      await fs.writeFile(filePath, '# Transcribator artifact flip\n\nSome body text.', 'utf-8');
+      const today = new Intl.DateTimeFormat('en-CA', {
+        timeZone: 'Europe/Istanbul',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+      }).format(new Date());
+      const items = await svc.readCompletedToday(today);
+      const item = items.find((c) => c.id === 'TRANS-0060');
+      expect(item?.title).toBe('Transcribator artifact flip');
+    });
+
+    it('excludes cancelled archives from completed list', async () => {
+      const arcDir = join(archiveRoot, 'arcanada-ecosystem');
+      await fs.mkdir(arcDir, { recursive: true });
+      const filePath = join(arcDir, 'archive-ARCA-0099.md');
+      await fs.writeFile(
+        filePath,
+        ['---', 'id: ARCA-0099', 'title: Cancelled task', 'status: cancelled', '---', ''].join(
+          '\n',
+        ),
+        'utf-8',
+      );
+      const today = new Intl.DateTimeFormat('en-CA', {
+        timeZone: 'Europe/Istanbul',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+      }).format(new Date());
+      const items = await svc.readCompletedToday(today);
+      expect(items.map((c) => c.id)).not.toContain('ARCA-0099');
+    });
+
+    it('does not depend on "Последние завершённые" section in activeContext.md', async () => {
+      // activeContext.md has no "Последние завершённые" section (thin-one-liner schema)
+      await writeFile(root, 'activeContext.md', '# Active Context\n\n## Active Tasks\n');
+      // archive dir is empty — should return [] without error, not throw
+      const items = await svc.readCompletedToday('2026-05-18');
+      expect(items).toEqual([]);
+    });
+
+    it('returns empty list when archive directory missing (fail-soft)', async () => {
+      await fs.rm(archiveRoot, { recursive: true, force: true });
+      const items = await svc.readCompletedToday('2026-05-18');
+      expect(items).toEqual([]);
     });
   });
 
@@ -150,6 +214,65 @@ describe('DatarimReaderService', () => {
       // root exists (mounted) but no tasks.md yet — this is idle, not broken.
       expect(await svc.sourceAvailable()).toBe(true);
       expect(await svc.readActiveTasks()).toEqual([]);
+    });
+  });
+
+  // ARCA-0163: KB staleness guard — detect present-but-stale KB (rsync gap)
+  describe('kbFreshness', () => {
+    it('returns stale=false when key files are fresh (mtime=now)', async () => {
+      await writeFile(root, 'tasks.md', '');
+      await writeFile(root, 'activeContext.md', '');
+      await writeFile(root, 'backlog.md', '');
+      // files were just written — mtime is now
+      const result = await svc.kbFreshness(3);
+      expect(result.stale).toBe(false);
+      expect(result.ageHours).toBeLessThan(0.1);
+    });
+
+    it('returns stale=true when all key files are older than threshold', async () => {
+      await writeFile(root, 'tasks.md', '');
+      await writeFile(root, 'activeContext.md', '');
+      await writeFile(root, 'backlog.md', '');
+      // back-date all three key files by 5 hours
+      const fiveHoursAgo = new Date(Date.now() - 5 * 60 * 60 * 1000);
+      await Promise.all([
+        fs.utimes(join(root, 'tasks.md'), fiveHoursAgo, fiveHoursAgo),
+        fs.utimes(join(root, 'activeContext.md'), fiveHoursAgo, fiveHoursAgo),
+        fs.utimes(join(root, 'backlog.md'), fiveHoursAgo, fiveHoursAgo),
+      ]);
+      const result = await svc.kbFreshness(3);
+      expect(result.stale).toBe(true);
+      expect(result.ageHours).toBeGreaterThanOrEqual(4.9);
+      expect(result.lastSyncIso).toMatch(/^\d{4}-\d{2}-\d{2}T/);
+    });
+
+    it('threshold is configurable — stale=false at 6h threshold when file is 5h old', async () => {
+      await writeFile(root, 'tasks.md', '');
+      const fiveHoursAgo = new Date(Date.now() - 5 * 60 * 60 * 1000);
+      await fs.utimes(join(root, 'tasks.md'), fiveHoursAgo, fiveHoursAgo);
+      // at threshold=6h a 5h-old file is NOT stale
+      const result = await svc.kbFreshness(6);
+      expect(result.stale).toBe(false);
+    });
+
+    it('uses max mtime across key files — one fresh file makes KB fresh', async () => {
+      await writeFile(root, 'tasks.md', '');
+      await writeFile(root, 'activeContext.md', '');
+      await writeFile(root, 'backlog.md', '');
+      // back-date tasks.md and backlog.md but keep activeContext.md fresh
+      const fiveHoursAgo = new Date(Date.now() - 5 * 60 * 60 * 1000);
+      await fs.utimes(join(root, 'tasks.md'), fiveHoursAgo, fiveHoursAgo);
+      await fs.utimes(join(root, 'backlog.md'), fiveHoursAgo, fiveHoursAgo);
+      // activeContext.md mtime stays at now
+      const result = await svc.kbFreshness(3);
+      expect(result.stale).toBe(false);
+    });
+
+    it('returns stale=true with ageHours=Infinity when no key files exist', async () => {
+      // root exists but has no key files (empty dir)
+      const result = await svc.kbFreshness(3);
+      expect(result.stale).toBe(true);
+      expect(result.ageHours).toBe(Infinity);
     });
   });
 });
