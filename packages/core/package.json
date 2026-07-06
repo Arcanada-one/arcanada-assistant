@@ -36,7 +36,7 @@
   },
   "dependencies": {
     "jose": "^6.2.3",
-    "opossum": "^9.0.0",
+    "opossum": "^10.0.0",
     "zod": "^4.4.3"
   },
   "peerDependencies": {
