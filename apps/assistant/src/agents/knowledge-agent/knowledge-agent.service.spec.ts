@@ -165,13 +165,11 @@ describe('KnowledgeAgentService', () => {
 
     it('flags async=true when client returns soft-fail (async ingest)', async () => {
       const client = mockClient({
-        ingestLtm: vi.fn(
-          async (): Promise<IngestResult> => ({
-            ok: true,
-            async: true,
-            warning: 'scrutator-soft-fail',
-          }),
-        ),
+        ingestLtm: vi.fn(async (): Promise<IngestResult> => ({
+          ok: true,
+          async: true,
+          warning: 'scrutator-soft-fail',
+        })),
       });
       const agent = new KnowledgeAgentService(client, 'assistant');
       const r = (await agent.execute('/remember', {

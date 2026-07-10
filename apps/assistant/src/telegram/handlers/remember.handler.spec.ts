@@ -16,13 +16,11 @@ function makeDeps(routeImpl: () => Promise<unknown>) {
 
 describe('RememberHandler', () => {
   it('renders remembered (sync) with namespace', async () => {
-    const { send, orchestrator, gateway } = makeDeps(
-      async (): Promise<KnowledgeAgentResult> => ({
-        kind: 'remembered',
-        namespace: 'assistant:user:14128108',
-        async: false,
-      }),
-    );
+    const { send, orchestrator, gateway } = makeDeps(async (): Promise<KnowledgeAgentResult> => ({
+      kind: 'remembered',
+      namespace: 'assistant:user:14128108',
+      async: false,
+    }));
     const handler = new RememberHandler(orchestrator, gateway);
     await handler.handle(99, 14128108, 'arcana-prod IP 65.108.236.39');
     expect(send.mock.calls[0][0]).toBe(99);
@@ -33,26 +31,22 @@ describe('RememberHandler', () => {
   });
 
   it('flags async ingest in user-facing message', async () => {
-    const { send, orchestrator, gateway } = makeDeps(
-      async (): Promise<KnowledgeAgentResult> => ({
-        kind: 'remembered',
-        namespace: 'assistant:user:1',
-        async: true,
-      }),
-    );
+    const { send, orchestrator, gateway } = makeDeps(async (): Promise<KnowledgeAgentResult> => ({
+      kind: 'remembered',
+      namespace: 'assistant:user:1',
+      async: true,
+    }));
     const handler = new RememberHandler(orchestrator, gateway);
     await handler.handle(1, 1, 'fact');
     expect(send.mock.calls[0][1]).toContain('фоновая');
   });
 
   it('passes (text, userId) to orchestrator', async () => {
-    const { orchestrator, gateway } = makeDeps(
-      async (): Promise<KnowledgeAgentResult> => ({
-        kind: 'remembered',
-        namespace: 'assistant:user:42',
-        async: false,
-      }),
-    );
+    const { orchestrator, gateway } = makeDeps(async (): Promise<KnowledgeAgentResult> => ({
+      kind: 'remembered',
+      namespace: 'assistant:user:42',
+      async: false,
+    }));
     const handler = new RememberHandler(orchestrator, gateway);
     await handler.handle(1, 42, 'hello');
     expect(orchestrator.route).toHaveBeenCalledWith('/remember', { text: 'hello', userId: 42 });
@@ -79,12 +73,10 @@ describe('RememberHandler', () => {
   });
 
   it('warns when knowledge agent returns unavailable', async () => {
-    const { send, orchestrator, gateway } = makeDeps(
-      async (): Promise<KnowledgeAgentResult> => ({
-        kind: 'unavailable',
-        reason: 'scrutator_circuit_open',
-      }),
-    );
+    const { send, orchestrator, gateway } = makeDeps(async (): Promise<KnowledgeAgentResult> => ({
+      kind: 'unavailable',
+      reason: 'scrutator_circuit_open',
+    }));
     const handler = new RememberHandler(orchestrator, gateway);
     await handler.handle(1, 1, 'fact');
     expect(send.mock.calls[0][1]).toMatch(/Не удалось запомнить/i);

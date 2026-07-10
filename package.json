@@ -28,19 +28,19 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "@types/node": "^25.9.1",
-    "@typescript-eslint/eslint-plugin": "^8.60.0",
-    "@typescript-eslint/parser": "^8.60.0",
-    "@vitest/coverage-v8": "^4.1.7",
-    "eslint": "^10.4.0",
+    "@types/node": "^26.0.1",
+    "@typescript-eslint/eslint-plugin": "^8.62.0",
+    "@typescript-eslint/parser": "^8.62.0",
+    "@vitest/coverage-v8": "^4.1.9",
+    "eslint": "^10.6.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-import": "^2.31.0",
-    "eslint-plugin-security": "^4.0.0",
-    "globals": "^17.6.0",
-    "prettier": "^3.4.0",
+    "eslint-plugin-security": "^4.0.1",
+    "globals": "^17.7.0",
+    "prettier": "^3.9.1",
     "typescript": "^6.0.3",
-    "typescript-eslint": "^8.60.0",
-    "vitest": "^4.1.7"
+    "typescript-eslint": "^8.62.0",
+    "vitest": "^4.1.9"
   },
   "pnpm": {
     "overrides": {
