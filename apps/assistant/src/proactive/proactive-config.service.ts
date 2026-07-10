@@ -1,7 +1,7 @@
 import { promises as fs } from 'node:fs';
 
 import { Injectable, Logger } from '@nestjs/common';
-import yaml from 'js-yaml';
+import { load as yamlLoad } from 'js-yaml';
 
 import { ProactiveConfigSchema, type ProactiveConfig } from './proactive.types.js';
 
@@ -52,7 +52,7 @@ export class ProactiveConfigService {
 
   async loadOnce(): Promise<ProactiveConfig> {
     const raw = await this.source.read();
-    const parsedYaml = yaml.load(raw);
+    const parsedYaml = yamlLoad(raw);
     const result = ProactiveConfigSchema.safeParse(parsedYaml);
     if (!result.success) {
       const messages = result.error.issues
