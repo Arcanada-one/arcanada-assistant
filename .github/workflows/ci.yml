@@ -18,7 +18,7 @@ jobs:
   lint:
     runs-on: [self-hosted, Linux, X64]
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6
         with:
           version: ${{ env.PNPM_VERSION }}
@@ -53,7 +53,7 @@ jobs:
       DATABASE_URL: postgresql://assistant_app:ci_password@localhost:5432/assistant?schema=public&sslmode=disable
       REDIS_URL: redis://localhost:6379/0
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6
         with:
           version: ${{ env.PNPM_VERSION }}
@@ -70,7 +70,7 @@ jobs:
   audit:
     runs-on: [self-hosted, Linux, X64]
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6
         with:
           version: ${{ env.PNPM_VERSION }}
@@ -127,7 +127,7 @@ jobs:
       BRIEFING_MORNING_TIME: '08:00'
       BRIEFING_EVENING_TIME: '21:00'
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6
         with:
           version: ${{ env.PNPM_VERSION }}
@@ -176,7 +176,7 @@ jobs:
           cd /opt/arcanada-assistant
           git fetch --all --prune
           git reset --hard origin/main
-      - name: Inject runtime secrets to .env (SEC-0006 + INFRA-0240)
+      - name: Inject runtime secrets to .env (SEC-0006 + INFRA-0240 + INFRA-0241)
         run: |
           umask 077
           cat > /opt/arcanada-assistant/.env <<EOF
@@ -187,6 +187,8 @@ jobs:
           MODEL_CONNECTOR_API_KEY=${{ secrets.MODEL_CONNECTOR_API_KEY }}
           OPSBOT_API_KEY=${{ secrets.OPSBOT_API_KEY }}
           MESH_VAULT_API_KEY=${{ secrets.MESH_VAULT_API_KEY }}
+          MUNERA_BASE_URL=${{ secrets.MUNERA_BASE_URL }}
+          MUNERA_API_TOKEN=${{ secrets.MUNERA_API_TOKEN }}
           SCRUTATOR_BASE_URL=http://100.70.137.104:8310
           EOF
           chmod 600 /opt/arcanada-assistant/.env

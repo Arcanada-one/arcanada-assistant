@@ -15,6 +15,10 @@ services:
       - '127.0.0.1:5432:5432'
     volumes:
       - postgres-data:/var/lib/postgresql/data
+      # ARCA-0039: strips SUPERUSER/CREATEROLE/CREATEDB from assistant_app.
+      # Only executes on first boot against an empty volume — see
+      # ops/postgres-init/01-restrict-role.sql header + README § Security.
+      - ./ops/postgres-init:/docker-entrypoint-initdb.d:ro
     healthcheck:
       test: ['CMD-SHELL', 'pg_isready -U assistant_app -d assistant']
       interval: 5s

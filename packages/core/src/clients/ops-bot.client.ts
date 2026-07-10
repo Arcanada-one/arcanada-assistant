@@ -7,6 +7,7 @@ import {
   EmitEventResponseSchema,
   ExecuteCommandInputSchema,
   ExecuteCommandResponseSchema,
+  toOpsBotWireEvent,
   type EcosystemSnapshot,
   type EmitEventInput,
   type EmitEventResponse,
@@ -167,10 +168,10 @@ export class OpsBotClient implements IOpsBotClient {
     if (!parsed.success) {
       throw new OpsBotClientError(`Invalid event input: ${parsed.error.message}`, parsed.error);
     }
-    const body = JSON.stringify({
-      ...parsed.data,
-      timestamp: parsed.data.timestamp ?? new Date().toISOString(),
-    });
+    // ARCA-0122: opsbot's `POST /events` accepts {category,agent,title,body,
+    // dedup_key} — not the internal OpsBotEventSchema shape. Translate at the
+    // wire boundary rather than sending parsed.data verbatim.
+    const body = JSON.stringify(toOpsBotWireEvent(parsed.data));
     const result = await this.callBreaker({
       url: `${this.baseUrl}/events`,
       method: 'POST',

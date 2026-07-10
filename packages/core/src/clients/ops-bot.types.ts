@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { OpsBotEventSchema } from '../types/schemas.js';
+import { OpsBotEventSchema, type OpsBotEventCategory } from '../types/schemas.js';
 
 export { OpsBotEventSchema, OpsBotEventCategory } from '../types/schemas.js';
 export type { OpsBotEvent } from '../types/schemas.js';
@@ -38,6 +38,78 @@ export const EmitEventInputSchema = OpsBotEventSchema.omit({ timestamp: true }).
   timestamp: z.iso.datetime().optional(),
 });
 export type EmitEventInput = z.infer<typeof EmitEventInputSchema>;
+
+/**
+ * ARCA-0122: the actual `POST /events` wire body Ops Bot accepts
+ * (`Arcanada-one/opsbot` `src/modules/events/dto/create-event.dto.ts`
+ * `CreateEventDto`, minus the `approval`/`github_workflow` discriminator
+ * payloads assistant never emits). `OpsBotEventSchema` above is the richer
+ * internal representation assistant call sites use (`service`/`severity`/
+ * `context`/`audit_ref`); this schema and `toOpsBotWireEvent` below are the
+ * boundary that translates one into the other. No shared package exists
+ * between the two repos yet — keep this in sync with opsbot's DTO by hand.
+ */
+export const OpsBotWireEventCategory = [
+  'fatal',
+  'warning',
+  'approval',
+  'digest',
+  'info',
+  'heartbeat',
+  'feedback',
+] as const;
+export type OpsBotWireEventCategory = (typeof OpsBotWireEventCategory)[number];
+
+export const OpsBotWireEventSchema = z.object({
+  category: z.enum(OpsBotWireEventCategory),
+  agent: z.string().min(1).max(128),
+  title: z.string().min(1).max(256),
+  body: z.string().max(4000),
+  dedup_key: z.string().min(1).max(128).optional(),
+});
+export type OpsBotWireEvent = z.infer<typeof OpsBotWireEventSchema>;
+
+const WIRE_TITLE_MAX = 256;
+const WIRE_BODY_MAX = 4000;
+const WIRE_DEDUP_MAX = 128;
+
+/**
+ * `OpsBotEventCategory` → `OpsBotWireEventCategory`. Assistant's `self_heal`/
+ * `tool_failure`/`cost_breaker_trip`/`briefing_cycle`/`audit` have no direct
+ * opsbot counterpart; mapped by severity/intent rather than name.
+ */
+const CATEGORY_TO_WIRE: Record<OpsBotEventCategory, OpsBotWireEventCategory> = {
+  fatal: 'fatal',
+  warning: 'warning',
+  tool_failure: 'warning',
+  cost_breaker_trip: 'warning',
+  self_heal: 'info',
+  briefing_cycle: 'digest',
+  audit: 'info',
+};
+
+/**
+ * Translates a validated `EmitEventInput` into the shape Ops Bot's
+ * `CreateEventDto` actually accepts. Truncates `title`/`body`/`dedup_key`
+ * defensively to opsbot's field limits rather than letting a long message
+ * fail Zod validation on the receiving side.
+ */
+export function toOpsBotWireEvent(event: EmitEventInput): OpsBotWireEvent {
+  const category = CATEGORY_TO_WIRE[event.category];
+  const title =
+    event.message.length > WIRE_TITLE_MAX
+      ? `${event.message.slice(0, WIRE_TITLE_MAX - 1)}…`
+      : event.message;
+  const body = event.context ? JSON.stringify(event.context).slice(0, WIRE_BODY_MAX) : '';
+  const dedup_key = event.audit_ref?.slice(0, WIRE_DEDUP_MAX);
+  return OpsBotWireEventSchema.parse({
+    category,
+    agent: event.service,
+    title,
+    body,
+    ...(dedup_key ? { dedup_key } : {}),
+  });
+}
 
 /**
  * Bidirectional Ops Bot command kinds (ARCA-0009 M3, PRD V-AC-3).

@@ -6,24 +6,28 @@ import type { Redis } from 'ioredis';
 
 import { OpsBotClient, OpsBotClientError } from './ops-bot.client.js';
 import type { OpsBotLogger } from './ops-bot.client.js';
+import { OpsBotWireEventSchema } from './ops-bot.types.js';
 
 const BASE_URL = 'https://ops.test.local';
 const API_KEY = 'test-api-key-1234';
 
 interface ServerCallLog {
   authorization: string | null;
+  lastEventBody: unknown;
   count: { events: number; metrics: number; health: number };
 }
 
 function makeServer(): { server: ReturnType<typeof setupServer>; calls: ServerCallLog } {
   const calls: ServerCallLog = {
     authorization: null,
+    lastEventBody: null,
     count: { events: 0, metrics: 0, health: 0 },
   };
   const server = setupServer(
     http.post(`${BASE_URL}/events`, async ({ request }) => {
       calls.count.events += 1;
       calls.authorization = request.headers.get('authorization');
+      calls.lastEventBody = await request.json();
       return HttpResponse.json(
         { event_id: '01J2H7K8FXYJ9P0Q3R5T6V8W0Z', status: 'accepted' },
         { status: 201 },
@@ -53,6 +57,7 @@ beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
 afterEach(() => {
   server.resetHandlers();
   calls.authorization = null;
+  calls.lastEventBody = null;
   calls.count.events = 0;
   calls.count.metrics = 0;
   calls.count.health = 0;
@@ -99,6 +104,33 @@ describe('OpsBotClient.emitEvent', () => {
     expect(ack.status).toBe('accepted');
     expect(calls.authorization).toBe(`Bearer ${API_KEY}`);
     expect(calls.count.events).toBe(1);
+  });
+
+  // ARCA-0122: the previous test only asserted the ack — it never checked
+  // *what* was actually POSTed, which is exactly how the assistant/opsbot
+  // schema drift (service/severity/context/audit_ref vs category/agent/
+  // title/body/dedup_key) went unnoticed until a live PROD smoke. This
+  // asserts the wire body against a mirror of opsbot's real CreateEventDto.
+  it('POSTs a body matching Ops Bot CreateEventDto, not the internal OpsBotEventSchema shape', async () => {
+    const client = makeClient();
+    await client.emitEvent({
+      service: 'arcanada-assistant',
+      category: 'self_heal',
+      severity: 'warning',
+      message: 'proactive-dispatcher digest: 3 consecutive failures',
+      context: { component: 'proactive-dispatcher', consecutive_failures: 3 },
+    });
+    expect(OpsBotWireEventSchema.safeParse(calls.lastEventBody).success).toBe(true);
+    expect(calls.lastEventBody).toEqual({
+      category: 'info',
+      agent: 'arcanada-assistant',
+      title: 'proactive-dispatcher digest: 3 consecutive failures',
+      body: JSON.stringify({ component: 'proactive-dispatcher', consecutive_failures: 3 }),
+    });
+    // opsbot's DTO has no `service`/`severity`/`context`/`audit_ref`/`timestamp` fields
+    expect(calls.lastEventBody).not.toHaveProperty('service');
+    expect(calls.lastEventBody).not.toHaveProperty('severity');
+    expect(calls.lastEventBody).not.toHaveProperty('timestamp');
   });
 
   it('rejects malformed input via Zod before HTTP', async () => {
@@ -213,10 +245,13 @@ describe('OpsBotClient circuit breaker', () => {
     await new Promise((r) => setTimeout(r, 80)); // > resetTimeoutMs (margin for CI)
     await client.emitEvent(event); // half-open → success → close
     await new Promise((r) => setTimeout(r, 100)); // let breaker.on('close') microtask flush
-    const selfHeal = bodies.filter((b) => b.category === 'self_heal');
+    // ARCA-0122: emitEvent now sends opsbot's wire shape (category/agent/
+    // title/body), not the internal OpsBotEventSchema shape — self_heal maps
+    // to wire category 'info', message -> title, context -> JSON body.
+    const selfHeal = bodies.filter((b) => b.category === 'info');
     expect(selfHeal.length).toBeGreaterThanOrEqual(1);
-    expect(selfHeal[0].message).toMatch(/recovered/);
-    expect(selfHeal[0].context).toMatchObject({
+    expect(selfHeal[0].title).toMatch(/recovered/);
+    expect(JSON.parse(selfHeal[0].body as string)).toMatchObject({
       component: 'ops-bot-client',
       state: 'close',
     });
@@ -444,11 +479,12 @@ describe('OpsBotClient.executeCommand (ARCA-0009 M3, V-AC-3)', () => {
       idempotencyKey: IDEMPOTENCY_KEY,
     });
     expect(ack.ok).toBe(false);
+    // ARCA-0122: wire shape uses title (not message) and JSON-string body (not context object)
     const post = bodies.find(
-      (b) => typeof b.message === 'string' && (b.message as string).includes('result'),
+      (b) => typeof b.title === 'string' && (b.title as string).includes('result'),
     );
     expect(post).toBeDefined();
-    expect((post?.context as Record<string, unknown>)?.ok).toBe(false);
+    expect((JSON.parse(post?.body as string) as Record<string, unknown>).ok).toBe(false);
   });
 
   it('does NOT retry on 5xx (executeCommand is non-idempotent at transport layer)', async () => {
