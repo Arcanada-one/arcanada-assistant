@@ -60,6 +60,16 @@ interface CapturedAudit {
   context: unknown;
 }
 
+// ARCA-0122: emitEvent POSTs Ops Bot's wire shape (title/body), not the
+// internal OpsBotEventSchema shape (message/context) — capture at the wire
+// boundary and re-derive message/context for assertions below.
+function auditFromWireBody(body: Record<string, unknown>): CapturedAudit {
+  return {
+    message: body.title,
+    context: typeof body.body === 'string' && body.body ? JSON.parse(body.body) : undefined,
+  };
+}
+
 interface Wiring {
   router: CommandRouter;
   telegram: TelegramGateway & {
@@ -129,7 +139,7 @@ function startServer(): { commands: CapturedCommand[]; audits: CapturedAudit[] }
     }),
     http.post(`${BASE_URL}/events`, async ({ request }) => {
       const body = (await request.json()) as Record<string, unknown>;
-      audits.push({ message: body.message, context: body.context });
+      audits.push(auditFromWireBody(body));
       return HttpResponse.json(
         { event_id: '01J2H7K8FXYJ9P0Q3R5T6V8W0Z', status: 'accepted' },
         { status: 201 },
