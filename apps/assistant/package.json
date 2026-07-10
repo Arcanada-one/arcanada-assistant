@@ -57,17 +57,17 @@
     "@prisma/config": "^7.8.0",
     "@types/js-yaml": "^4.0.9",
     "@types/json-logic-js": "^2.0.8",
-    "@types/node": "^25.9.1",
+    "@types/node": "^26.1.1",
     "@types/opossum": "^8.1.9",
     "@types/supertest": "^7.2.0",
-    "@vitest/coverage-v8": "^4.1.7",
+    "@vitest/coverage-v8": "^4.1.10",
     "ioredis-mock": "^8.13.1",
-    "msw": "^2.14.6",
+    "msw": "^2.15.0",
     "prisma": "^7.8.0",
     "supertest": "^7.0.0",
-    "tsx": "^4.22.3",
-    "typescript": "^6.0.3",
-    "vitest": "^4.1.7"
+    "tsx": "^4.23.0",
+    "typescript": "^7.0.2",
+    "vitest": "^4.1.10"
   },
   "arcanada": {
     "current_aal": "L3",

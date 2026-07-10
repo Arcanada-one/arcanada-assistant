@@ -60,9 +60,9 @@
     }
   },
   "devDependencies": {
-    "@types/node": "^25.9.1",
+    "@types/node": "^26.1.1",
     "@types/opossum": "^8.1.9",
     "ioredis-mock": "^8.13.1",
-    "msw": "^2.14.6"
+    "msw": "^2.15.0"
   }
 }
