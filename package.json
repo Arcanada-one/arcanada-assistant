@@ -2,7 +2,7 @@
   "name": "arcanada-assistant",
   "version": "0.1.0",
   "private": true,
-  "description": "Arcanada Assistant — единая точка входа в экосистему Arcanada (Telegram + AI orchestrator)",
+  "description": "Arcanada Assistant \u2014 \u0435\u0434\u0438\u043d\u0430\u044f \u0442\u043e\u0447\u043a\u0430 \u0432\u0445\u043e\u0434\u0430 \u0432 \u044d\u043a\u043e\u0441\u0438\u0441\u0442\u0435\u043c\u0443 Arcanada (Telegram + AI orchestrator)",
   "license": "MIT",
   "author": "Pavel Valentov <pavel@aether-media.com>",
   "homepage": "https://assistant.arcanada.one",
@@ -45,17 +45,18 @@
   "pnpm": {
     "overrides": {
       "fastify": "^5.8.5",
-      "fast-uri": "^3.1.2"
+      "fast-uri": "^3.1.2",
+      "hono": ">=4.12.25"
     }
   },
   "arcanada": {
     "current_aal": "L1",
     "target_aal": "L4",
     "aal_roadmap": [
-      "L1: ARCA-0006 (this) — scaffold + Docker + CI/CD",
-      "L2: ARCA-0007/0008 — structured logs (pino), trace_id, Langfuse integration",
-      "L3: ARCA-0009 — heartbeat to Ops Bot, output schema validation, exception hierarchy",
-      "L4: ARCA-0010..0012 — cost circuit breakers, fallback chain, self-heal events"
+      "L1: ARCA-0006 (this) \u2014 scaffold + Docker + CI/CD",
+      "L2: ARCA-0007/0008 \u2014 structured logs (pino), trace_id, Langfuse integration",
+      "L3: ARCA-0009 \u2014 heartbeat to Ops Bot, output schema validation, exception hierarchy",
+      "L4: ARCA-0010..0012 \u2014 cost circuit breakers, fallback chain, self-heal events"
     ]
   }
 }
