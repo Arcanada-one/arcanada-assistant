@@ -24,23 +24,23 @@ Please do not file public issues for security findings. Reports include:
 
 ## Disclosure SLA
 
-| Stage | Target |
-|-------|--------|
-| Acknowledgement of report | <= 72 hours |
-| Triage and severity assignment | <= 7 days |
-| Fix for HIGH / CRITICAL | <= 90 days |
-| Fix for MEDIUM | <= 180 days |
-| Fix for LOW | best-effort, batched into next minor |
-| Coordinated public disclosure | within 14 days of fix, or 120 days after report (whichever sooner), unless embargo is mutually agreed |
+| Stage                          | Target                                                                                                |
+| ------------------------------ | ----------------------------------------------------------------------------------------------------- |
+| Acknowledgement of report      | <= 72 hours                                                                                           |
+| Triage and severity assignment | <= 7 days                                                                                             |
+| Fix for HIGH / CRITICAL        | <= 90 days                                                                                            |
+| Fix for MEDIUM                 | <= 180 days                                                                                           |
+| Fix for LOW                    | best-effort, batched into next minor                                                                  |
+| Coordinated public disclosure  | within 14 days of fix, or 120 days after report (whichever sooner), unless embargo is mutually agreed |
 
 If the reporter does not hear back within the acknowledgement window,
 they may publicly disclose without further coordination.
 
 ## Supported Versions
 
-| Version | Supported |
-|---------|-----------|
-| `main` (default branch) | yes |
+| Version                 | Supported |
+| ----------------------- | --------- |
+| `main` (default branch) | yes       |
 
 This repository has no tagged releases yet; `main` is the only supported
 version line. When releases begin, this table lists the supported minors.
@@ -79,9 +79,9 @@ Machine-readable source-of-truth: `accepted-risk.yml` at repo root. That
 register is **not present in this repository yet**; the table below is the
 rendered projection and is empty until it is added.
 
-| Advisory ID | Package | Severity | Scope | Last review | Re-review | Reviewed by | Reason |
-|-------------|---------|----------|-------|-------------|-----------|-------------|--------|
-| _(no entries)_ | | | | | | | |
+| Advisory ID    | Package | Severity | Scope | Last review | Re-review | Reviewed by | Reason |
+| -------------- | ------- | -------- | ----- | ----------- | --------- | ----------- | ------ |
+| _(no entries)_ |         |          |       |             |           |             |        |
 
 Re-review dates MUST satisfy `re_review <= last_review + 90 days`.
 Entries past `re_review` raise an ecosystem-wide stale-trigger event
