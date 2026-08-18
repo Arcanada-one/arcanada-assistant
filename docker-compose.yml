@@ -76,13 +76,16 @@ services:
       # INFRA-0240: hostname `arcana-db` not resolvable inside docker (no MagicDNS); fall back to Tailscale IP for arcana-db. Override via .env on hosts с разной топологией.
       SCRUTATOR_BASE_URL: ${SCRUTATOR_BASE_URL:-http://100.70.137.104:8310}
       SCRUTATOR_LTM_NAMESPACE: assistant-ltm-pavel
-      # ARCA-0154: reach OpsBot /metrics over the internal docker network
-      # (opsbot_default). The public https://ops.arcanada.one/metrics returns
-      # 403 (nginx allowlist) even with a valid Bearer; the internal endpoint
-      # returns 200. Zod relaxed to allow http:// only for docker-internal /
-      # loopback hosts (see apps/assistant/src/config/url-schemas.ts). Override
-      # via .env on hosts that are not joined to opsbot_default.
-      OPSBOT_BASE_URL: ${OPSBOT_BASE_URL:-http://opsbot:3600}
+      # AGENT-0210: Ops Bot moved off this host to arcana-agents on 2026-08-16,
+      # which killed the previous default (the opsbot_default docker network and
+      # its container-name URL) — a service name only resolves while both
+      # containers share a host. The public host cannot substitute BY DESIGN:
+      # ops.arcanada.ai resolves to Cloudflare, so a request arrives from a CF
+      # address and nginx rejects /metrics via its mesh allowlist, which is what
+      # keeps the ecosystem snapshot off the public internet. The default is
+      # therefore the mesh address; not a secret, so it lives here in plain
+      # sight. http:// is accepted for mesh hosts by url-schemas.ts.
+      OPSBOT_BASE_URL: ${OPSBOT_BASE_URL:-http://100.108.24.109:3600}
       OPSBOT_API_KEY: ${OPSBOT_API_KEY:-changeme}
       MUNERA_BASE_URL: ${MUNERA_BASE_URL:-https://muneral.com}
       MUNERA_API_TOKEN: ${MUNERA_API_TOKEN:-changeme}
@@ -104,9 +107,6 @@ services:
       - '127.0.0.1:3800:3800'
     networks:
       - default
-      # ARCA-0154: join the existing OpsBot docker network so http://opsbot:3600
-      # resolves (container-to-container, Tier 0; no host port published).
-      - opsbot_default
     volumes:
       # Read-only bind for the proactive-config directory. Host dir deployed by
       # operator (see datarim/tasks/ARCA-0010-task-description.md § Operator
@@ -122,10 +122,15 @@ services:
 
 networks:
   default: {}
-  # ARCA-0154: external — created by the OpsBot compose project (opsbot_default).
-  # assistant joins it read-only for /metrics; it is NOT created here.
-  opsbot_default:
-    external: true
+  # AGENT-0210: `opsbot_default` (external: true) was removed here. It was
+  # created by the Ops Bot compose project on this host; Ops Bot moved to
+  # arcana-agents on 2026-08-16, so nothing creates it any more. An `external`
+  # network is never created by compose — it is only looked up — so the entry
+  # had become a latent hard failure: the network survived solely because the
+  # assistant container was still attached to it, and the first `compose up`
+  # after a full stop would have died with "network opsbot_default declared as
+  # external, but could not be found". Ops Bot is reached over the mesh address
+  # in OPSBOT_BASE_URL above, so the network is no longer needed for anything.
 
 volumes:
   postgres-data:
