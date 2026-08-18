@@ -192,7 +192,16 @@ jobs:
     if: github.ref == 'refs/heads/main'
     # No `docker` label: this runner deliberately cannot reach the socket, and
     # a label claiming otherwise would misroute unrelated jobs onto production.
-    runs-on: [self-hosted, linux, arcana-prod]
+    #
+    # `arcana-prod-host` rather than `arcana-prod`, because that label is not
+    # unique: `arcana-prod-replacement` carries it too and physically lives on
+    # arcana-agents, a DIFFERENT machine that was standing in during an
+    # outage and still advertises the label. The assistant's containers and its
+    # postgres volume exist only on arcana-prod, and only that host's broker
+    # lists the service — so a deploy landing on the stand-in is at best a
+    # preflight failure and at worst a second, empty stack on the wrong host.
+    # This label resolves to exactly one machine.
+    runs-on: [self-hosted, linux, arcana-prod-host]
     steps:
       - uses: actions/checkout@v7
       - name: Verify deploy-broker capability
@@ -216,7 +225,10 @@ jobs:
   verify:
     needs: [deploy]
     if: github.ref == 'refs/heads/main'
-    runs-on: [self-hosted, linux, arcana-prod]
+    # Same host as deploy, and for the same reason: this job curls
+    # 127.0.0.1:3800 and asks the broker for logs, both of which are only
+    # meaningful on the machine the stack actually runs on.
+    runs-on: [self-hosted, linux, arcana-prod-host]
     steps:
       - name: Wait for /health
         run: |
