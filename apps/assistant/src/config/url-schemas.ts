@@ -60,7 +60,6 @@ export const internalHttpOrHttpsUrl = z
       return false;
     },
     {
-      message:
-        'must be https:// (http:// allowed only for docker-internal / loopback / mesh host)',
+      message: 'must be https:// (http:// allowed only for docker-internal / loopback / mesh host)',
     },
   );
