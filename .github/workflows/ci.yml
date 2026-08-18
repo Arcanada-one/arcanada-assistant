@@ -166,74 +166,104 @@ jobs:
           kill -9 $APP_PID || true
           exit 1
 
+  # SEC-0063: this job used to own its own deploy path — it held a runner-owned
+  # checkout at /opt/arcanada-assistant, wrote the production .env there with a
+  # heredoc, and drove `docker compose` against the host socket directly. That
+  # is the arrangement SEC-0028 removed from every other service on arcana-prod
+  # on 2026-07-30; the assistant was the one that was missed. When the `docker`
+  # group was retired the job did not start failing quietly — it failed loudly,
+  # at `permission denied ... /var/run/docker.sock`, on every push to main since.
+  #
+  # Three defects died with the old block, and they are worth naming because
+  # none of them is about the docker socket:
+  #   * The heredoc was unquoted, so backticks in its own explanatory comment
+  #     were executed as command substitutions by the runner's shell. Harmless
+  #     text this time; the construction is arbitrary command execution.
+  #   * `git reset --hard origin/main` ran in a runner-owned .git, so nothing
+  #     stopped the runner from repointing `origin` or checking out any SHA.
+  #     The broker refuses a SHA that is not an ancestor of origin/main.
+  #   * The .env was runner-owned 0600 — mode 600 protects a file from other
+  #     users, not from its owner. Eight production credentials were readable
+  #     by the runner account for as long as this job existed. They now live in
+  #     /etc/arcanada/deploy-env/arcanada-assistant.env, root-owned, and are
+  #     re-installed into the checkout by the broker on every sync.
   deploy:
     needs: [lint, test, audit, smoke]
     if: github.ref == 'refs/heads/main'
-    runs-on: [self-hosted, linux, arcana-prod, docker]
+    # No `docker` label: this runner deliberately cannot reach the socket, and
+    # a label claiming otherwise would misroute unrelated jobs onto production.
+    runs-on: [self-hosted, linux, arcana-prod]
     steps:
-      - name: Pull repo on PROD path
-        run: |
-          cd /opt/arcanada-assistant
-          git fetch --all --prune
-          git reset --hard origin/main
-      - name: Inject runtime secrets to .env (SEC-0006 + INFRA-0240 + INFRA-0241)
-        run: |
-          umask 077
-          cat > /opt/arcanada-assistant/.env <<EOF
-          POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
-          REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}
-          TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_WEBHOOK_SECRET=${{ secrets.TELEGRAM_WEBHOOK_SECRET }}
-          MODEL_CONNECTOR_API_KEY=${{ secrets.MODEL_CONNECTOR_API_KEY }}
-          OPSBOT_API_KEY=${{ secrets.OPSBOT_API_KEY }}
-          MESH_VAULT_API_KEY=${{ secrets.MESH_VAULT_API_KEY }}
-          MUNERA_BASE_URL=${{ secrets.MUNERA_BASE_URL }}
-          MUNERA_API_TOKEN=${{ secrets.MUNERA_API_TOKEN }}
-          SCRUTATOR_BASE_URL=http://100.70.137.104:8310
-          # AGENT-0210: Ops Bot moved to arcana-agents on 2026-08-16, which killed
-          # the compose default `http://opsbot:3600` — that service name only
-          # resolved while both containers shared a host. Every briefing has since
-          # printed "snapshot недоступен" (the snapshot is GET {base}/metrics).
-          # The public host is not usable for it BY DESIGN: ops.arcanada.ai
-          # resolves to Cloudflare, so we arrive from a CF address and nginx
-          # rejects /metrics via `allow 100.64.0.0/10` — the rule that keeps the
-          # ecosystem snapshot off the public internet. Mesh address, like
-          # SCRUTATOR_BASE_URL above; not a secret, so it lives here in plain sight.
-          OPSBOT_BASE_URL=http://100.108.24.109:3600
-          EOF
-          chmod 600 /opt/arcanada-assistant/.env
-      - name: Build + start via docker compose
-        run: |
-          cd /opt/arcanada-assistant
-          docker compose build assistant
-          docker compose up -d --remove-orphans assistant postgres redis
+      - uses: actions/checkout@v7
+      - name: Verify deploy-broker capability
+        env:
+          BROKER_PREFLIGHT_SERVICE: arcanada-assistant
+        run: bash scripts/ci/runner-broker-preflight.sh
+
+      # The broker takes a service name from a compiled-in allowlist and a
+      # commit SHA, and nothing else. No credential on stdin: this repository
+      # is public, so `AUTH` is deliberately absent from its broker row and an
+      # empty-stdin read would fail the sync.
+      - name: Sync broker checkout to this commit
+        run: sudo -n /usr/local/sbin/arcanada-compose-broker arcanada-assistant sync "$GITHUB_SHA"
+
+      - name: Build image
+        run: sudo -n /usr/local/sbin/arcanada-compose-broker arcanada-assistant build
+
+      - name: Bring up stack
+        run: sudo -n /usr/local/sbin/arcanada-compose-broker arcanada-assistant up
 
   verify:
     needs: [deploy]
     if: github.ref == 'refs/heads/main'
-    runs-on: [self-hosted, linux, arcana-prod, docker]
+    runs-on: [self-hosted, linux, arcana-prod]
     steps:
       - name: Wait for /health
         run: |
-          # Symmetric to smoke gate: 200 = full health, 503 = boot success +
-          # downstream degraded (Scrutator/MC/Munera deps unreachable from
-          # docker network or stubs in place). Both prove app boot + HTTP
-          # routing + /health handler wired. Real downstream-health probing
-          # surfaces in /health body for operator inspection; CI verifies
-          # the deploy lifecycle, not the upstream-dependency mesh.
+          set -euo pipefail
+          # A 503 is still accepted, because an upstream this deploy does not
+          # own (Model Connector, Munera, Ops Bot) being unreachable is not a
+          # reason to fail the assistant's own release. But 503 alone is too
+          # weak a gate on its own: it is also what an assistant talking to an
+          # EMPTY database would return, and that is precisely the failure a
+          # botched compose-project rename produces — a parallel stack on a
+          # fresh volume, serving happily. So the owned dependencies are
+          # asserted by name from the body: postgres and redis must be `ok`
+          # whatever the status code says.
           for i in $(seq 1 30); do
             HTTP_CODE=$(curl -sS -o /tmp/health.json -w '%{http_code}' http://127.0.0.1:3800/health || true)
             if [ "$HTTP_CODE" = "200" ] || [ "$HTTP_CODE" = "503" ]; then
-              echo "healthy after ${i}s (http $HTTP_CODE)"
-              cat /tmp/health.json || true
+              echo "responded http=${HTTP_CODE} after ${i}s"
+              cat /tmp/health.json
+              echo
+              for dep in postgres redis; do
+                STATE=$(python3 -c "import json;print(json.load(open('/tmp/health.json'))['dependencies'].get('${dep}',{}).get('status','ABSENT'))")
+                if [ "$STATE" != "ok" ]; then
+                  echo "verify failed: owned dependency ${dep} is '${STATE}', expected 'ok'"
+                  sudo -n /usr/local/sbin/arcanada-compose-broker arcanada-assistant logs 200 || true
+                  exit 1
+                fi
+                echo "owned dependency ${dep}: ok"
+              done
               exit 0
             fi
             sleep 1
           done
-          echo "health check did not pass within 30s"
+          echo "health check did not respond within 30s"
           curl -v http://127.0.0.1:3800/health || true
-          docker compose -f /opt/arcanada-assistant/docker-compose.yml logs --tail=200 assistant || true
+          sudo -n /usr/local/sbin/arcanada-compose-broker arcanada-assistant logs 200 || true
           exit 1
+
+      # Defends against a silent no-op build (INFRA-0039): a container that was
+      # not recreated is running the previous code however green the deploy is.
+      - name: Container freshness
+        run: sudo -n /usr/local/sbin/arcanada-compose-broker arcanada-assistant freshness
+
+      # Asserts the stack the broker drives is the one that was already live:
+      # same compose project, therefore the same `arcanada-assistant_postgres-data`
+      # volume. A parallel stack on a fresh volume is the migration's worst case.
+      - name: Status snapshot
+        run: sudo -n /usr/local/sbin/arcanada-compose-broker arcanada-assistant ps
 
   notify-on-fail:
     needs: [lint, test, audit, smoke, deploy, verify]
