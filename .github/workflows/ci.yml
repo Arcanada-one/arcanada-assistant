@@ -190,6 +190,16 @@ jobs:
           MUNERA_BASE_URL=${{ secrets.MUNERA_BASE_URL }}
           MUNERA_API_TOKEN=${{ secrets.MUNERA_API_TOKEN }}
           SCRUTATOR_BASE_URL=http://100.70.137.104:8310
+          # AGENT-0210: Ops Bot moved to arcana-agents on 2026-08-16, which killed
+          # the compose default `http://opsbot:3600` — that service name only
+          # resolved while both containers shared a host. Every briefing has since
+          # printed "snapshot недоступен" (the snapshot is GET {base}/metrics).
+          # The public host is not usable for it BY DESIGN: ops.arcanada.ai
+          # resolves to Cloudflare, so we arrive from a CF address and nginx
+          # rejects /metrics via `allow 100.64.0.0/10` — the rule that keeps the
+          # ecosystem snapshot off the public internet. Mesh address, like
+          # SCRUTATOR_BASE_URL above; not a secret, so it lives here in plain sight.
+          OPSBOT_BASE_URL=http://100.108.24.109:3600
           EOF
           chmod 600 /opt/arcanada-assistant/.env
       - name: Build + start via docker compose

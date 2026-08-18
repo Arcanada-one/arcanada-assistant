@@ -14,8 +14,8 @@ updates:
     directory: '/'
     schedule:
       interval: monthly
-  - package-ecosystem: "docker"
-    directory: "/apps/assistant"
+  - package-ecosystem: 'docker'
+    directory: '/apps/assistant'
     schedule:
       interval: weekly
     open-pull-requests-limit: 10
@@ -23,4 +23,4 @@ updates:
     # cannot rot visibly -- nobody reads a sha256 and notices it is a year old.
     groups:
       minor-and-patch:
-        update-types: ["minor", "patch"]
+        update-types: ['minor', 'patch']
