@@ -5,7 +5,7 @@
 # at runtime. Single stage keeps the workspace intact so Prisma's generated
 # files stay reachable via the same .pnpm symlinks the build used.
 
-FROM node:24-alpine
+FROM node:26-alpine
 WORKDIR /workspace
 ENV NODE_ENV=production \
     PORT=3800
