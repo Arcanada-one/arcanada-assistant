@@ -85,7 +85,7 @@ services:
       # keeps the ecosystem snapshot off the public internet. The default is
       # therefore the mesh address; not a secret, so it lives here in plain
       # sight. http:// is accepted for mesh hosts by url-schemas.ts.
-      OPSBOT_BASE_URL: ${OPSBOT_BASE_URL:-http://100.108.24.109:3600}
+      OPSBOT_BASE_URL: ${OPSBOT_BASE_URL:-http://100.90.7.20:3600}
       OPSBOT_API_KEY: ${OPSBOT_API_KEY:-changeme}
       MUNERA_BASE_URL: ${MUNERA_BASE_URL:-https://muneral.com}
       MUNERA_API_TOKEN: ${MUNERA_API_TOKEN:-changeme}
