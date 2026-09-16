@@ -32,6 +32,17 @@ jobs:
 
   test:
     runs-on: [self-hosted, Linux, X64, arcana-ai]
+    # The published host ports are deliberately left for the runner to assign
+    # (`'5432/tcp'`, not `'5432:5432'`). These are SHARED self-hosted runners:
+    # a fixed host port makes any two concurrent jobs -- or the host's own
+    # postgres -- collide, and the job then dies in `Initialize containers`
+    # with `failed to bind host port 0.0.0.0:5432/tcp: address already in use`
+    # before a single test runs. That is what has been failing this job
+    # intermittently on main since at least 2026-09-09; it is a race, which is
+    # why the port looks free whenever one goes to check afterwards.
+    #
+    # The assigned port is read back from the `job.services.<id>.ports` context
+    # below, so the connection strings follow whatever the runner chose.
     services:
       postgres:
         image: postgres:17-alpine
@@ -39,19 +50,19 @@ jobs:
           POSTGRES_USER: assistant_app
           POSTGRES_PASSWORD: ci_password
           POSTGRES_DB: assistant
-        ports: ['5432:5432']
+        ports: ['5432/tcp']
         options: >-
           --health-cmd "pg_isready -U assistant_app -d assistant"
           --health-interval 5s --health-timeout 3s --health-retries 10
       redis:
         image: redis:7-alpine
-        ports: ['6379:6379']
+        ports: ['6379/tcp']
         options: >-
           --health-cmd "redis-cli ping"
           --health-interval 5s --health-timeout 3s --health-retries 10
     env:
-      DATABASE_URL: postgresql://assistant_app:ci_password@localhost:5432/assistant?schema=public&sslmode=disable
-      REDIS_URL: redis://localhost:6379/0
+      DATABASE_URL: postgresql://assistant_app:ci_password@localhost:${{ job.services.postgres.ports['5432'] }}/assistant?schema=public&sslmode=disable
+      REDIS_URL: redis://localhost:${{ job.services.redis.ports['6379'] }}/0
     steps:
       - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6
