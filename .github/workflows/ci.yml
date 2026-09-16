@@ -60,10 +60,20 @@ jobs:
         options: >-
           --health-cmd "redis-cli ping"
           --health-interval 5s --health-timeout 3s --health-retries 10
-    env:
-      DATABASE_URL: postgresql://assistant_app:ci_password@localhost:${{ job.services.postgres.ports['5432'] }}/assistant?schema=public&sslmode=disable
-      REDIS_URL: redis://localhost:${{ job.services.redis.ports['6379'] }}/0
     steps:
+      # The `job` context is NOT available in a job-level `env:` block -- only
+      # inside steps -- so the two URLs are exported here instead. Putting the
+      # expansion in `env:` is accepted by the YAML parser and then fails the
+      # whole run as a "workflow file issue", with no job and no annotation.
+      - name: Resolve the runner-assigned service ports
+        env:
+          PG_PORT: ${{ job.services.postgres.ports['5432'] }}
+          REDIS_PORT: ${{ job.services.redis.ports['6379'] }}
+        run: |
+          set -euo pipefail
+          echo "DATABASE_URL=postgresql://assistant_app:ci_password@localhost:${PG_PORT}/assistant?schema=public&sslmode=disable" >> "$GITHUB_ENV"
+          echo "REDIS_URL=redis://localhost:${REDIS_PORT}/0" >> "$GITHUB_ENV"
+
       - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6
         with:
