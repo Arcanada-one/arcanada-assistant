@@ -1,0 +1,29 @@
+{
+ "declared_sources": [
+  ".env.example",
+  "docker-compose.yml"
+ ],
+ "declared_count": 33,
+ "new": [],
+ "frozen": [
+  {
+   "verifier": "config_schema",
+   "rule": "UNDECLARED_CONFIG_KEY",
+   "entity": "code_unit:apps/assistant/src/approval/approval.module.ts",
+   "detail": "reads AGENT_APPROVAL_POLICY_PATH, declared in none of .env.example, docker-compose.yml",
+   "key": "AGENT_APPROVAL_POLICY_PATH",
+   "fingerprint": "sha256:c8e3b23a73643948c3cd1c947105cddd91c75b333ca6ea82cb1a2facbb455277",
+   "status": "frozen"
+  },
+  {
+   "verifier": "config_schema",
+   "rule": "UNDECLARED_CONFIG_KEY",
+   "entity": "code_unit:apps/assistant/src/proactive/datarim-reader.service.ts",
+   "detail": "reads KB_STALENESS_THRESHOLD_HOURS, declared in none of .env.example, docker-compose.yml",
+   "key": "KB_STALENESS_THRESHOLD_HOURS",
+   "fingerprint": "sha256:d94fd07db6981372ad621c1896a8a85440c6e25e0ed3afd1c2a59b55c8b9c96b",
+   "status": "frozen"
+  }
+ ],
+ "vendored_not_attributed": []
+}

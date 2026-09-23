@@ -3,25 +3,10 @@
   "rule": "admitted requires every verdict = verified; failed without exemption ⇒ refused; not_measured without exemption ⇒ paused_safe; exemptions (owner + expiry) are attached by the admitting agent, never by the verifier (DEC-AUP-0008, matrix P1/P4)",
   "verdict": "paused_safe"
  },
- "captured_at_utc": "2026-09-23T18:43:36Z",
+ "captured_at_utc": "2026-09-23T18:48:40Z",
  "change_set": {
-  "base": "481ae329e37a2dfe429e602f1d3e52e9a578b82e",
+  "base": "c0a4578ffbb89d673fa149749b81515aa22f60c8",
   "files": [
-   {
-    "kind": "config",
-    "node_id": "code_unit:.github/workflows/ci.yml",
-    "node_ids": [
-     "code_unit:.github/workflows/ci.yml"
-    ],
-    "path": ".github/workflows/ci.yml",
-    "status": "M"
-   },
-   {
-    "kind": "other",
-    "path": ".prettierignore",
-    "status": "M",
-    "uncovered": true
-   },
    {
     "kind": "test",
     "node_id": "code_unit:apps/assistant/src/config/require-env.spec.ts",
@@ -75,115 +60,6 @@
     ],
     "path": "apps/assistant/src/database/redis.service.ts",
     "status": "M"
-   },
-   {
-    "kind": "test",
-    "node_id": "code_unit:apps/assistant/src/health/build-fingerprint.spec.ts",
-    "node_ids": [
-     "code_unit:apps/assistant/src/health/build-fingerprint.spec.ts"
-    ],
-    "path": "apps/assistant/src/health/build-fingerprint.spec.ts",
-    "status": "A"
-   },
-   {
-    "kind": "code",
-    "node_id": "code_unit:apps/assistant/src/health/build-fingerprint.ts",
-    "node_ids": [
-     "code_unit:apps/assistant/src/health/build-fingerprint.ts"
-    ],
-    "path": "apps/assistant/src/health/build-fingerprint.ts",
-    "status": "A"
-   },
-   {
-    "kind": "test",
-    "node_id": "code_unit:apps/assistant/src/health/deployed-build-gate.spec.ts",
-    "node_ids": [
-     "code_unit:apps/assistant/src/health/deployed-build-gate.spec.ts"
-    ],
-    "path": "apps/assistant/src/health/deployed-build-gate.spec.ts",
-    "status": "A"
-   },
-   {
-    "kind": "route",
-    "node_id": "code_unit:apps/assistant/src/health/health.controller.ts",
-    "node_ids": [
-     "code_unit:apps/assistant/src/health/health.controller.ts",
-     "route:GET /health"
-    ],
-    "path": "apps/assistant/src/health/health.controller.ts",
-    "status": "M"
-   },
-   {
-    "kind": "receipt",
-    "new": true,
-    "path": "receipts/graph/change-admission-a2-222-20260923T175744Z.d/graph-bbbf453e2d8a.json",
-    "status": "A"
-   },
-   {
-    "kind": "receipt",
-    "new": true,
-    "path": "receipts/graph/change-admission-a2-222-20260923T175744Z.d/graph-head-073500aeaad1.json",
-    "status": "A"
-   },
-   {
-    "kind": "receipt",
-    "new": true,
-    "path": "receipts/graph/change-admission-a2-222-20260923T175744Z.d/v-canary.json",
-    "status": "A"
-   },
-   {
-    "kind": "receipt",
-    "new": true,
-    "path": "receipts/graph/change-admission-a2-222-20260923T175744Z.d/v-contract-diff.json",
-    "status": "A"
-   },
-   {
-    "kind": "doc",
-    "new": true,
-    "path": "receipts/graph/change-admission-a2-222-20260923T175744Z.d/v-doc-reference.txt",
-    "status": "A"
-   },
-   {
-    "kind": "receipt",
-    "new": true,
-    "path": "receipts/graph/change-admission-a2-222-20260923T175744Z.d/v-fitness.json",
-    "status": "A"
-   },
-   {
-    "kind": "doc",
-    "new": true,
-    "path": "receipts/graph/change-admission-a2-222-20260923T175744Z.d/v-route-config.txt",
-    "status": "A"
-   },
-   {
-    "kind": "doc",
-    "new": true,
-    "path": "receipts/graph/change-admission-a2-222-20260923T175744Z.d/v-type-check-apps-assistant-tsconfig.txt",
-    "status": "A"
-   },
-   {
-    "kind": "doc",
-    "new": true,
-    "path": "receipts/graph/change-admission-a2-222-20260923T175744Z.d/v-workflow-config-b803fcb7f17ed923.txt",
-    "status": "A"
-   },
-   {
-    "kind": "receipt",
-    "node_id": "receipt:receipts/graph/change-admission-a2-222-20260923T175744Z.json",
-    "node_ids": [
-     "receipt:receipts/graph/change-admission-a2-222-20260923T175744Z.json"
-    ],
-    "path": "receipts/graph/change-admission-a2-222-20260923T175744Z.json",
-    "status": "A"
-   },
-   {
-    "kind": "other",
-    "node_id": "code_unit:scripts/ci/deployed-build-gate.py",
-    "node_ids": [
-     "code_unit:scripts/ci/deployed-build-gate.py"
-    ],
-    "path": "scripts/ci/deployed-build-gate.py",
-    "status": "A"
    }
   ],
   "head": "7aac89577ee87281338831a672b81dd3342e043b",
@@ -194,18 +70,18 @@
  "graph": {
   "builder_version": "1.0.1",
   "built_at_utc": "2026-09-05T00:00:00Z",
-  "graph_digest": "sha256:ef7764c0861a30c28743473703382b2898502bd50c44a109b5f78f02ab5d020f",
-  "path": "/home/dev/aup/arc2/runs/A2-226/change-admission-a2-226.d/graph-481ae329e37a.json",
-  "source_commit": "481ae329e37a2dfe429e602f1d3e52e9a578b82e"
+  "graph_digest": "sha256:d2c1b040767878506c39e6b64dc23dbcd48ac3240d5b6128a081de94650732ad",
+  "path": "/home/dev/aup/arc2/runs/A2-226/change-admission-a2-226-v2.d/graph-c0a4578ffbb8.json",
+  "source_commit": "c0a4578ffbb89d673fa149749b81515aa22f60c8"
  },
  "head_graph": {
   "builder_version": "1.0.1",
   "built_at_utc": "2026-09-05T00:00:00Z",
   "graph_digest": "sha256:6370c11ce6f1a84589fb8a677e93e83ea228f3498ed19d6a32bf9ce570a82ec3",
-  "path": "/home/dev/aup/arc2/runs/A2-226/change-admission-a2-226.d/graph-head-7aac89577ee8.json",
+  "path": "/home/dev/aup/arc2/runs/A2-226/change-admission-a2-226-v2.d/graph-head-7aac89577ee8.json",
   "source_commit": "7aac89577ee87281338831a672b81dd3342e043b",
   "staleness": {
-   "checked_at_utc": "2026-09-23T18:43:37Z",
+   "checked_at_utc": "2026-09-23T18:48:41Z",
    "checked_nodes": 209,
    "method": "manifest.dirty must be false; manifest.source_commit == change_set.head; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at head (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
    "mismatched_nodes": [],
@@ -925,10 +801,17 @@
    },
    {
     "boundary": "intra_unit",
-    "depth": 1,
+    "depth": 2,
     "entity": "code_unit:apps/assistant/src/health/health.controller.spec.ts",
     "node_type": "code_unit",
     "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/assistant/src/health/health.controller.ts",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/assistant/src/database/prisma.service.ts",
+      "via": "relative"
+     },
      {
       "edge_type": "imports",
       "from": "code_unit:apps/assistant/src/health/health.controller.spec.ts",
@@ -940,10 +823,17 @@
     "revision_paths": [
      {
       "boundary": "intra_unit",
-      "depth": 1,
+      "depth": 2,
       "entity": "code_unit:apps/assistant/src/health/health.controller.spec.ts",
       "node_type": "code_unit",
       "path": [
+       {
+        "edge_type": "imports",
+        "from": "code_unit:apps/assistant/src/health/health.controller.ts",
+        "provenance": "deterministic",
+        "to": "code_unit:apps/assistant/src/database/prisma.service.ts",
+        "via": "relative"
+       },
        {
         "edge_type": "imports",
         "from": "code_unit:apps/assistant/src/health/health.controller.spec.ts",
@@ -958,10 +848,17 @@
      },
      {
       "boundary": "intra_unit",
-      "depth": 1,
+      "depth": 2,
       "entity": "code_unit:apps/assistant/src/health/health.controller.spec.ts",
       "node_type": "code_unit",
       "path": [
+       {
+        "edge_type": "imports",
+        "from": "code_unit:apps/assistant/src/health/health.controller.ts",
+        "provenance": "deterministic",
+        "to": "code_unit:apps/assistant/src/database/prisma.service.ts",
+        "via": "relative"
+       },
        {
         "edge_type": "imports",
         "from": "code_unit:apps/assistant/src/health/health.controller.spec.ts",
@@ -980,14 +877,14 @@
    {
     "boundary": "intra_unit",
     "depth": 1,
-    "entity": "code_unit:apps/assistant/src/health/health.module.ts",
+    "entity": "code_unit:apps/assistant/src/health/health.controller.ts",
     "node_type": "code_unit",
     "path": [
      {
       "edge_type": "imports",
-      "from": "code_unit:apps/assistant/src/health/health.module.ts",
+      "from": "code_unit:apps/assistant/src/health/health.controller.ts",
       "provenance": "deterministic",
-      "to": "code_unit:apps/assistant/src/health/health.controller.ts",
+      "to": "code_unit:apps/assistant/src/database/prisma.service.ts",
       "via": "relative"
      }
     ],
@@ -995,14 +892,14 @@
      {
       "boundary": "intra_unit",
       "depth": 1,
-      "entity": "code_unit:apps/assistant/src/health/health.module.ts",
+      "entity": "code_unit:apps/assistant/src/health/health.controller.ts",
       "node_type": "code_unit",
       "path": [
        {
         "edge_type": "imports",
-        "from": "code_unit:apps/assistant/src/health/health.module.ts",
+        "from": "code_unit:apps/assistant/src/health/health.controller.ts",
         "provenance": "deterministic",
-        "to": "code_unit:apps/assistant/src/health/health.controller.ts",
+        "to": "code_unit:apps/assistant/src/database/prisma.service.ts",
         "via": "relative"
        }
       ],
@@ -1013,14 +910,89 @@
      {
       "boundary": "intra_unit",
       "depth": 1,
+      "entity": "code_unit:apps/assistant/src/health/health.controller.ts",
+      "node_type": "code_unit",
+      "path": [
+       {
+        "edge_type": "imports",
+        "from": "code_unit:apps/assistant/src/health/health.controller.ts",
+        "provenance": "deterministic",
+        "to": "code_unit:apps/assistant/src/database/prisma.service.ts",
+        "via": "relative"
+       }
+      ],
+      "revision": "head",
+      "section": "deterministic_core",
+      "verifier_hint": "type-check / compile of the importer"
+     }
+    ],
+    "verifier_hint": "type-check / compile of the importer"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "code_unit:apps/assistant/src/health/health.module.ts",
+    "node_type": "code_unit",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/assistant/src/agents/ops-agent/ops-agent.module.ts",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/assistant/src/database/redis.service.ts",
+      "via": "relative"
+     },
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/assistant/src/health/health.module.ts",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/assistant/src/agents/ops-agent/ops-agent.module.ts",
+      "via": "relative"
+     }
+    ],
+    "revision_paths": [
+     {
+      "boundary": "intra_unit",
+      "depth": 2,
       "entity": "code_unit:apps/assistant/src/health/health.module.ts",
       "node_type": "code_unit",
       "path": [
        {
         "edge_type": "imports",
+        "from": "code_unit:apps/assistant/src/agents/ops-agent/ops-agent.module.ts",
+        "provenance": "deterministic",
+        "to": "code_unit:apps/assistant/src/database/redis.service.ts",
+        "via": "relative"
+       },
+       {
+        "edge_type": "imports",
         "from": "code_unit:apps/assistant/src/health/health.module.ts",
         "provenance": "deterministic",
-        "to": "code_unit:apps/assistant/src/health/health.controller.ts",
+        "to": "code_unit:apps/assistant/src/agents/ops-agent/ops-agent.module.ts",
+        "via": "relative"
+       }
+      ],
+      "revision": "base",
+      "section": "deterministic_core",
+      "verifier_hint": "type-check / compile of the importer"
+     },
+     {
+      "boundary": "intra_unit",
+      "depth": 2,
+      "entity": "code_unit:apps/assistant/src/health/health.module.ts",
+      "node_type": "code_unit",
+      "path": [
+       {
+        "edge_type": "imports",
+        "from": "code_unit:apps/assistant/src/agents/ops-agent/ops-agent.module.ts",
+        "provenance": "deterministic",
+        "to": "code_unit:apps/assistant/src/database/redis.service.ts",
+        "via": "relative"
+       },
+       {
+        "edge_type": "imports",
+        "from": "code_unit:apps/assistant/src/health/health.module.ts",
+        "provenance": "deterministic",
+        "to": "code_unit:apps/assistant/src/agents/ops-agent/ops-agent.module.ts",
         "via": "relative"
        }
       ],
@@ -2434,57 +2406,153 @@
    },
    {
     "boundary": "intra_unit",
-    "depth": 1,
-    "entity": "document:SECURITY.md",
-    "node_type": "document",
+    "depth": 2,
+    "entity": "receipt:receipts/graph/change-admission-a2-222-20260923T175744Z.json",
+    "node_type": "receipt",
     "path": [
      {
-      "edge_type": "documents",
-      "from": "document:SECURITY.md",
+      "edge_type": "imports",
+      "from": "code_unit:apps/assistant/src/health/health.controller.ts",
       "provenance": "deterministic",
-      "to": "code_unit:.github/workflows/ci.yml",
+      "to": "code_unit:apps/assistant/src/database/prisma.service.ts",
+      "via": "relative"
+     },
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-a2-222-20260923T175744Z.json",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/assistant/src/health/health.controller.ts",
       "via": "explicit-path"
      }
     ],
     "revision_paths": [
      {
       "boundary": "intra_unit",
-      "depth": 1,
-      "entity": "document:SECURITY.md",
-      "node_type": "document",
+      "depth": 2,
+      "entity": "receipt:receipts/graph/change-admission-a2-222-20260923T175744Z.json",
+      "node_type": "receipt",
       "path": [
        {
-        "edge_type": "documents",
-        "from": "document:SECURITY.md",
+        "edge_type": "imports",
+        "from": "code_unit:apps/assistant/src/health/health.controller.ts",
         "provenance": "deterministic",
-        "to": "code_unit:.github/workflows/ci.yml",
+        "to": "code_unit:apps/assistant/src/database/prisma.service.ts",
+        "via": "relative"
+       },
+       {
+        "edge_type": "verifies",
+        "from": "receipt:receipts/graph/change-admission-a2-222-20260923T175744Z.json",
+        "provenance": "deterministic",
+        "to": "code_unit:apps/assistant/src/health/health.controller.ts",
         "via": "explicit-path"
        }
       ],
       "revision": "base",
       "section": "deterministic_core",
-      "verifier_hint": "doc reference check (path/id still resolves)"
+      "verifier_hint": "selectable: run the targeted test / re-read the receipt"
      },
      {
       "boundary": "intra_unit",
-      "depth": 1,
-      "entity": "document:SECURITY.md",
-      "node_type": "document",
+      "depth": 2,
+      "entity": "receipt:receipts/graph/change-admission-a2-222-20260923T175744Z.json",
+      "node_type": "receipt",
       "path": [
        {
-        "edge_type": "documents",
-        "from": "document:SECURITY.md",
+        "edge_type": "imports",
+        "from": "code_unit:apps/assistant/src/health/health.controller.ts",
         "provenance": "deterministic",
-        "to": "code_unit:.github/workflows/ci.yml",
+        "to": "code_unit:apps/assistant/src/database/prisma.service.ts",
+        "via": "relative"
+       },
+       {
+        "edge_type": "verifies",
+        "from": "receipt:receipts/graph/change-admission-a2-222-20260923T175744Z.json",
+        "provenance": "deterministic",
+        "to": "code_unit:apps/assistant/src/health/health.controller.ts",
         "via": "explicit-path"
        }
       ],
       "revision": "head",
       "section": "deterministic_core",
-      "verifier_hint": "doc reference check (path/id still resolves)"
+      "verifier_hint": "selectable: run the targeted test / re-read the receipt"
      }
     ],
-    "verifier_hint": "doc reference check (path/id still resolves)"
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "route:GET /health",
+    "node_type": "route",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/assistant/src/health/health.controller.ts",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/assistant/src/database/prisma.service.ts",
+      "via": "relative"
+     },
+     {
+      "edge_type": "provides_route",
+      "from": "code_unit:apps/assistant/src/health/health.controller.ts",
+      "provenance": "deterministic",
+      "to": "route:GET /health",
+      "via": "nest-decorator"
+     }
+    ],
+    "revision_paths": [
+     {
+      "boundary": "intra_unit",
+      "depth": 2,
+      "entity": "route:GET /health",
+      "node_type": "route",
+      "path": [
+       {
+        "edge_type": "imports",
+        "from": "code_unit:apps/assistant/src/health/health.controller.ts",
+        "provenance": "deterministic",
+        "to": "code_unit:apps/assistant/src/database/prisma.service.ts",
+        "via": "relative"
+       },
+       {
+        "edge_type": "provides_route",
+        "from": "code_unit:apps/assistant/src/health/health.controller.ts",
+        "provenance": "deterministic",
+        "to": "route:GET /health",
+        "via": "nest-decorator"
+       }
+      ],
+      "revision": "base",
+      "section": "deterministic_core",
+      "verifier_hint": "controller compile + contract-diff + route/config consistency"
+     },
+     {
+      "boundary": "intra_unit",
+      "depth": 2,
+      "entity": "route:GET /health",
+      "node_type": "route",
+      "path": [
+       {
+        "edge_type": "imports",
+        "from": "code_unit:apps/assistant/src/health/health.controller.ts",
+        "provenance": "deterministic",
+        "to": "code_unit:apps/assistant/src/database/prisma.service.ts",
+        "via": "relative"
+       },
+       {
+        "edge_type": "provides_route",
+        "from": "code_unit:apps/assistant/src/health/health.controller.ts",
+        "provenance": "deterministic",
+        "to": "route:GET /health",
+        "via": "nest-decorator"
+       }
+      ],
+      "revision": "head",
+      "section": "deterministic_core",
+      "verifier_hint": "controller compile + contract-diff + route/config consistency"
+     }
+    ],
+    "verifier_hint": "controller compile + contract-diff + route/config consistency"
    }
   ],
   "edge_types": "all",
@@ -2494,24 +2562,24 @@
   "inferred_tail": [],
   "max_depth": 3,
   "method": "Union of independently revision-bound base/head traversals; reverse traversal (dependents) + forward declared-by hops (provides_route, implements_contract, maps_model of the same file, deploys_to); best path = fewest inferred/observed hops, then shortest; max_depth 3",
-  "total": 30
+  "total": 32
  },
  "notes": [
   "DRAFT produced by `arcana verify` (tools/graph/verify.py 1.0.1) from matrix contracts/graph-verified-change/verifier-matrix.v1.json; selection rule: required(entity) = ⋃ edge_types[t].mandatory over the edge types t of the hops that reach the entity in its best path (i…",
-  "profile: (auto-detected); baseline: (auto-base-freeze: pre-existing findings at base frozen for this run; persist one with --freeze-baseline) (valid); selected: none; disabled: none"
+  "profile: (auto-detected); baseline: (auto-base-freeze: pre-existing findings at base frozen for this run; persist one with --freeze-baseline) (valid); selected: none; disabled: none",
+  "head tree 7aac89577ee8 exported with git archive into /home/dev/aup/arc2/runs/A2-226/work/verify2.d/export-7aac89577ee8 (node_modules linked from the repository for ['.', 'apps/assistant', 'packages/core']; workspace packages built: ['packages/core (tsc exit 0, 0.91s)']); the repository was not written"
  ],
  "producer": {
   "tool": "tools/graph/verify.py",
   "version": "1.0.1"
  },
- "receipt_id": "car-verify-20260923T184336Z-7aac8957",
+ "receipt_id": "car-verify-20260923T184840Z-7aac8957",
  "repo": {
   "name": "Arcanada-one/arcanada-assistant",
   "path": "/home/dev/aup/arc2/runs/A2-226/arcanada-assistant"
  },
  "revision_selection": {
   "base": [
-   "code_unit:.github/workflows/ci.yml",
    "code_unit:apps/assistant/src/agents/knowledge-agent/knowledge-agent.module.ts",
    "code_unit:apps/assistant/src/agents/ops-agent/ops-agent.module.ts",
    "code_unit:apps/assistant/src/app.module.ts",
@@ -2546,11 +2614,10 @@
    "code_unit:apps/assistant/test/e2e/opsbot-bidirectional.e2e.spec.ts",
    "contract:apps/assistant/src/approval/redis-idempotency.service.ts#ClaimOutcome",
    "deployable_unit:apps/assistant",
-   "document:SECURITY.md",
+   "receipt:receipts/graph/change-admission-a2-222-20260923T175744Z.json",
    "route:GET /health"
   ],
   "head": [
-   "code_unit:.github/workflows/ci.yml",
    "code_unit:apps/assistant/src/agents/knowledge-agent/knowledge-agent.module.ts",
    "code_unit:apps/assistant/src/agents/ops-agent/ops-agent.module.ts",
    "code_unit:apps/assistant/src/app.module.ts",
@@ -2567,9 +2634,6 @@
    "code_unit:apps/assistant/src/database/prisma.service.ts",
    "code_unit:apps/assistant/src/database/redis.service.spec.ts",
    "code_unit:apps/assistant/src/database/redis.service.ts",
-   "code_unit:apps/assistant/src/health/build-fingerprint.spec.ts",
-   "code_unit:apps/assistant/src/health/build-fingerprint.ts",
-   "code_unit:apps/assistant/src/health/deployed-build-gate.spec.ts",
    "code_unit:apps/assistant/src/health/health.controller.spec.ts",
    "code_unit:apps/assistant/src/health/health.controller.ts",
    "code_unit:apps/assistant/src/health/health.module.ts",
@@ -2588,10 +2652,8 @@
    "code_unit:apps/assistant/src/webhook/webhook.module.ts",
    "code_unit:apps/assistant/test/e2e/munera-task-create-hitl.e2e.spec.ts",
    "code_unit:apps/assistant/test/e2e/opsbot-bidirectional.e2e.spec.ts",
-   "code_unit:scripts/ci/deployed-build-gate.py",
    "contract:apps/assistant/src/approval/redis-idempotency.service.ts#ClaimOutcome",
    "deployable_unit:apps/assistant",
-   "document:SECURITY.md",
    "receipt:receipts/graph/change-admission-a2-222-20260923T175744Z.json",
    "route:GET /health"
   ],
@@ -2600,25 +2662,16 @@
  },
  "schema": "ChangeAdmissionReceipt/v1",
  "staleness": {
-  "checked_at_utc": "2026-09-23T18:43:37Z",
+  "checked_at_utc": "2026-09-23T18:48:41Z",
   "method": "manifest.dirty must be false; manifest.source_commit == change_set.base; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at base (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
   "mismatched_nodes": [],
   "verdict": "fresh"
  },
  "tree": {
-  "commit": "7aac89577ee87281338831a672b81dd3342e043b",
+  "commit": "42f77c0e6a116bc63bd71fe0f815ead3959057c9",
   "dirty": false
  },
  "verdicts": [
-  {
-   "entity": "code_unit:.github/workflows/ci.yml",
-   "reason": "v-workflow-config-b803fcb7f17ed923: bounded workflow configuration shape valid; expressions, shell, actions and hosted execution NOT_MEASURED; v-fitness: no new fitness violation",
-   "verdict": "verified",
-   "verifier_ids": [
-    "v-fitness",
-    "v-workflow-config-b803fcb7f17ed923"
-   ]
-  },
   {
    "entity": "code_unit:apps/assistant/src/agents/knowledge-agent/knowledge-agent.module.ts",
    "reason": "v-type-check-apps-assistant-tsconfig: apps/assistant/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
@@ -2769,33 +2822,6 @@
    "verifier_ids": [
     "v-canary",
     "v-config-schema",
-    "v-fitness",
-    "v-type-check-apps-assistant-tsconfig"
-   ]
-  },
-  {
-   "entity": "code_unit:apps/assistant/src/health/build-fingerprint.spec.ts",
-   "reason": "v-type-check-apps-assistant-tsconfig: apps/assistant/tsconfig.json does not include apps/assistant/src/health/build-fingerprint.spec.ts",
-   "verdict": "not_measured",
-   "verifier_ids": [
-    "v-fitness",
-    "v-type-check-apps-assistant-tsconfig"
-   ]
-  },
-  {
-   "entity": "code_unit:apps/assistant/src/health/build-fingerprint.ts",
-   "reason": "v-type-check-apps-assistant-tsconfig: apps/assistant/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
-   "verdict": "verified",
-   "verifier_ids": [
-    "v-fitness",
-    "v-type-check-apps-assistant-tsconfig"
-   ]
-  },
-  {
-   "entity": "code_unit:apps/assistant/src/health/deployed-build-gate.spec.ts",
-   "reason": "v-type-check-apps-assistant-tsconfig: apps/assistant/tsconfig.json does not include apps/assistant/src/health/deployed-build-gate.spec.ts",
-   "verdict": "not_measured",
-   "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-assistant-tsconfig"
    ]
@@ -2967,14 +2993,6 @@
    ]
   },
   {
-   "entity": "code_unit:scripts/ci/deployed-build-gate.py",
-   "reason": "v-fitness: no new fitness violation",
-   "verdict": "verified",
-   "verifier_ids": [
-    "v-fitness"
-   ]
-  },
-  {
    "entity": "contract:apps/assistant/src/approval/redis-idempotency.service.ts#ClaimOutcome",
    "reason": "v-contract-diff: unchanged: no breaking change (0 change(s))",
    "verdict": "verified",
@@ -2989,14 +3007,6 @@
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-assistant-tsconfig"
-   ]
-  },
-  {
-   "entity": "document:SECURITY.md",
-   "reason": "v-doc-reference: 0 reference(s) resolve at head",
-   "verdict": "verified",
-   "verifier_ids": [
-    "v-doc-reference"
    ]
   },
   {
@@ -3018,8 +3028,8 @@
  ],
  "verifiers": [
   {
-   "command": "/home/dev/aup/arc2/runs/A2-226/arcanada-assistant/node_modules/.bin/tsc -p /home/dev/aup/arc2/runs/A2-226/arcanada-assistant/apps/assistant/tsconfig.json --noEmit --incremental false --listFiles",
-   "duration_s": 2.95,
+   "command": "/home/dev/aup/arc2/runs/A2-226/work/verify2.d/export-7aac89577ee8/node_modules/.bin/tsc -p /home/dev/aup/arc2/runs/A2-226/work/verify2.d/export-7aac89577ee8/apps/assistant/tsconfig.json --noEmit --incremental false --listFiles",
+   "duration_s": 2.72,
    "entities": [
     "code_unit:apps/assistant/src/agents/knowledge-agent/knowledge-agent.module.ts",
     "code_unit:apps/assistant/src/agents/ops-agent/ops-agent.module.ts",
@@ -3037,9 +3047,6 @@
     "code_unit:apps/assistant/src/database/prisma.service.ts",
     "code_unit:apps/assistant/src/database/redis.service.spec.ts",
     "code_unit:apps/assistant/src/database/redis.service.ts",
-    "code_unit:apps/assistant/src/health/build-fingerprint.spec.ts",
-    "code_unit:apps/assistant/src/health/build-fingerprint.ts",
-    "code_unit:apps/assistant/src/health/deployed-build-gate.spec.ts",
     "code_unit:apps/assistant/src/health/health.controller.spec.ts",
     "code_unit:apps/assistant/src/health/health.controller.ts",
     "code_unit:apps/assistant/src/health/health.module.ts",
@@ -3064,13 +3071,13 @@
    "exit_code": 0,
    "id": "v-type-check-apps-assistant-tsconfig",
    "kind": "type_check",
-   "output_ref": "/home/dev/aup/arc2/runs/A2-226/change-admission-a2-226.d/v-type-check-apps-assistant-tsconfig.txt",
-   "started_at_utc": "2026-09-23T18:43:38Z",
+   "output_ref": "/home/dev/aup/arc2/runs/A2-226/change-admission-a2-226-v2.d/v-type-check-apps-assistant-tsconfig.txt",
+   "started_at_utc": "2026-09-23T18:48:43Z",
    "summary": "apps/assistant/tsconfig.json: exit 0, 0 error(s), 1321 files listed"
   },
   {
-   "command": "tools/graph/contract_diff.py.run_diff(base=481ae329e37a, head=7aac89577ee8, graph=head graph)",
-   "duration_s": 0.92,
+   "command": "tools/graph/contract_diff.py.run_diff(base=c0a4578ffbb8, head=7aac89577ee8, graph=head graph)",
+   "duration_s": 0.81,
    "entities": [
     "code_unit:apps/assistant/src/approval/approval.service.ts",
     "code_unit:apps/assistant/src/approval/redis-idempotency.service.ts",
@@ -3083,8 +3090,8 @@
    "exit_code": 1,
    "id": "v-contract-diff",
    "kind": "contract_diff",
-   "output_ref": "/home/dev/aup/arc2/runs/A2-226/change-admission-a2-226.d/v-contract-diff.json",
-   "started_at_utc": "2026-09-23T18:43:41Z",
+   "output_ref": "/home/dev/aup/arc2/runs/A2-226/change-admission-a2-226-v2.d/v-contract-diff.json",
+   "started_at_utc": "2026-09-23T18:48:46Z",
    "summary": "54→54 contracts, breaking 0, edges {'failed': 20, 'verified': 94}"
   },
   {
@@ -3096,26 +3103,13 @@
    "exit_code": 0,
    "id": "v-route-config",
    "kind": "config_schema",
-   "output_ref": "/home/dev/aup/arc2/runs/A2-226/change-admission-a2-226.d/v-route-config.txt",
-   "started_at_utc": "2026-09-23T18:43:42Z",
+   "output_ref": "/home/dev/aup/arc2/runs/A2-226/change-admission-a2-226-v2.d/v-route-config.txt",
+   "started_at_utc": "2026-09-23T18:48:46Z",
    "summary": "1 route(s), 0 failed"
   },
   {
-   "command": "workflow_config.validate exact head bytes",
-   "duration_s": 0.0,
-   "entities": [
-    "code_unit:.github/workflows/ci.yml"
-   ],
-   "exit_code": 0,
-   "id": "v-workflow-config-b803fcb7f17ed923",
-   "kind": "config_schema",
-   "output_ref": "/home/dev/aup/arc2/runs/A2-226/change-admission-a2-226.d/v-workflow-config-b803fcb7f17ed923.txt",
-   "started_at_utc": "2026-09-23T18:43:42Z",
-   "summary": "bounded workflow configuration shape valid; expressions, shell, actions and hosted execution NOT_MEASURED"
-  },
-  {
    "command": "verify.py config_schema: keys read at head ⊆ declared keys",
-   "duration_s": 0.01,
+   "duration_s": 0.0,
    "entities": [
     "code_unit:apps/assistant/src/database/prisma.service.spec.ts",
     "code_unit:apps/assistant/src/database/prisma.service.ts",
@@ -3125,15 +3119,14 @@
    "exit_code": 0,
    "id": "v-config-schema",
    "kind": "config_schema",
-   "output_ref": "/home/dev/aup/arc2/runs/A2-226/change-admission-a2-226.d/v-config-schema.json",
-   "started_at_utc": "2026-09-23T18:43:42Z",
+   "output_ref": "/home/dev/aup/arc2/runs/A2-226/change-admission-a2-226-v2.d/v-config-schema.json",
+   "started_at_utc": "2026-09-23T18:48:46Z",
    "summary": "2 source(s), 0 new / 2 frozen undeclared reads, 0 failed"
   },
   {
    "command": "verify.py fitness_rules FR-01..FR-05 over the head graph + head sources",
    "duration_s": 0.03,
    "entities": [
-    "code_unit:.github/workflows/ci.yml",
     "code_unit:apps/assistant/src/agents/knowledge-agent/knowledge-agent.module.ts",
     "code_unit:apps/assistant/src/agents/ops-agent/ops-agent.module.ts",
     "code_unit:apps/assistant/src/app.module.ts",
@@ -3150,9 +3143,6 @@
     "code_unit:apps/assistant/src/database/prisma.service.ts",
     "code_unit:apps/assistant/src/database/redis.service.spec.ts",
     "code_unit:apps/assistant/src/database/redis.service.ts",
-    "code_unit:apps/assistant/src/health/build-fingerprint.spec.ts",
-    "code_unit:apps/assistant/src/health/build-fingerprint.ts",
-    "code_unit:apps/assistant/src/health/deployed-build-gate.spec.ts",
     "code_unit:apps/assistant/src/health/health.controller.spec.ts",
     "code_unit:apps/assistant/src/health/health.controller.ts",
     "code_unit:apps/assistant/src/health/health.module.ts",
@@ -3171,28 +3161,14 @@
     "code_unit:apps/assistant/src/webhook/webhook.module.ts",
     "code_unit:apps/assistant/test/e2e/munera-task-create-hitl.e2e.spec.ts",
     "code_unit:apps/assistant/test/e2e/opsbot-bidirectional.e2e.spec.ts",
-    "code_unit:scripts/ci/deployed-build-gate.py",
     "deployable_unit:apps/assistant"
    ],
    "exit_code": 0,
    "id": "v-fitness",
    "kind": "fitness_rules",
-   "output_ref": "/home/dev/aup/arc2/runs/A2-226/change-admission-a2-226.d/v-fitness.json",
-   "started_at_utc": "2026-09-23T18:43:42Z",
+   "output_ref": "/home/dev/aup/arc2/runs/A2-226/change-admission-a2-226-v2.d/v-fitness.json",
+   "started_at_utc": "2026-09-23T18:48:46Z",
    "summary": "21 finding(s): 0 new / 21 frozen; 0 entity(ies) failed"
-  },
-  {
-   "command": "verify.py doc_reference: path / route / model references of affected documents resolve at head",
-   "duration_s": 0.0,
-   "entities": [
-    "document:SECURITY.md"
-   ],
-   "exit_code": 0,
-   "id": "v-doc-reference",
-   "kind": "doc_reference",
-   "output_ref": "/home/dev/aup/arc2/runs/A2-226/change-admission-a2-226.d/v-doc-reference.txt",
-   "started_at_utc": "2026-09-23T18:43:42Z",
-   "summary": "1 document(s), 0 failed"
   },
   {
    "command": "tools/graph/deploy_gate.py canary --plan <plan> --phase pre|post (results supplied with --canary)",
@@ -3208,18 +3184,14 @@
    "exit_code": 0,
    "id": "v-canary",
    "kind": "canary",
-   "output_ref": "/home/dev/aup/arc2/runs/A2-226/change-admission-a2-226.d/v-canary.json",
-   "started_at_utc": "2026-09-23T18:43:42Z",
+   "output_ref": "/home/dev/aup/arc2/runs/A2-226/change-admission-a2-226-v2.d/v-canary.json",
+   "started_at_utc": "2026-09-23T18:48:46Z",
    "summary": "0 canary result(s); 0 verified / 0 failed / 6 not_measured of 6 entities"
   }
  ],
  "verify": {
   "events": [],
   "required_by_entity": {
-   "code_unit:.github/workflows/ci.yml": [
-    "config_schema",
-    "fitness_rules"
-   ],
    "code_unit:apps/assistant/src/agents/knowledge-agent/knowledge-agent.module.ts": [
     "fitness_rules",
     "type_check"
@@ -3291,18 +3263,6 @@
    "code_unit:apps/assistant/src/database/redis.service.ts": [
     "canary",
     "config_schema",
-    "fitness_rules",
-    "type_check"
-   ],
-   "code_unit:apps/assistant/src/health/build-fingerprint.spec.ts": [
-    "fitness_rules",
-    "type_check"
-   ],
-   "code_unit:apps/assistant/src/health/build-fingerprint.ts": [
-    "fitness_rules",
-    "type_check"
-   ],
-   "code_unit:apps/assistant/src/health/deployed-build-gate.spec.ts": [
     "fitness_rules",
     "type_check"
    ],
@@ -3382,18 +3342,12 @@
     "fitness_rules",
     "type_check"
    ],
-   "code_unit:scripts/ci/deployed-build-gate.py": [
-    "fitness_rules"
-   ],
    "contract:apps/assistant/src/approval/redis-idempotency.service.ts#ClaimOutcome": [
     "contract_diff"
    ],
    "deployable_unit:apps/assistant": [
     "fitness_rules",
     "type_check"
-   ],
-   "document:SECURITY.md": [
-    "doc_reference"
    ],
    "receipt:receipts/graph/change-admission-a2-222-20260923T175744Z.json": [],
    "route:GET /health": [
@@ -3404,9 +3358,9 @@
    ]
   },
   "seconds": {
-   "prepare": 0.78,
-   "total": 6.26,
-   "verifiers": 3.92
+   "prepare": 1.68,
+   "total": 6.74,
+   "verifiers": 3.57
   }
  },
  "work_item": "A2-226"
