@@ -5,3 +5,8 @@ coverage/
 pnpm-lock.yaml
 *.tsbuildinfo
 .vitest-cache/
+
+# A2-222 — graph-admission receipts and their verifier outputs are machine artefacts, not source.
+# `tools/graph/verify.py --verifier-out` also writes some of them with a `.json` name and trailing
+# non-JSON text (v-canary.json, v-contract-diff.json), which prettier parses and fails on.
+receipts/
