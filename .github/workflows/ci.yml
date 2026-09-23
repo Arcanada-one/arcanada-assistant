@@ -256,6 +256,12 @@ jobs:
     # arcana-prd with the deploy job above (INFRA-0417).
     runs-on: [self-hosted, linux, arcana-prd-host]
     steps:
+      # A2-222 — this job had no checkout; the deployed-build gate below needs one, because the
+      # expectation it compares against is the digest of THIS commit's image inputs, computed
+      # from the repository. Without an explicit checkout a self-hosted runner would offer
+      # whatever a previous job left in the workspace, at whatever commit that was.
+      - uses: actions/checkout@v7
+
       - name: Wait for /health
         run: |
           set -euo pipefail
@@ -292,10 +298,37 @@ jobs:
           sudo -n /usr/local/sbin/arcanada-compose-broker arcanada-assistant logs 200 || true
           exit 1
 
-      # Defends against a silent no-op build (INFRA-0039): a container that was
-      # not recreated is running the previous code however green the deploy is.
-      - name: Container freshness
-        run: sudo -n /usr/local/sbin/arcanada-compose-broker arcanada-assistant freshness
+      # A2-222 — the gate that proves the deploy landed. It replaced
+      # `arcanada-compose-broker arcanada-assistant freshness`, which asserted the
+      # container is younger than the broker's MAXAGE. That was a proxy for
+      # INFRA-0039's silent no-op build, and it is the wrong one: any merge that
+      # changes no file the image is built from (docs, .github/, ops/) produces a
+      # byte-identical image, compose correctly recreates nothing, and the check
+      # fails a deploy that landed. Measured on argana, same broker verb,
+      # 2026-09-23: `container argana-argana-1 is 2197s old (limit 600s)` on a
+      # merge whose image was identical. Production was right and the red was
+      # false — and a red everyone knows to ignore is how a real one gets ignored.
+      #
+      # This asks the question the deploy actually has to answer: is the process
+      # serving traffic built from THIS commit's image inputs? The image is
+      # single-stage and builds in place, so the sources it was built from are
+      # still in the container; /health digests them and this step recomputes the
+      # same digest from the checkout above. Unchanged image → equal digests →
+      # green with nothing recreated. Changed image that never reached the
+      # container → different digests → red, which IS the INFRA-0039 no-op. A
+      # service that cannot name what it was built from is red as `could not
+      # prove`, never green.
+      #
+      # It runs after the /health wait because it needs the service to answer, and
+      # it accepts a 503 for the same reason that step does: a degraded upstream
+      # is not an undeployed release.
+      #
+      # Nothing was removed from the broker — its CONTAINER and MAXAGE rows for
+      # this service stay in the table (removing a row is a root re-install on
+      # arcana-prd, not a CI change); they are simply no longer what this deploy's
+      # verdict rests on.
+      - name: Deployed-build gate (the container runs THIS commit's image)
+        run: python3 scripts/ci/deployed-build-gate.py
 
       # Asserts the stack the broker drives is the one that was already live:
       # same compose project, therefore the same `arcanada-assistant_postgres-data`
