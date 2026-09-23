@@ -14,6 +14,7 @@ import { SCRUTATOR_CLIENT } from '../agents/knowledge-agent/knowledge-agent.serv
 import { OPS_BOT_CLIENT } from '../agents/ops-agent/ops-agent.service.js';
 import type { AgentHealthSnapshot } from '../aal/agent-health.types.js';
 
+import { buildFingerprint, type BuildFingerprint } from './build-fingerprint.js';
 import { PerAgentHealthIndicator } from './per-agent.health.indicator.js';
 import { AUTH_ARCANA_HEALTH_CLIENT, MODEL_CONNECTOR_HEALTH_CLIENT } from './health.tokens.js';
 
@@ -30,6 +31,13 @@ interface HealthBody {
   status: 'ok' | 'degraded' | 'fail';
   version: string;
   timestamp: string;
+  /**
+   * A2-222 — the one fact a deploy cannot read from outside: what this process was BUILT from.
+   * `scripts/ci/deployed-build-gate.py` compares this digest with the one computed at the
+   * checkout being deployed, which is how "the container runs THIS commit's image" gets proved
+   * instead of guessed from the container's age.
+   */
+  buildFingerprint: BuildFingerprint;
   dependencies: {
     postgres: DepStatus;
     redis: DepStatus;
@@ -146,6 +154,12 @@ export class HealthController {
       status,
       version: APP_VERSION,
       timestamp: new Date().toISOString(),
+      // A2-222. Deliberately computed AFTER `status` and never folded into it: a digest from an
+      // older commit means the deploy failed, not that the service is unhealthy — it is answering
+      // perfectly well, with the previous release. Those are two different alarms, and the 503
+      // gate (which decides whether this host is taken out of rotation) must not learn to read
+      // one as the other.
+      buildFingerprint: buildFingerprint(),
       dependencies,
       agents: mesh.agents,
     };

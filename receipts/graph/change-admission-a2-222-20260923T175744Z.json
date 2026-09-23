@@ -1,0 +1,847 @@
+{
+ "admission": {
+  "rule": "admitted requires every verdict = verified; failed without exemption ⇒ refused; not_measured without exemption ⇒ paused_safe; exemptions (owner + expiry) are attached by the admitting agent, never by the verifier (DEC-AUP-0008, matrix P1/P4)",
+  "verdict": "paused_safe"
+ },
+ "captured_at_utc": "2026-09-23T17:57:44Z",
+ "change_set": {
+  "base": "bbbf453e2d8af4a33025ded27925a2a90ed390f6",
+  "files": [
+   {
+    "kind": "config",
+    "node_id": "code_unit:.github/workflows/ci.yml",
+    "node_ids": [
+     "code_unit:.github/workflows/ci.yml"
+    ],
+    "path": ".github/workflows/ci.yml",
+    "status": "M"
+   },
+   {
+    "kind": "test",
+    "node_id": "code_unit:apps/assistant/src/health/build-fingerprint.spec.ts",
+    "node_ids": [
+     "code_unit:apps/assistant/src/health/build-fingerprint.spec.ts"
+    ],
+    "path": "apps/assistant/src/health/build-fingerprint.spec.ts",
+    "status": "A"
+   },
+   {
+    "kind": "code",
+    "node_id": "code_unit:apps/assistant/src/health/build-fingerprint.ts",
+    "node_ids": [
+     "code_unit:apps/assistant/src/health/build-fingerprint.ts"
+    ],
+    "path": "apps/assistant/src/health/build-fingerprint.ts",
+    "status": "A"
+   },
+   {
+    "kind": "test",
+    "node_id": "code_unit:apps/assistant/src/health/deployed-build-gate.spec.ts",
+    "node_ids": [
+     "code_unit:apps/assistant/src/health/deployed-build-gate.spec.ts"
+    ],
+    "path": "apps/assistant/src/health/deployed-build-gate.spec.ts",
+    "status": "A"
+   },
+   {
+    "kind": "route",
+    "node_id": "code_unit:apps/assistant/src/health/health.controller.ts",
+    "node_ids": [
+     "code_unit:apps/assistant/src/health/health.controller.ts",
+     "route:GET /health"
+    ],
+    "path": "apps/assistant/src/health/health.controller.ts",
+    "status": "M"
+   },
+   {
+    "kind": "other",
+    "node_id": "code_unit:scripts/ci/deployed-build-gate.py",
+    "node_ids": [
+     "code_unit:scripts/ci/deployed-build-gate.py"
+    ],
+    "path": "scripts/ci/deployed-build-gate.py",
+    "status": "A"
+   }
+  ],
+  "head": "073500aeaad18cd91e9c55992f4225b108b6fc84",
+  "mode": "diff"
+ },
+ "decision_ref": "DEC-AUP-0008",
+ "exemptions": [],
+ "graph": {
+  "builder_version": "1.0.1",
+  "built_at_utc": "2026-09-05T00:00:00Z",
+  "graph_digest": "sha256:2934a19a3bde3a5190bc2ffc57e475614c45cb4e67427bea3cdb016e2156ab0c",
+  "path": "/home/dev/aup/arc2/runs/A2-222/repos/arcanada-assistant/receipts/graph/change-admission-a2-222-20260923T175744Z.d/graph-bbbf453e2d8a.json",
+  "source_commit": "bbbf453e2d8af4a33025ded27925a2a90ed390f6"
+ },
+ "head_graph": {
+  "builder_version": "1.0.1",
+  "built_at_utc": "2026-09-05T00:00:00Z",
+  "graph_digest": "sha256:bfdf31f86e6b914d1090d38ddf40899990bd3604b70000a0b42ef07e36d29cad",
+  "path": "/home/dev/aup/arc2/runs/A2-222/repos/arcanada-assistant/receipts/graph/change-admission-a2-222-20260923T175744Z.d/graph-head-073500aeaad1.json",
+  "source_commit": "073500aeaad18cd91e9c55992f4225b108b6fc84",
+  "staleness": {
+   "checked_at_utc": "2026-09-23T17:57:45Z",
+   "checked_nodes": 206,
+   "method": "manifest.dirty must be false; manifest.source_commit == change_set.head; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at head (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
+   "mismatched_nodes": [],
+   "verdict": "fresh"
+  }
+ },
+ "host": "arcana-devs",
+ "impact_set": {
+  "deterministic_core": [
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "code_unit:apps/assistant/src/app.module.ts",
+    "node_type": "code_unit",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/assistant/src/health/health.module.ts",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/assistant/src/health/health.controller.ts",
+      "via": "relative"
+     },
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/assistant/src/app.module.ts",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/assistant/src/health/health.module.ts",
+      "via": "relative"
+     }
+    ],
+    "revision_paths": [
+     {
+      "boundary": "intra_unit",
+      "depth": 2,
+      "entity": "code_unit:apps/assistant/src/app.module.ts",
+      "node_type": "code_unit",
+      "path": [
+       {
+        "edge_type": "imports",
+        "from": "code_unit:apps/assistant/src/health/health.module.ts",
+        "provenance": "deterministic",
+        "to": "code_unit:apps/assistant/src/health/health.controller.ts",
+        "via": "relative"
+       },
+       {
+        "edge_type": "imports",
+        "from": "code_unit:apps/assistant/src/app.module.ts",
+        "provenance": "deterministic",
+        "to": "code_unit:apps/assistant/src/health/health.module.ts",
+        "via": "relative"
+       }
+      ],
+      "revision": "base",
+      "section": "deterministic_core",
+      "verifier_hint": "type-check / compile of the importer"
+     },
+     {
+      "boundary": "intra_unit",
+      "depth": 2,
+      "entity": "code_unit:apps/assistant/src/app.module.ts",
+      "node_type": "code_unit",
+      "path": [
+       {
+        "edge_type": "imports",
+        "from": "code_unit:apps/assistant/src/health/health.module.ts",
+        "provenance": "deterministic",
+        "to": "code_unit:apps/assistant/src/health/health.controller.ts",
+        "via": "relative"
+       },
+       {
+        "edge_type": "imports",
+        "from": "code_unit:apps/assistant/src/app.module.ts",
+        "provenance": "deterministic",
+        "to": "code_unit:apps/assistant/src/health/health.module.ts",
+        "via": "relative"
+       }
+      ],
+      "revision": "head",
+      "section": "deterministic_core",
+      "verifier_hint": "type-check / compile of the importer"
+     }
+    ],
+    "verifier_hint": "type-check / compile of the importer"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "code_unit:apps/assistant/src/health/health.controller.spec.ts",
+    "node_type": "code_unit",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/assistant/src/health/health.controller.spec.ts",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/assistant/src/health/health.controller.ts",
+      "via": "relative"
+     }
+    ],
+    "revision_paths": [
+     {
+      "boundary": "intra_unit",
+      "depth": 1,
+      "entity": "code_unit:apps/assistant/src/health/health.controller.spec.ts",
+      "node_type": "code_unit",
+      "path": [
+       {
+        "edge_type": "imports",
+        "from": "code_unit:apps/assistant/src/health/health.controller.spec.ts",
+        "provenance": "deterministic",
+        "to": "code_unit:apps/assistant/src/health/health.controller.ts",
+        "via": "relative"
+       }
+      ],
+      "revision": "base",
+      "section": "deterministic_core",
+      "verifier_hint": "type-check / compile of the importer"
+     },
+     {
+      "boundary": "intra_unit",
+      "depth": 1,
+      "entity": "code_unit:apps/assistant/src/health/health.controller.spec.ts",
+      "node_type": "code_unit",
+      "path": [
+       {
+        "edge_type": "imports",
+        "from": "code_unit:apps/assistant/src/health/health.controller.spec.ts",
+        "provenance": "deterministic",
+        "to": "code_unit:apps/assistant/src/health/health.controller.ts",
+        "via": "relative"
+       }
+      ],
+      "revision": "head",
+      "section": "deterministic_core",
+      "verifier_hint": "type-check / compile of the importer"
+     }
+    ],
+    "verifier_hint": "type-check / compile of the importer"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "code_unit:apps/assistant/src/health/health.module.ts",
+    "node_type": "code_unit",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/assistant/src/health/health.module.ts",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/assistant/src/health/health.controller.ts",
+      "via": "relative"
+     }
+    ],
+    "revision_paths": [
+     {
+      "boundary": "intra_unit",
+      "depth": 1,
+      "entity": "code_unit:apps/assistant/src/health/health.module.ts",
+      "node_type": "code_unit",
+      "path": [
+       {
+        "edge_type": "imports",
+        "from": "code_unit:apps/assistant/src/health/health.module.ts",
+        "provenance": "deterministic",
+        "to": "code_unit:apps/assistant/src/health/health.controller.ts",
+        "via": "relative"
+       }
+      ],
+      "revision": "base",
+      "section": "deterministic_core",
+      "verifier_hint": "type-check / compile of the importer"
+     },
+     {
+      "boundary": "intra_unit",
+      "depth": 1,
+      "entity": "code_unit:apps/assistant/src/health/health.module.ts",
+      "node_type": "code_unit",
+      "path": [
+       {
+        "edge_type": "imports",
+        "from": "code_unit:apps/assistant/src/health/health.module.ts",
+        "provenance": "deterministic",
+        "to": "code_unit:apps/assistant/src/health/health.controller.ts",
+        "via": "relative"
+       }
+      ],
+      "revision": "head",
+      "section": "deterministic_core",
+      "verifier_hint": "type-check / compile of the importer"
+     }
+    ],
+    "verifier_hint": "type-check / compile of the importer"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 3,
+    "entity": "code_unit:apps/assistant/src/main.ts",
+    "node_type": "code_unit",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/assistant/src/health/health.module.ts",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/assistant/src/health/health.controller.ts",
+      "via": "relative"
+     },
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/assistant/src/app.module.ts",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/assistant/src/health/health.module.ts",
+      "via": "relative"
+     },
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/assistant/src/main.ts",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/assistant/src/app.module.ts",
+      "via": "relative"
+     }
+    ],
+    "revision_paths": [
+     {
+      "boundary": "intra_unit",
+      "depth": 3,
+      "entity": "code_unit:apps/assistant/src/main.ts",
+      "node_type": "code_unit",
+      "path": [
+       {
+        "edge_type": "imports",
+        "from": "code_unit:apps/assistant/src/health/health.module.ts",
+        "provenance": "deterministic",
+        "to": "code_unit:apps/assistant/src/health/health.controller.ts",
+        "via": "relative"
+       },
+       {
+        "edge_type": "imports",
+        "from": "code_unit:apps/assistant/src/app.module.ts",
+        "provenance": "deterministic",
+        "to": "code_unit:apps/assistant/src/health/health.module.ts",
+        "via": "relative"
+       },
+       {
+        "edge_type": "imports",
+        "from": "code_unit:apps/assistant/src/main.ts",
+        "provenance": "deterministic",
+        "to": "code_unit:apps/assistant/src/app.module.ts",
+        "via": "relative"
+       }
+      ],
+      "revision": "base",
+      "section": "deterministic_core",
+      "verifier_hint": "type-check / compile of the importer"
+     },
+     {
+      "boundary": "intra_unit",
+      "depth": 3,
+      "entity": "code_unit:apps/assistant/src/main.ts",
+      "node_type": "code_unit",
+      "path": [
+       {
+        "edge_type": "imports",
+        "from": "code_unit:apps/assistant/src/health/health.module.ts",
+        "provenance": "deterministic",
+        "to": "code_unit:apps/assistant/src/health/health.controller.ts",
+        "via": "relative"
+       },
+       {
+        "edge_type": "imports",
+        "from": "code_unit:apps/assistant/src/app.module.ts",
+        "provenance": "deterministic",
+        "to": "code_unit:apps/assistant/src/health/health.module.ts",
+        "via": "relative"
+       },
+       {
+        "edge_type": "imports",
+        "from": "code_unit:apps/assistant/src/main.ts",
+        "provenance": "deterministic",
+        "to": "code_unit:apps/assistant/src/app.module.ts",
+        "via": "relative"
+       }
+      ],
+      "revision": "head",
+      "section": "deterministic_core",
+      "verifier_hint": "type-check / compile of the importer"
+     }
+    ],
+    "verifier_hint": "type-check / compile of the importer"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "deployable_unit:apps/assistant",
+    "node_type": "deployable_unit",
+    "path": [
+     {
+      "edge_type": "deploys_to",
+      "from": "code_unit:apps/assistant/src/health/health.controller.ts",
+      "provenance": "deterministic",
+      "to": "deployable_unit:apps/assistant",
+      "via": "containment"
+     }
+    ],
+    "revision_paths": [
+     {
+      "boundary": "intra_unit",
+      "depth": 1,
+      "entity": "deployable_unit:apps/assistant",
+      "node_type": "deployable_unit",
+      "path": [
+       {
+        "edge_type": "deploys_to",
+        "from": "code_unit:apps/assistant/src/health/health.controller.ts",
+        "provenance": "deterministic",
+        "to": "deployable_unit:apps/assistant",
+        "via": "containment"
+       }
+      ],
+      "revision": "base",
+      "section": "deterministic_core",
+      "verifier_hint": "can-i-deploy gate (GRAPH-008)"
+     },
+     {
+      "boundary": "intra_unit",
+      "depth": 1,
+      "entity": "deployable_unit:apps/assistant",
+      "node_type": "deployable_unit",
+      "path": [
+       {
+        "edge_type": "deploys_to",
+        "from": "code_unit:apps/assistant/src/health/build-fingerprint.spec.ts",
+        "provenance": "deterministic",
+        "to": "deployable_unit:apps/assistant",
+        "via": "containment"
+       }
+      ],
+      "revision": "head",
+      "section": "deterministic_core",
+      "verifier_hint": "can-i-deploy gate (GRAPH-008)"
+     }
+    ],
+    "verifier_hint": "can-i-deploy gate (GRAPH-008)"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "document:SECURITY.md",
+    "node_type": "document",
+    "path": [
+     {
+      "edge_type": "documents",
+      "from": "document:SECURITY.md",
+      "provenance": "deterministic",
+      "to": "code_unit:.github/workflows/ci.yml",
+      "via": "explicit-path"
+     }
+    ],
+    "revision_paths": [
+     {
+      "boundary": "intra_unit",
+      "depth": 1,
+      "entity": "document:SECURITY.md",
+      "node_type": "document",
+      "path": [
+       {
+        "edge_type": "documents",
+        "from": "document:SECURITY.md",
+        "provenance": "deterministic",
+        "to": "code_unit:.github/workflows/ci.yml",
+        "via": "explicit-path"
+       }
+      ],
+      "revision": "base",
+      "section": "deterministic_core",
+      "verifier_hint": "doc reference check (path/id still resolves)"
+     },
+     {
+      "boundary": "intra_unit",
+      "depth": 1,
+      "entity": "document:SECURITY.md",
+      "node_type": "document",
+      "path": [
+       {
+        "edge_type": "documents",
+        "from": "document:SECURITY.md",
+        "provenance": "deterministic",
+        "to": "code_unit:.github/workflows/ci.yml",
+        "via": "explicit-path"
+       }
+      ],
+      "revision": "head",
+      "section": "deterministic_core",
+      "verifier_hint": "doc reference check (path/id still resolves)"
+     }
+    ],
+    "verifier_hint": "doc reference check (path/id still resolves)"
+   }
+  ],
+  "edge_types": "all",
+  "global_fallback": {
+   "triggered": false
+  },
+  "inferred_tail": [],
+  "max_depth": 3,
+  "method": "Union of independently revision-bound base/head traversals; reverse traversal (dependents) + forward declared-by hops (provides_route, implements_contract, maps_model of the same file, deploys_to); best path = fewest inferred/observed hops, then shortest; max_depth 3",
+  "total": 6
+ },
+ "notes": [
+  "DRAFT produced by `arcana verify` (tools/graph/verify.py 1.0.1) from matrix contracts/graph-verified-change/verifier-matrix.v1.json; selection rule: required(entity) = ⋃ edge_types[t].mandatory over the edge types t of the hops that reach the entity in its best path (i…",
+  "profile: (auto-detected); baseline: (auto-base-freeze: pre-existing findings at base frozen for this run; persist one with --freeze-baseline) (valid); selected: none; disabled: none",
+  "head tree 073500aeaad1 exported with git archive into /tmp/a2-222-graph/assistant-verify/export-073500aeaad1 (node_modules linked from the repository for ['.', 'apps/assistant', 'packages/core']; workspace packages built: ['packages/core (tsc exit 0, 1.04s)']); the repository was not written"
+ ],
+ "producer": {
+  "tool": "tools/graph/verify.py",
+  "version": "1.0.1"
+ },
+ "receipt_id": "car-verify-20260923T175744Z-073500ae",
+ "repo": {
+  "name": "Arcanada-one/arcanada-assistant",
+  "path": "/home/dev/aup/arc2/runs/A2-222/repos/arcanada-assistant"
+ },
+ "revision_selection": {
+  "base": [
+   "code_unit:.github/workflows/ci.yml",
+   "code_unit:apps/assistant/src/app.module.ts",
+   "code_unit:apps/assistant/src/health/health.controller.spec.ts",
+   "code_unit:apps/assistant/src/health/health.controller.ts",
+   "code_unit:apps/assistant/src/health/health.module.ts",
+   "code_unit:apps/assistant/src/main.ts",
+   "deployable_unit:apps/assistant",
+   "document:SECURITY.md",
+   "route:GET /health"
+  ],
+  "head": [
+   "code_unit:.github/workflows/ci.yml",
+   "code_unit:apps/assistant/src/app.module.ts",
+   "code_unit:apps/assistant/src/health/build-fingerprint.spec.ts",
+   "code_unit:apps/assistant/src/health/build-fingerprint.ts",
+   "code_unit:apps/assistant/src/health/deployed-build-gate.spec.ts",
+   "code_unit:apps/assistant/src/health/health.controller.spec.ts",
+   "code_unit:apps/assistant/src/health/health.controller.ts",
+   "code_unit:apps/assistant/src/health/health.module.ts",
+   "code_unit:apps/assistant/src/main.ts",
+   "code_unit:scripts/ci/deployed-build-gate.py",
+   "deployable_unit:apps/assistant",
+   "document:SECURITY.md",
+   "route:GET /health"
+  ],
+  "schema": "RevisionImpactSelection/v1",
+  "unmeasured_head_files": []
+ },
+ "schema": "ChangeAdmissionReceipt/v1",
+ "staleness": {
+  "checked_at_utc": "2026-09-23T17:57:45Z",
+  "method": "manifest.dirty must be false; manifest.source_commit == change_set.base; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at base (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
+  "mismatched_nodes": [],
+  "verdict": "fresh"
+ },
+ "tree": {
+  "commit": "073500aeaad18cd91e9c55992f4225b108b6fc84",
+  "dirty": false
+ },
+ "verdicts": [
+  {
+   "entity": "code_unit:.github/workflows/ci.yml",
+   "reason": "v-workflow-config-b803fcb7f17ed923: bounded workflow configuration shape valid; expressions, shell, actions and hosted execution NOT_MEASURED; v-fitness: no new fitness violation",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-fitness",
+    "v-workflow-config-b803fcb7f17ed923"
+   ]
+  },
+  {
+   "entity": "code_unit:apps/assistant/src/app.module.ts",
+   "reason": "v-type-check-apps-assistant-tsconfig: apps/assistant/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-fitness",
+    "v-type-check-apps-assistant-tsconfig"
+   ]
+  },
+  {
+   "entity": "code_unit:apps/assistant/src/health/build-fingerprint.spec.ts",
+   "reason": "v-type-check-apps-assistant-tsconfig: apps/assistant/tsconfig.json does not include apps/assistant/src/health/build-fingerprint.spec.ts",
+   "verdict": "not_measured",
+   "verifier_ids": [
+    "v-fitness",
+    "v-type-check-apps-assistant-tsconfig"
+   ]
+  },
+  {
+   "entity": "code_unit:apps/assistant/src/health/build-fingerprint.ts",
+   "reason": "v-type-check-apps-assistant-tsconfig: apps/assistant/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-fitness",
+    "v-type-check-apps-assistant-tsconfig"
+   ]
+  },
+  {
+   "entity": "code_unit:apps/assistant/src/health/deployed-build-gate.spec.ts",
+   "reason": "v-type-check-apps-assistant-tsconfig: apps/assistant/tsconfig.json does not include apps/assistant/src/health/deployed-build-gate.spec.ts",
+   "verdict": "not_measured",
+   "verifier_ids": [
+    "v-fitness",
+    "v-type-check-apps-assistant-tsconfig"
+   ]
+  },
+  {
+   "entity": "code_unit:apps/assistant/src/health/health.controller.spec.ts",
+   "reason": "v-type-check-apps-assistant-tsconfig: apps/assistant/tsconfig.json does not include apps/assistant/src/health/health.controller.spec.ts",
+   "verdict": "not_measured",
+   "verifier_ids": [
+    "v-fitness",
+    "v-type-check-apps-assistant-tsconfig"
+   ]
+  },
+  {
+   "entity": "code_unit:apps/assistant/src/health/health.controller.ts",
+   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+   "verdict": "not_measured",
+   "verifier_ids": [
+    "v-canary",
+    "v-contract-diff",
+    "v-fitness",
+    "v-type-check-apps-assistant-tsconfig"
+   ]
+  },
+  {
+   "entity": "code_unit:apps/assistant/src/health/health.module.ts",
+   "reason": "v-type-check-apps-assistant-tsconfig: apps/assistant/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-fitness",
+    "v-type-check-apps-assistant-tsconfig"
+   ]
+  },
+  {
+   "entity": "code_unit:apps/assistant/src/main.ts",
+   "reason": "v-type-check-apps-assistant-tsconfig: apps/assistant/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-fitness",
+    "v-type-check-apps-assistant-tsconfig"
+   ]
+  },
+  {
+   "entity": "code_unit:scripts/ci/deployed-build-gate.py",
+   "reason": "v-fitness: no new fitness violation",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-fitness"
+   ]
+  },
+  {
+   "entity": "deployable_unit:apps/assistant",
+   "reason": "v-type-check-apps-assistant-tsconfig: apps/assistant/tsconfig.json: 0 errors; v-fitness: no new violation in apps/assistant (21 frozen)",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-fitness",
+    "v-type-check-apps-assistant-tsconfig"
+   ]
+  },
+  {
+   "entity": "document:SECURITY.md",
+   "reason": "v-doc-reference: 0 reference(s) resolve at head",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-doc-reference"
+   ]
+  },
+  {
+   "entity": "route:GET /health",
+   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+   "verdict": "not_measured",
+   "verifier_ids": [
+    "v-canary",
+    "v-contract-diff",
+    "v-route-config",
+    "v-type-check-apps-assistant-tsconfig"
+   ]
+  }
+ ],
+ "verifiers": [
+  {
+   "command": "/tmp/a2-222-graph/assistant-verify/export-073500aeaad1/node_modules/.bin/tsc -p /tmp/a2-222-graph/assistant-verify/export-073500aeaad1/apps/assistant/tsconfig.json --noEmit --incremental false --listFiles",
+   "duration_s": 3.15,
+   "entities": [
+    "code_unit:apps/assistant/src/app.module.ts",
+    "code_unit:apps/assistant/src/health/build-fingerprint.spec.ts",
+    "code_unit:apps/assistant/src/health/build-fingerprint.ts",
+    "code_unit:apps/assistant/src/health/deployed-build-gate.spec.ts",
+    "code_unit:apps/assistant/src/health/health.controller.spec.ts",
+    "code_unit:apps/assistant/src/health/health.controller.ts",
+    "code_unit:apps/assistant/src/health/health.module.ts",
+    "code_unit:apps/assistant/src/main.ts",
+    "deployable_unit:apps/assistant",
+    "route:GET /health"
+   ],
+   "exit_code": 0,
+   "id": "v-type-check-apps-assistant-tsconfig",
+   "kind": "type_check",
+   "output_ref": "/home/dev/aup/arc2/runs/A2-222/repos/arcanada-assistant/receipts/graph/change-admission-a2-222-20260923T175744Z.d/v-type-check-apps-assistant-tsconfig.txt",
+   "started_at_utc": "2026-09-23T17:57:47Z",
+   "summary": "apps/assistant/tsconfig.json: exit 0, 0 error(s), 1320 files listed"
+  },
+  {
+   "command": "tools/graph/contract_diff.py.run_diff(base=bbbf453e2d8a, head=073500aeaad1, graph=head graph)",
+   "duration_s": 0.8,
+   "entities": [
+    "code_unit:apps/assistant/src/health/health.controller.ts",
+    "route:GET /health"
+   ],
+   "exit_code": 1,
+   "id": "v-contract-diff",
+   "kind": "contract_diff",
+   "output_ref": "/home/dev/aup/arc2/runs/A2-222/repos/arcanada-assistant/receipts/graph/change-admission-a2-222-20260923T175744Z.d/v-contract-diff.json",
+   "started_at_utc": "2026-09-23T17:57:51Z",
+   "summary": "54→54 contracts, breaking 0, edges {'failed': 20, 'verified': 94}"
+  },
+  {
+   "command": "verify.py route_config_consistency RC-01 prefix / RC-02 registration / RC-03 served",
+   "duration_s": 0.01,
+   "entities": [
+    "route:GET /health"
+   ],
+   "exit_code": 0,
+   "id": "v-route-config",
+   "kind": "config_schema",
+   "output_ref": "/home/dev/aup/arc2/runs/A2-222/repos/arcanada-assistant/receipts/graph/change-admission-a2-222-20260923T175744Z.d/v-route-config.txt",
+   "started_at_utc": "2026-09-23T17:57:52Z",
+   "summary": "1 route(s), 0 failed"
+  },
+  {
+   "command": "workflow_config.validate exact head bytes",
+   "duration_s": 0.0,
+   "entities": [
+    "code_unit:.github/workflows/ci.yml"
+   ],
+   "exit_code": 0,
+   "id": "v-workflow-config-b803fcb7f17ed923",
+   "kind": "config_schema",
+   "output_ref": "/home/dev/aup/arc2/runs/A2-222/repos/arcanada-assistant/receipts/graph/change-admission-a2-222-20260923T175744Z.d/v-workflow-config-b803fcb7f17ed923.txt",
+   "started_at_utc": "2026-09-23T17:57:52Z",
+   "summary": "bounded workflow configuration shape valid; expressions, shell, actions and hosted execution NOT_MEASURED"
+  },
+  {
+   "command": "verify.py fitness_rules FR-01..FR-05 over the head graph + head sources",
+   "duration_s": 0.03,
+   "entities": [
+    "code_unit:.github/workflows/ci.yml",
+    "code_unit:apps/assistant/src/app.module.ts",
+    "code_unit:apps/assistant/src/health/build-fingerprint.spec.ts",
+    "code_unit:apps/assistant/src/health/build-fingerprint.ts",
+    "code_unit:apps/assistant/src/health/deployed-build-gate.spec.ts",
+    "code_unit:apps/assistant/src/health/health.controller.spec.ts",
+    "code_unit:apps/assistant/src/health/health.controller.ts",
+    "code_unit:apps/assistant/src/health/health.module.ts",
+    "code_unit:apps/assistant/src/main.ts",
+    "code_unit:scripts/ci/deployed-build-gate.py",
+    "deployable_unit:apps/assistant"
+   ],
+   "exit_code": 0,
+   "id": "v-fitness",
+   "kind": "fitness_rules",
+   "output_ref": "/home/dev/aup/arc2/runs/A2-222/repos/arcanada-assistant/receipts/graph/change-admission-a2-222-20260923T175744Z.d/v-fitness.json",
+   "started_at_utc": "2026-09-23T17:57:52Z",
+   "summary": "21 finding(s): 0 new / 21 frozen; 0 entity(ies) failed"
+  },
+  {
+   "command": "verify.py doc_reference: path / route / model references of affected documents resolve at head",
+   "duration_s": 0.0,
+   "entities": [
+    "document:SECURITY.md"
+   ],
+   "exit_code": 0,
+   "id": "v-doc-reference",
+   "kind": "doc_reference",
+   "output_ref": "/home/dev/aup/arc2/runs/A2-222/repos/arcanada-assistant/receipts/graph/change-admission-a2-222-20260923T175744Z.d/v-doc-reference.txt",
+   "started_at_utc": "2026-09-23T17:57:52Z",
+   "summary": "1 document(s), 0 failed"
+  },
+  {
+   "command": "tools/graph/deploy_gate.py canary --plan <plan> --phase pre|post (results supplied with --canary)",
+   "duration_s": 0.0,
+   "entities": [
+    "code_unit:apps/assistant/src/health/health.controller.ts",
+    "route:GET /health"
+   ],
+   "exit_code": 0,
+   "id": "v-canary",
+   "kind": "canary",
+   "output_ref": "/home/dev/aup/arc2/runs/A2-222/repos/arcanada-assistant/receipts/graph/change-admission-a2-222-20260923T175744Z.d/v-canary.json",
+   "started_at_utc": "2026-09-23T17:57:52Z",
+   "summary": "0 canary result(s); 0 verified / 0 failed / 2 not_measured of 2 entities"
+  }
+ ],
+ "verify": {
+  "events": [],
+  "required_by_entity": {
+   "code_unit:.github/workflows/ci.yml": [
+    "config_schema",
+    "fitness_rules"
+   ],
+   "code_unit:apps/assistant/src/app.module.ts": [
+    "fitness_rules",
+    "type_check"
+   ],
+   "code_unit:apps/assistant/src/health/build-fingerprint.spec.ts": [
+    "fitness_rules",
+    "type_check"
+   ],
+   "code_unit:apps/assistant/src/health/build-fingerprint.ts": [
+    "fitness_rules",
+    "type_check"
+   ],
+   "code_unit:apps/assistant/src/health/deployed-build-gate.spec.ts": [
+    "fitness_rules",
+    "type_check"
+   ],
+   "code_unit:apps/assistant/src/health/health.controller.spec.ts": [
+    "fitness_rules",
+    "type_check"
+   ],
+   "code_unit:apps/assistant/src/health/health.controller.ts": [
+    "canary",
+    "contract_diff",
+    "fitness_rules",
+    "type_check"
+   ],
+   "code_unit:apps/assistant/src/health/health.module.ts": [
+    "fitness_rules",
+    "type_check"
+   ],
+   "code_unit:apps/assistant/src/main.ts": [
+    "fitness_rules",
+    "type_check"
+   ],
+   "code_unit:scripts/ci/deployed-build-gate.py": [
+    "fitness_rules"
+   ],
+   "deployable_unit:apps/assistant": [
+    "fitness_rules",
+    "type_check"
+   ],
+   "document:SECURITY.md": [
+    "doc_reference"
+   ],
+   "route:GET /health": [
+    "canary",
+    "contract_diff",
+    "route_config_consistency",
+    "type_check"
+   ]
+  },
+  "seconds": {
+   "prepare": 1.89,
+   "total": 7.45,
+   "verifiers": 3.99
+  }
+ },
+ "work_item": "A2-222"
+}
