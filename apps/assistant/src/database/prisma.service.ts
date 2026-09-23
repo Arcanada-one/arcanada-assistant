@@ -2,6 +2,8 @@ import { Injectable, type OnModuleDestroy, type OnModuleInit } from '@nestjs/com
 import prismaPkg from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 
+import { requireEnv } from '../config/require-env.js';
+
 // CJS interop: Prisma 7's @prisma/client is CJS — under NodeNext ESM only
 // the default import works. @prisma/adapter-pg already exports ESM-friendly.
 const { PrismaClient } = prismaPkg as unknown as {
@@ -20,7 +22,12 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
   readonly client: PrismaClient;
 
   constructor() {
-    const connectionString = process.env.DATABASE_URL ?? '';
+    // A2-226: an empty connection string is not inert — node-postgres resolves
+    // it to the ambient libpq defaults, i.e. localhost:5432 as the OS user,
+    // which on arcana-prd is the production database (docker-compose.yml:15).
+    // Measured: with DATABASE_URL unset the adapter reached a real server and
+    // failed at the SASL password exchange, not at "no database configured".
+    const connectionString = requireEnv('DATABASE_URL');
     const adapter = new PrismaPg({ connectionString });
     this.client = new PrismaClient({ adapter });
   }

@@ -1,6 +1,8 @@
 import { Injectable, type OnModuleDestroy } from '@nestjs/common';
 import { Redis as RedisCtor, type Redis as RedisClient } from 'ioredis';
 
+import { requireEnv } from '../config/require-env.js';
+
 import type { ProbeResult } from './prisma.service.js';
 
 @Injectable()
@@ -8,7 +10,11 @@ export class RedisService implements OnModuleDestroy {
   readonly client: RedisClient;
 
   constructor() {
-    this.client = new RedisCtor(process.env.REDIS_URL ?? 'redis://localhost:6379/0', {
+    // A2-226: no localhost fallback. On arcana-prd the production Redis is
+    // published on loopback (docker-compose.yml:38), so defaulting to
+    // redis://localhost:6379 would silently connect a misconfigured process to
+    // production instead of failing. requireEnv refuses, naming the variable.
+    this.client = new RedisCtor(requireEnv('REDIS_URL'), {
       lazyConnect: false,
       maxRetriesPerRequest: 2,
       enableReadyCheck: true,
