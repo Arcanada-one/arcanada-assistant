@@ -105,6 +105,15 @@ jobs:
   smoke:
     needs: [lint, test, audit]
     runs-on: [self-hosted, Linux, X64, arcana-ai]
+    # Same rule as `test` above, and for a harder reason than a race: this job
+    # used to publish `'5432:5432'`, and the arcana-ai label resolves to a
+    # runner on arcana-prd, where 127.0.0.1:5432 is held permanently by
+    # `arcanada-assistant-postgres-1` -- this service's own PRODUCTION
+    # database. So the bind did not lose a race, it could never win one:
+    # `Bind for 127.0.0.1:5432 failed: port is already allocated`, in
+    # `Initialize containers`, before any repo code runs. Every PR's smoke was
+    # red on that host (3/3 reruns on #72). Ephemeral host ports, read back
+    # from `job.services.<id>.ports`, leave the production container alone.
     services:
       postgres:
         image: postgres:17-alpine
@@ -112,20 +121,21 @@ jobs:
           POSTGRES_USER: assistant_app
           POSTGRES_PASSWORD: ci_password
           POSTGRES_DB: assistant
-        ports: ['5432:5432']
+        ports: ['5432/tcp']
         options: >-
           --health-cmd "pg_isready -U assistant_app -d assistant"
           --health-interval 5s --health-timeout 3s --health-retries 10
       redis:
         image: redis:7-alpine
-        ports: ['6379:6379']
+        ports: ['6379/tcp']
         options: >-
           --health-cmd "redis-cli ping"
           --health-interval 5s --health-timeout 3s --health-retries 10
+    # DATABASE_URL / REDIS_URL / PORT are NOT here: the `job` context is
+    # unavailable in a job-level `env:` block, and an expansion placed here
+    # parses fine and then kills the whole run as a "workflow file issue" with
+    # no job and no annotation. They are exported from the first step instead.
     env:
-      DATABASE_URL: postgresql://assistant_app:ci_password@localhost:5432/assistant?schema=public&sslmode=disable
-      REDIS_URL: redis://localhost:6379/1
-      PORT: '3800'
       LOG_LEVEL: info
       TELEGRAM_BOT_TOKEN: ci-stub-token
       TELEGRAM_WEBHOOK_SECRET: ci-stub-secretci-stub-secretci-stub-secret
@@ -148,6 +158,43 @@ jobs:
       BRIEFING_MORNING_TIME: '08:00'
       BRIEFING_EVENING_TIME: '21:00'
     steps:
+      - name: Resolve the runner-assigned service ports
+        env:
+          PG_PORT: ${{ job.services.postgres.ports['5432'] }}
+          REDIS_PORT: ${{ job.services.redis.ports['6379'] }}
+        run: |
+          set -euo pipefail
+          echo "smoke services: postgres=${PG_PORT} redis=${REDIS_PORT}"
+          echo "DATABASE_URL=postgresql://assistant_app:ci_password@localhost:${PG_PORT}/assistant?schema=public&sslmode=disable" >> "$GITHUB_ENV"
+          echo "REDIS_URL=redis://localhost:${REDIS_PORT}/1" >> "$GITHUB_ENV"
+          # The app's own port is picked the same way, and for a sharper
+          # reason than tidiness. PORT used to be the fixed 3800 -- which on
+          # arcana-prd is the PRODUCTION assistant's published port
+          # (docker-compose.yml: '127.0.0.1:3800:3800'). `main.ts` listens on
+          # 0.0.0.0, and a wildcard bind next to an existing 127.0.0.1 bind
+          # either fails outright or succeeds while `curl localhost:3800`
+          # still reaches the more specific socket -- i.e. the smoke check
+          # would have probed PRODUCTION's /health and passed without ever
+          # touching the code under test. An ephemeral port removes the
+          # ambiguity: the only thing listening on it is this job's build.
+          # Probed with bash's own /dev/tcp rather than a helper binary: this
+          # step runs BEFORE setup-node, so node is not on PATH yet, and a
+          # missing python3 would take the job down for the wrong reason.
+          # 20000-29999 sits below net.ipv4.ip_local_port_range, so the pick
+          # cannot collide with an outbound connection's ephemeral port.
+          APP_PORT=''
+          for _ in $(seq 1 50); do
+            CANDIDATE=$(( (RANDOM % 10000) + 20000 ))
+            if ! (exec 3<>"/dev/tcp/127.0.0.1/${CANDIDATE}") 2>/dev/null; then
+              APP_PORT="${CANDIDATE}"
+              break
+            fi
+            exec 3>&- 3<&- || true
+          done
+          test -n "${APP_PORT}" || { echo "no free port found in 20000-29999"; exit 1; }
+          echo "smoke app port: ${APP_PORT}"
+          echo "PORT=${APP_PORT}" >> "$GITHUB_ENV"
+
       - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6
         with:
@@ -164,6 +211,8 @@ jobs:
         run: cd apps/assistant && pnpm exec prisma migrate deploy
       - name: Boot app + smoke /health
         run: |
+          set -uo pipefail
+          : "${PORT:?PORT was not resolved by the port-resolution step}"
           cd apps/assistant
           node dist/main.js > /tmp/assistant.log 2>&1 &
           APP_PID=$!
@@ -172,7 +221,7 @@ jobs:
           # invalid hosts in CI). Treat any HTTP response from /health as
           # boot success — only TCP-refused / no-response within 30 s fails.
           for i in $(seq 1 30); do
-            HTTP_CODE=$(curl -sS -o /tmp/health.json -w '%{http_code}' http://localhost:3800/health || true)
+            HTTP_CODE=$(curl -sS -o /tmp/health.json -w '%{http_code}' "http://127.0.0.1:${PORT}/health" || true)
             if [ "$HTTP_CODE" = "200" ] || [ "$HTTP_CODE" = "503" ]; then
               echo "smoke responded http=${HTTP_CODE} after ${i}s"
               cat /tmp/health.json
