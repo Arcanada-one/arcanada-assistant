@@ -1,0 +1,1 @@
+bounded workflow configuration shape valid; expressions, shell, actions and hosted execution NOT_MEASURED

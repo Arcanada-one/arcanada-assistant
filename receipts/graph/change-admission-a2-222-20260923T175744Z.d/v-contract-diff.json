@@ -1,0 +1,3036 @@
+{
+ "schema": "ContractDiff/v1",
+ "tool": "tools/graph/contract_diff.py",
+ "tool_version": "1.0.0",
+ "repo": "Arcanada-one/arcanada-assistant",
+ "base": {
+  "commit": "bbbf453e2d8af4a33025ded27925a2a90ed390f6",
+  "rev": "bbbf453e2d8af4a33025ded27925a2a90ed390f6",
+  "tree": "git-objects"
+ },
+ "head": {
+  "commit": "073500aeaad18cd91e9c55992f4225b108b6fc84",
+  "rev": "073500aeaad18cd91e9c55992f4225b108b6fc84",
+  "tree": "git-objects",
+  "dirty": false
+ },
+ "graph": {
+  "source_commit": "073500aeaad18cd91e9c55992f4225b108b6fc84",
+  "graph_digest": "sha256:bfdf31f86e6b914d1090d38ddf40899990bd3604b70000a0b42ef07e36d29cad"
+ },
+ "edge_source": "graph",
+ "contracts": {
+  "contract:apps/assistant/src/aal/agent-health.types.ts#AgentCircuitState": {
+   "kind": "type_alias_union",
+   "path": "apps/assistant/src/aal/agent-health.types.ts",
+   "symbol": "AgentCircuitState",
+   "status": "unchanged",
+   "direction": "bidirectional",
+   "decl_hash_base": "sha256:ce4e492da2a1b70b31d828ef29143ec2216fb65deac85067f0fe4c1847a43d28",
+   "decl_hash_head": "sha256:ce4e492da2a1b70b31d828ef29143ec2216fb65deac85067f0fe4c1847a43d28",
+   "changes": [],
+   "error_code": false
+  },
+  "contract:apps/assistant/src/aal/agent-health.types.ts#AgentHealthState": {
+   "kind": "type_alias_union",
+   "path": "apps/assistant/src/aal/agent-health.types.ts",
+   "symbol": "AgentHealthState",
+   "status": "unchanged",
+   "direction": "bidirectional",
+   "decl_hash_base": "sha256:8384ebeb46d87a03dfbd52e0ed14147dd578f2ae2d59381b7b1cdf0a644a0ce2",
+   "decl_hash_head": "sha256:8384ebeb46d87a03dfbd52e0ed14147dd578f2ae2d59381b7b1cdf0a644a0ce2",
+   "changes": [],
+   "error_code": false
+  },
+  "contract:apps/assistant/src/aal/exceptions.ts#AgentErrorKind": {
+   "kind": "type_alias_union",
+   "path": "apps/assistant/src/aal/exceptions.ts",
+   "symbol": "AgentErrorKind",
+   "status": "unchanged",
+   "direction": "bidirectional",
+   "decl_hash_base": "sha256:729868cdaf39abadb54196d35985b8f23a5d6ad0b9b33d81f1726324796b637c",
+   "decl_hash_head": "sha256:729868cdaf39abadb54196d35985b8f23a5d6ad0b9b33d81f1726324796b637c",
+   "changes": [],
+   "error_code": true
+  },
+  "contract:apps/assistant/src/aal/scope.schema.ts#ScopeManifestSchema": {
+   "kind": "zod",
+   "path": "apps/assistant/src/aal/scope.schema.ts",
+   "symbol": "ScopeManifestSchema",
+   "status": "unchanged",
+   "direction": "bidirectional",
+   "decl_hash_base": "sha256:1732b15de7397767b7a29151e00bda68695071416c81d54244ebbd9faa1ed8ec",
+   "decl_hash_head": "sha256:1732b15de7397767b7a29151e00bda68695071416c81d54244ebbd9faa1ed8ec",
+   "changes": [],
+   "error_code": false
+  },
+  "contract:apps/assistant/src/aal/scope.schema.ts#agentScopeEntrySchema": {
+   "kind": "zod",
+   "path": "apps/assistant/src/aal/scope.schema.ts",
+   "symbol": "agentScopeEntrySchema",
+   "status": "unchanged",
+   "direction": "bidirectional",
+   "decl_hash_base": "sha256:e839a437140d6a89de4813b809fdaa6f8935fce52e197b21b810fd0cd9598bab",
+   "decl_hash_head": "sha256:e839a437140d6a89de4813b809fdaa6f8935fce52e197b21b810fd0cd9598bab",
+   "changes": [],
+   "error_code": false
+  },
+  "contract:apps/assistant/src/aal/scope.schema.ts#intentSchema": {
+   "kind": "zod",
+   "path": "apps/assistant/src/aal/scope.schema.ts",
+   "symbol": "intentSchema",
+   "status": "unchanged",
+   "direction": "bidirectional",
+   "decl_hash_base": "sha256:d836796a58ada381d815089bbd21cac6332f64f569735c9d34fbbe688a1aabac",
+   "decl_hash_head": "sha256:d836796a58ada381d815089bbd21cac6332f64f569735c9d34fbbe688a1aabac",
+   "changes": [],
+   "error_code": false
+  },
+  "contract:apps/assistant/src/aal/scope.schema.ts#principalScopeEntrySchema": {
+   "kind": "zod",
+   "path": "apps/assistant/src/aal/scope.schema.ts",
+   "symbol": "principalScopeEntrySchema",
+   "status": "unchanged",
+   "direction": "bidirectional",
+   "decl_hash_base": "sha256:edc99f2b86dd2820bc4725057dafe33d1688fae8c69aa93965b15451fb5f4903",
+   "decl_hash_head": "sha256:edc99f2b86dd2820bc4725057dafe33d1688fae8c69aa93965b15451fb5f4903",
+   "changes": [],
+   "error_code": false
+  },
+  "contract:apps/assistant/src/agents/claude/claude.schemas.ts#ClaudeContentBlockSchema": {
+   "kind": "zod",
+   "path": "apps/assistant/src/agents/claude/claude.schemas.ts",
+   "symbol": "ClaudeContentBlockSchema",
+   "status": "unchanged",
+   "direction": "bidirectional",
+   "decl_hash_base": "sha256:f4f8b19a7cf32af0fafce9701fe4e5c19798d277a50c5fa44db05c3acf3d2107",
+   "decl_hash_head": "sha256:f4f8b19a7cf32af0fafce9701fe4e5c19798d277a50c5fa44db05c3acf3d2107",
+   "changes": [],
+   "error_code": false
+  },
+  "contract:apps/assistant/src/agents/claude/claude.schemas.ts#ClaudeResultSchema": {
+   "kind": "zod",
+   "path": "apps/assistant/src/agents/claude/claude.schemas.ts",
+   "symbol": "ClaudeResultSchema",
+   "status": "unchanged",
+   "direction": "output",
+   "decl_hash_base": "sha256:d7943328874a4a707784e9b32d99c2a7ea95110228215d6ca2b7a250371cfa1f",
+   "decl_hash_head": "sha256:d7943328874a4a707784e9b32d99c2a7ea95110228215d6ca2b7a250371cfa1f",
+   "changes": [],
+   "error_code": false
+  },
+  "contract:apps/assistant/src/agents/dreamer/dreamer.schemas.ts#DreamerResultSchema": {
+   "kind": "zod",
+   "path": "apps/assistant/src/agents/dreamer/dreamer.schemas.ts",
+   "symbol": "DreamerResultSchema",
+   "status": "unchanged",
+   "direction": "output",
+   "decl_hash_base": "sha256:f7693d51ce80440de698a4dd0bc6e8fcb1e5362af298a78a636ea03fbb40aa74",
+   "decl_hash_head": "sha256:f7693d51ce80440de698a4dd0bc6e8fcb1e5362af298a78a636ea03fbb40aa74",
+   "changes": [],
+   "error_code": false
+  },
+  "contract:apps/assistant/src/agents/dreamer/dreamer.schemas.ts#IndexPageOkSchema": {
+   "kind": "zod",
+   "path": "apps/assistant/src/agents/dreamer/dreamer.schemas.ts",
+   "symbol": "IndexPageOkSchema",
+   "status": "unchanged",
+   "direction": "bidirectional",
+   "decl_hash_base": "sha256:22e5dd1dea62b1525d4a8eb831699da99594529dccfce5fb5a63bb6d4220a38e",
+   "decl_hash_head": "sha256:22e5dd1dea62b1525d4a8eb831699da99594529dccfce5fb5a63bb6d4220a38e",
+   "changes": [],
+   "error_code": false
+  },
+  "contract:apps/assistant/src/agents/dreamer/dreamer.schemas.ts#LinkGraphOkSchema": {
+   "kind": "zod",
+   "path": "apps/assistant/src/agents/dreamer/dreamer.schemas.ts",
+   "symbol": "LinkGraphOkSchema",
+   "status": "unchanged",
+   "direction": "bidirectional",
+   "decl_hash_base": "sha256:c14291f855da5c462916e6d7a9b20be2d6b5934b5c65d4e4f0501c829ce9fab3",
+   "decl_hash_head": "sha256:c14291f855da5c462916e6d7a9b20be2d6b5934b5c65d4e4f0501c829ce9fab3",
+   "changes": [],
+   "error_code": false
+  },
+  "contract:apps/assistant/src/agents/dreamer/dreamer.schemas.ts#SummarizeOkSchema": {
+   "kind": "zod",
+   "path": "apps/assistant/src/agents/dreamer/dreamer.schemas.ts",
+   "symbol": "SummarizeOkSchema",
+   "status": "unchanged",
+   "direction": "bidirectional",
+   "decl_hash_base": "sha256:624bcee5931fa2eb352f087604a97cac78022c008ab370ad993f9031615858ac",
+   "decl_hash_head": "sha256:624bcee5931fa2eb352f087604a97cac78022c008ab370ad993f9031615858ac",
+   "changes": [],
+   "error_code": false
+  },
+  "contract:apps/assistant/src/agents/munera/munera.schemas.ts#MuneraTaskListSchema": {
+   "kind": "zod",
+   "path": "apps/assistant/src/agents/munera/munera.schemas.ts",
+   "symbol": "MuneraTaskListSchema",
+   "status": "unchanged",
+   "direction": "bidirectional",
+   "decl_hash_base": "sha256:f1f03074364d7efb464224c6954e809423adc238e5103424295bf47f4fba68f8",
+   "decl_hash_head": "sha256:f1f03074364d7efb464224c6954e809423adc238e5103424295bf47f4fba68f8",
+   "changes": [],
+   "error_code": false
+  },
+  "contract:apps/assistant/src/agents/munera/munera.schemas.ts#TaskListResultSchema": {
+   "kind": "zod",
+   "path": "apps/assistant/src/agents/munera/munera.schemas.ts",
+   "symbol": "TaskListResultSchema",
+   "status": "unchanged",
+   "direction": "output",
+   "decl_hash_base": "sha256:66a6c82cfa0dc2e323cfbf5745e88835128b209215f726dbd90bfc2643634e1e",
+   "decl_hash_head": "sha256:66a6c82cfa0dc2e323cfbf5745e88835128b209215f726dbd90bfc2643634e1e",
+   "changes": [],
+   "error_code": false
+  },
+  "contract:apps/assistant/src/agents/munera/munera.schemas.ts#TaskResultSchema": {
+   "kind": "zod",
+   "path": "apps/assistant/src/agents/munera/munera.schemas.ts",
+   "symbol": "TaskResultSchema",
+   "status": "unchanged",
+   "direction": "output",
+   "decl_hash_base": "sha256:d2c84b63466cee5aa4ad4aead7517755ec2bcc860bf9d9bbdbcf525d023ea5dd",
+   "decl_hash_head": "sha256:d2c84b63466cee5aa4ad4aead7517755ec2bcc860bf9d9bbdbcf525d023ea5dd",
+   "changes": [],
+   "error_code": false
+  },
+  "contract:apps/assistant/src/agents/transcriber/transcriber.schemas.ts#TranscribeResultSchema": {
+   "kind": "zod",
+   "path": "apps/assistant/src/agents/transcriber/transcriber.schemas.ts",
+   "symbol": "TranscribeResultSchema",
+   "status": "unchanged",
+   "direction": "output",
+   "decl_hash_base": "sha256:aa67cba2514ed84e3e776e9555296c5505eb2a8f14f3a6ad6836c0596d76c497",
+   "decl_hash_head": "sha256:aa67cba2514ed84e3e776e9555296c5505eb2a8f14f3a6ad6836c0596d76c497",
+   "changes": [],
+   "error_code": false
+  },
+  "contract:apps/assistant/src/approval/predicate-ast.schema.ts#predicateAstSchema": {
+   "kind": "zod",
+   "path": "apps/assistant/src/approval/predicate-ast.schema.ts",
+   "symbol": "predicateAstSchema",
+   "status": "unchanged",
+   "direction": "bidirectional",
+   "decl_hash_base": "sha256:876dc50f769cdeecd1640318abd2d39bfecbaa2c1b46b1bb9a1bfb4cf447b928",
+   "decl_hash_head": "sha256:876dc50f769cdeecd1640318abd2d39bfecbaa2c1b46b1bb9a1bfb4cf447b928",
+   "changes": [],
+   "error_code": false
+  },
+  "contract:apps/assistant/src/approval/redis-idempotency.service.ts#ClaimOutcome": {
+   "kind": "type_alias_union",
+   "path": "apps/assistant/src/approval/redis-idempotency.service.ts",
+   "symbol": "ClaimOutcome",
+   "status": "unchanged",
+   "direction": "bidirectional",
+   "decl_hash_base": "sha256:4a492a7df70052e1917417447ae34c30415576a45ac147a054e3c77cd71b046c",
+   "decl_hash_head": "sha256:4a492a7df70052e1917417447ae34c30415576a45ac147a054e3c77cd71b046c",
+   "changes": [],
+   "error_code": false
+  },
+  "contract:apps/assistant/src/approval/telegram-callback.parser.ts#ApprovalDecisionTag": {
+   "kind": "type_alias_union",
+   "path": "apps/assistant/src/approval/telegram-callback.parser.ts",
+   "symbol": "ApprovalDecisionTag",
+   "status": "unchanged",
+   "direction": "bidirectional",
+   "decl_hash_base": "sha256:e9bb526f0e648e3b6b02e13412145d15ad31024256a4d9639e89ea53669778bf",
+   "decl_hash_head": "sha256:e9bb526f0e648e3b6b02e13412145d15ad31024256a4d9639e89ea53669778bf",
+   "changes": [],
+   "error_code": false
+  },
+  "contract:apps/assistant/src/approval/telegram-callback.parser.ts#ApprovalDecisionVerb": {
+   "kind": "type_alias_union",
+   "path": "apps/assistant/src/approval/telegram-callback.parser.ts",
+   "symbol": "ApprovalDecisionVerb",
+   "status": "unchanged",
+   "direction": "bidirectional",
+   "decl_hash_base": "sha256:1ea7608292c2d3505dd308121d9d58dbd7ef675a6f77f6a854077f93201d6f15",
+   "decl_hash_head": "sha256:1ea7608292c2d3505dd308121d9d58dbd7ef675a6f77f6a854077f93201d6f15",
+   "changes": [],
+   "error_code": false
+  },
+  "contract:apps/assistant/src/auth/auth-strategy.interface.ts#AuthStrategyName": {
+   "kind": "type_alias_union",
+   "path": "apps/assistant/src/auth/auth-strategy.interface.ts",
+   "symbol": "AuthStrategyName",
+   "status": "unchanged",
+   "direction": "bidirectional",
+   "decl_hash_base": "sha256:6ddaaa5995f1c3b78e819b5adbd241bcf137bd616a0bee383cec40e968cfa834",
+   "decl_hash_head": "sha256:6ddaaa5995f1c3b78e819b5adbd241bcf137bd616a0bee383cec40e968cfa834",
+   "changes": [],
+   "error_code": false
+  },
+  "contract:apps/assistant/src/config/claude.config.ts#envSchema": {
+   "kind": "zod",
+   "path": "apps/assistant/src/config/claude.config.ts",
+   "symbol": "envSchema",
+   "status": "unchanged",
+   "direction": "bidirectional",
+   "decl_hash_base": "sha256:9a630d62f48b83cdf305e1e7c901c9c002b8d9525a0a2db431f8e74948779680",
+   "decl_hash_head": "sha256:9a630d62f48b83cdf305e1e7c901c9c002b8d9525a0a2db431f8e74948779680",
+   "changes": [],
+   "error_code": false
+  },
+  "contract:apps/assistant/src/config/configuration.ts#configurationSchema": {
+   "kind": "zod",
+   "path": "apps/assistant/src/config/configuration.ts",
+   "symbol": "configurationSchema",
+   "status": "unchanged",
+   "direction": "bidirectional",
+   "decl_hash_base": "sha256:c5f02185bd497e1d018fcc22dbe7de16824c3fba3dcccd84b5313c99384c5984",
+   "decl_hash_head": "sha256:c5f02185bd497e1d018fcc22dbe7de16824c3fba3dcccd84b5313c99384c5984",
+   "changes": [],
+   "error_code": false
+  },
+  "contract:apps/assistant/src/config/configuration.ts#hhmm": {
+   "kind": "zod",
+   "path": "apps/assistant/src/config/configuration.ts",
+   "symbol": "hhmm",
+   "status": "unchanged",
+   "direction": "bidirectional",
+   "decl_hash_base": "sha256:35fd41b28686d9e5971cbe5c4fdcb85702838edf7ce1319260c742bbe88073f6",
+   "decl_hash_head": "sha256:35fd41b28686d9e5971cbe5c4fdcb85702838edf7ce1319260c742bbe88073f6",
+   "changes": [],
+   "error_code": false
+  },
+  "contract:apps/assistant/src/config/configuration.ts#httpOrHttpsUrl": {
+   "kind": "zod",
+   "path": "apps/assistant/src/config/configuration.ts",
+   "symbol": "httpOrHttpsUrl",
+   "status": "unchanged",
+   "direction": "bidirectional",
+   "decl_hash_base": "sha256:768597bfd5381369c8ec73a1c68d88cad512f72e381bb22be94629bd9110ae9e",
+   "decl_hash_head": "sha256:768597bfd5381369c8ec73a1c68d88cad512f72e381bb22be94629bd9110ae9e",
+   "changes": [],
+   "error_code": false
+  },
+  "contract:apps/assistant/src/config/dreamer.config.ts#envSchema": {
+   "kind": "zod",
+   "path": "apps/assistant/src/config/dreamer.config.ts",
+   "symbol": "envSchema",
+   "status": "unchanged",
+   "direction": "bidirectional",
+   "decl_hash_base": "sha256:a3104f17194e247643a5e6170f403ce9d8908a914442f0330a0db77240ee3d41",
+   "decl_hash_head": "sha256:a3104f17194e247643a5e6170f403ce9d8908a914442f0330a0db77240ee3d41",
+   "changes": [],
+   "error_code": false
+  },
+  "contract:apps/assistant/src/config/munera.config.ts#envSchema": {
+   "kind": "zod",
+   "path": "apps/assistant/src/config/munera.config.ts",
+   "symbol": "envSchema",
+   "status": "unchanged",
+   "direction": "bidirectional",
+   "decl_hash_base": "sha256:b6e20b7fd79740df7ae62e1ea1c9c94b8fd7dfa98b4cafdf8e96dbc1fc12b0ee",
+   "decl_hash_head": "sha256:b6e20b7fd79740df7ae62e1ea1c9c94b8fd7dfa98b4cafdf8e96dbc1fc12b0ee",
+   "changes": [],
+   "error_code": false
+  },
+  "contract:apps/assistant/src/config/ops-bot.config.ts#opsBotEnvSchema": {
+   "kind": "zod",
+   "path": "apps/assistant/src/config/ops-bot.config.ts",
+   "symbol": "opsBotEnvSchema",
+   "status": "unchanged",
+   "direction": "bidirectional",
+   "decl_hash_base": "sha256:64cd29ed9caa18b6a259a1583f03f65c50b6a64d3f996624ca039ff1934e795b",
+   "decl_hash_head": "sha256:64cd29ed9caa18b6a259a1583f03f65c50b6a64d3f996624ca039ff1934e795b",
+   "changes": [],
+   "error_code": false
+  },
+  "contract:apps/assistant/src/config/scrutator.config.ts#scrutatorEnvSchema": {
+   "kind": "zod",
+   "path": "apps/assistant/src/config/scrutator.config.ts",
+   "symbol": "scrutatorEnvSchema",
+   "status": "unchanged",
+   "direction": "bidirectional",
+   "decl_hash_base": "sha256:a3db585d74db405110fb95e82a472d453f6eead314df12ce2f86621fc3378baf",
+   "decl_hash_head": "sha256:a3db585d74db405110fb95e82a472d453f6eead314df12ce2f86621fc3378baf",
+   "changes": [],
+   "error_code": false
+  },
+  "contract:apps/assistant/src/config/transcriber.config.ts#envSchema": {
+   "kind": "zod",
+   "path": "apps/assistant/src/config/transcriber.config.ts",
+   "symbol": "envSchema",
+   "status": "unchanged",
+   "direction": "bidirectional",
+   "decl_hash_base": "sha256:adf887521c7ed6fc64bb69e861b7ebba28f3a4d6a2bbe687081cf972408e3c27",
+   "decl_hash_head": "sha256:adf887521c7ed6fc64bb69e861b7ebba28f3a4d6a2bbe687081cf972408e3c27",
+   "changes": [],
+   "error_code": false
+  },
+  "contract:apps/assistant/src/proactive/proactive.controller.ts#TriggerSchema": {
+   "kind": "zod",
+   "path": "apps/assistant/src/proactive/proactive.controller.ts",
+   "symbol": "TriggerSchema",
+   "status": "unchanged",
+   "direction": "bidirectional",
+   "decl_hash_base": "sha256:027c70f339be7ba6701b76fda441606a8a117386f68b31df6f40b32560d7ca89",
+   "decl_hash_head": "sha256:027c70f339be7ba6701b76fda441606a8a117386f68b31df6f40b32560d7ca89",
+   "changes": [],
+   "error_code": false
+  },
+  "contract:apps/assistant/src/proactive/proactive.types.ts#DispatchOutcome": {
+   "kind": "type_alias_union",
+   "path": "apps/assistant/src/proactive/proactive.types.ts",
+   "symbol": "DispatchOutcome",
+   "status": "unchanged",
+   "direction": "bidirectional",
+   "decl_hash_base": "sha256:0b37bc3e59635ec3a7b596444432575068e37962b8935724144ca177ceae6c0f",
+   "decl_hash_head": "sha256:0b37bc3e59635ec3a7b596444432575068e37962b8935724144ca177ceae6c0f",
+   "changes": [],
+   "error_code": false
+  },
+  "contract:apps/assistant/src/proactive/proactive.types.ts#ProactiveConfigSchema": {
+   "kind": "zod",
+   "path": "apps/assistant/src/proactive/proactive.types.ts",
+   "symbol": "ProactiveConfigSchema",
+   "status": "unchanged",
+   "direction": "bidirectional",
+   "decl_hash_base": "sha256:f51a5b83a3db1c0dfe6735368ede633792f5d0bb4dc46ef1d2c3e8cfe022d32e",
+   "decl_hash_head": "sha256:f51a5b83a3db1c0dfe6735368ede633792f5d0bb4dc46ef1d2c3e8cfe022d32e",
+   "changes": [],
+   "error_code": false
+  },
+  "contract:apps/assistant/src/proactive/proactive.types.ts#ProactiveKind": {
+   "kind": "type_alias_union",
+   "path": "apps/assistant/src/proactive/proactive.types.ts",
+   "symbol": "ProactiveKind",
+   "status": "unchanged",
+   "direction": "bidirectional",
+   "decl_hash_base": "sha256:d652cefa55885cfe968e3808dbece956281dfa7ba57e0e146f9a921ea7d74757",
+   "decl_hash_head": "sha256:d652cefa55885cfe968e3808dbece956281dfa7ba57e0e146f9a921ea7d74757",
+   "changes": [],
+   "error_code": false
+  },
+  "contract:packages/core/src/clients/ops-bot.types.ts#EcosystemSnapshotSchema": {
+   "kind": "zod",
+   "path": "packages/core/src/clients/ops-bot.types.ts",
+   "symbol": "EcosystemSnapshotSchema",
+   "status": "unchanged",
+   "direction": "bidirectional",
+   "decl_hash_base": "sha256:1a458e09a358831b68e1f98c1aa45c8726355a6a71a9b317ed29fd2ec259d174",
+   "decl_hash_head": "sha256:1a458e09a358831b68e1f98c1aa45c8726355a6a71a9b317ed29fd2ec259d174",
+   "changes": [],
+   "error_code": false
+  },
+  "contract:packages/core/src/clients/ops-bot.types.ts#EmitEventInputSchema": {
+   "kind": "zod",
+   "path": "packages/core/src/clients/ops-bot.types.ts",
+   "symbol": "EmitEventInputSchema",
+   "status": "unchanged",
+   "direction": "input",
+   "decl_hash_base": "sha256:e2a18dbbf41f9bf1376a0f4d869aa2bacf4ace832502fa816cf10a9f863c4e51",
+   "decl_hash_head": "sha256:e2a18dbbf41f9bf1376a0f4d869aa2bacf4ace832502fa816cf10a9f863c4e51",
+   "changes": [],
+   "error_code": false
+  },
+  "contract:packages/core/src/clients/ops-bot.types.ts#EmitEventResponseSchema": {
+   "kind": "zod",
+   "path": "packages/core/src/clients/ops-bot.types.ts",
+   "symbol": "EmitEventResponseSchema",
+   "status": "unchanged",
+   "direction": "output",
+   "decl_hash_base": "sha256:ffbb40ee4e70ffde85b66505bb54bae3c3b9cef9b8ce60ff3596149b68764ccb",
+   "decl_hash_head": "sha256:ffbb40ee4e70ffde85b66505bb54bae3c3b9cef9b8ce60ff3596149b68764ccb",
+   "changes": [],
+   "error_code": false
+  },
+  "contract:packages/core/src/clients/ops-bot.types.ts#ExecuteCommandInputSchema": {
+   "kind": "zod",
+   "path": "packages/core/src/clients/ops-bot.types.ts",
+   "symbol": "ExecuteCommandInputSchema",
+   "status": "unchanged",
+   "direction": "input",
+   "decl_hash_base": "sha256:54bc08f19df9279e21adbe95cfed0b2ba8289fffde0ffc2e043421b24e1534a5",
+   "decl_hash_head": "sha256:54bc08f19df9279e21adbe95cfed0b2ba8289fffde0ffc2e043421b24e1534a5",
+   "changes": [],
+   "error_code": false
+  },
+  "contract:packages/core/src/clients/ops-bot.types.ts#ExecuteCommandResponseSchema": {
+   "kind": "zod",
+   "path": "packages/core/src/clients/ops-bot.types.ts",
+   "symbol": "ExecuteCommandResponseSchema",
+   "status": "unchanged",
+   "direction": "output",
+   "decl_hash_base": "sha256:bd53c158cea02a45d6b00b554373e1a2f789168e156b24c24903127038760e6d",
+   "decl_hash_head": "sha256:bd53c158cea02a45d6b00b554373e1a2f789168e156b24c24903127038760e6d",
+   "changes": [],
+   "error_code": false
+  },
+  "contract:packages/core/src/clients/ops-bot.types.ts#OpsBotCommandKindSchema": {
+   "kind": "zod",
+   "path": "packages/core/src/clients/ops-bot.types.ts",
+   "symbol": "OpsBotCommandKindSchema",
+   "status": "unchanged",
+   "direction": "bidirectional",
+   "decl_hash_base": "sha256:ba8ec1430c2df4b97522fe20777fa8f48ec62cfa34a883d13ca768d31f7e85c6",
+   "decl_hash_head": "sha256:ba8ec1430c2df4b97522fe20777fa8f48ec62cfa34a883d13ca768d31f7e85c6",
+   "changes": [],
+   "error_code": false
+  },
+  "contract:packages/core/src/clients/ops-bot.types.ts#OpsBotWireEventSchema": {
+   "kind": "zod",
+   "path": "packages/core/src/clients/ops-bot.types.ts",
+   "symbol": "OpsBotWireEventSchema",
+   "status": "unchanged",
+   "direction": "output",
+   "decl_hash_base": "sha256:8111a5ba51fb7f7e1a1feb69f9463cba7c8bdcb105a9e3477de8cb8769c12f50",
+   "decl_hash_head": "sha256:8111a5ba51fb7f7e1a1feb69f9463cba7c8bdcb105a9e3477de8cb8769c12f50",
+   "changes": [],
+   "error_code": false
+  },
+  "contract:packages/core/src/clients/scrutator.types.ts#HealthResponseSchema": {
+   "kind": "zod",
+   "path": "packages/core/src/clients/scrutator.types.ts",
+   "symbol": "HealthResponseSchema",
+   "status": "unchanged",
+   "direction": "output",
+   "decl_hash_base": "sha256:d446de5960ff3c613a9830f7b021dd98befd71ca58fdcc3f52cd82c256fe6ef1",
+   "decl_hash_head": "sha256:d446de5960ff3c613a9830f7b021dd98befd71ca58fdcc3f52cd82c256fe6ef1",
+   "changes": [],
+   "error_code": false
+  },
+  "contract:packages/core/src/clients/scrutator.types.ts#IngestRequestSchema": {
+   "kind": "zod",
+   "path": "packages/core/src/clients/scrutator.types.ts",
+   "symbol": "IngestRequestSchema",
+   "status": "unchanged",
+   "direction": "input",
+   "decl_hash_base": "sha256:971d4af574354017a53d6bcdb81eda679affbb102ccbac7dce3e5475a911ccc5",
+   "decl_hash_head": "sha256:971d4af574354017a53d6bcdb81eda679affbb102ccbac7dce3e5475a911ccc5",
+   "changes": [],
+   "error_code": false
+  },
+  "contract:packages/core/src/clients/scrutator.types.ts#IngestResultSchema": {
+   "kind": "zod",
+   "path": "packages/core/src/clients/scrutator.types.ts",
+   "symbol": "IngestResultSchema",
+   "status": "unchanged",
+   "direction": "output",
+   "decl_hash_base": "sha256:2609d0b1e6c91061e19d6c3f093b72a837d5913c95e76c8a6eb39beab3664b75",
+   "decl_hash_head": "sha256:2609d0b1e6c91061e19d6c3f093b72a837d5913c95e76c8a6eb39beab3664b75",
+   "changes": [],
+   "error_code": false
+  },
+  "contract:packages/core/src/clients/scrutator.types.ts#RecallHitSchema": {
+   "kind": "zod",
+   "path": "packages/core/src/clients/scrutator.types.ts",
+   "symbol": "RecallHitSchema",
+   "status": "unchanged",
+   "direction": "bidirectional",
+   "decl_hash_base": "sha256:13b41c58cdefb64a017a0493001e35a68af35de56406c844f96853b5411231b4",
+   "decl_hash_head": "sha256:13b41c58cdefb64a017a0493001e35a68af35de56406c844f96853b5411231b4",
+   "changes": [],
+   "error_code": false
+  },
+  "contract:packages/core/src/clients/scrutator.types.ts#RecallRequestSchema": {
+   "kind": "zod",
+   "path": "packages/core/src/clients/scrutator.types.ts",
+   "symbol": "RecallRequestSchema",
+   "status": "unchanged",
+   "direction": "input",
+   "decl_hash_base": "sha256:7ad7bca7cde53338040433643039114b2146fb9eaec3c802334384a7aa5e26a3",
+   "decl_hash_head": "sha256:7ad7bca7cde53338040433643039114b2146fb9eaec3c802334384a7aa5e26a3",
+   "changes": [],
+   "error_code": false
+  },
+  "contract:packages/core/src/clients/scrutator.types.ts#RecallResultSchema": {
+   "kind": "zod",
+   "path": "packages/core/src/clients/scrutator.types.ts",
+   "symbol": "RecallResultSchema",
+   "status": "unchanged",
+   "direction": "output",
+   "decl_hash_base": "sha256:d7fceecf09332cfe6d7bede6e78f2a42ae0bc377ff48fc29e73710fc6ff6ade5",
+   "decl_hash_head": "sha256:d7fceecf09332cfe6d7bede6e78f2a42ae0bc377ff48fc29e73710fc6ff6ade5",
+   "changes": [],
+   "error_code": false
+  },
+  "contract:packages/core/src/clients/scrutator.types.ts#SearchHitSchema": {
+   "kind": "zod",
+   "path": "packages/core/src/clients/scrutator.types.ts",
+   "symbol": "SearchHitSchema",
+   "status": "unchanged",
+   "direction": "bidirectional",
+   "decl_hash_base": "sha256:df14f2f65d91c341009296f1b3b5631ee681eef44e1030ebd58421886af520cd",
+   "decl_hash_head": "sha256:df14f2f65d91c341009296f1b3b5631ee681eef44e1030ebd58421886af520cd",
+   "changes": [],
+   "error_code": false
+  },
+  "contract:packages/core/src/clients/scrutator.types.ts#SearchRequestSchema": {
+   "kind": "zod",
+   "path": "packages/core/src/clients/scrutator.types.ts",
+   "symbol": "SearchRequestSchema",
+   "status": "unchanged",
+   "direction": "input",
+   "decl_hash_base": "sha256:3227987871c4fd4f7f377ecdbb0d3571a348de0484b0ee36d24fa1c3e1d8c6cf",
+   "decl_hash_head": "sha256:3227987871c4fd4f7f377ecdbb0d3571a348de0484b0ee36d24fa1c3e1d8c6cf",
+   "changes": [],
+   "error_code": false
+  },
+  "contract:packages/core/src/clients/scrutator.types.ts#SearchResultSchema": {
+   "kind": "zod",
+   "path": "packages/core/src/clients/scrutator.types.ts",
+   "symbol": "SearchResultSchema",
+   "status": "unchanged",
+   "direction": "output",
+   "decl_hash_base": "sha256:8de50745dc35c7c1de578cee00c53094d3aeb710646ec9cfea3853e923bc9e06",
+   "decl_hash_head": "sha256:8de50745dc35c7c1de578cee00c53094d3aeb710646ec9cfea3853e923bc9e06",
+   "changes": [],
+   "error_code": false
+  },
+  "contract:packages/core/src/health/dep-probe.ts#ProbeStatus": {
+   "kind": "type_alias_union",
+   "path": "packages/core/src/health/dep-probe.ts",
+   "symbol": "ProbeStatus",
+   "status": "unchanged",
+   "direction": "bidirectional",
+   "decl_hash_base": "sha256:3239d1acb627b55a64fbb43f927aa1de82958018aa293ae98942e4b37e4dae72",
+   "decl_hash_head": "sha256:3239d1acb627b55a64fbb43f927aa1de82958018aa293ae98942e4b37e4dae72",
+   "changes": [],
+   "error_code": false
+  },
+  "contract:packages/core/src/types/schemas.ts#OpsBotEventSchema": {
+   "kind": "zod",
+   "path": "packages/core/src/types/schemas.ts",
+   "symbol": "OpsBotEventSchema",
+   "status": "unchanged",
+   "direction": "output",
+   "decl_hash_base": "sha256:8373e712d2d85b4d1333679b4e57d4e8163354311015cf9c05e0ef870c6fdea1",
+   "decl_hash_head": "sha256:8373e712d2d85b4d1333679b4e57d4e8163354311015cf9c05e0ef870c6fdea1",
+   "changes": [],
+   "error_code": false
+  },
+  "contract:packages/core/src/types/schemas.ts#TelegramUpdateStubSchema": {
+   "kind": "zod",
+   "path": "packages/core/src/types/schemas.ts",
+   "symbol": "TelegramUpdateStubSchema",
+   "status": "unchanged",
+   "direction": "bidirectional",
+   "decl_hash_base": "sha256:e8e75d740ba6af890e8b37ad8d937d4956466d9d3ce3b10799cb4fd1c2946f57",
+   "decl_hash_head": "sha256:e8e75d740ba6af890e8b37ad8d937d4956466d9d3ce3b10799cb4fd1c2946f57",
+   "changes": [],
+   "error_code": false
+  }
+ },
+ "breaking": [],
+ "edges": [
+  {
+   "edge": {
+    "from": "code_unit:apps/assistant/src/aal/agent-health.types.ts",
+    "to": "contract:apps/assistant/src/aal/agent-health.types.ts#AgentCircuitState",
+    "type": "implements_contract",
+    "provenance": "deterministic",
+    "via": "declaration",
+    "symbol": "AgentCircuitState"
+   },
+   "verdict": "verified",
+   "reasons": [
+    "provider side: unchanged"
+   ]
+  },
+  {
+   "edge": {
+    "from": "code_unit:apps/assistant/src/aal/agent-health.types.ts",
+    "to": "contract:apps/assistant/src/aal/agent-health.types.ts#AgentHealthState",
+    "type": "implements_contract",
+    "provenance": "deterministic",
+    "via": "declaration",
+    "symbol": "AgentHealthState"
+   },
+   "verdict": "verified",
+   "reasons": [
+    "provider side: unchanged"
+   ]
+  },
+  {
+   "edge": {
+    "from": "code_unit:apps/assistant/src/aal/exceptions.ts",
+    "to": "contract:apps/assistant/src/aal/exceptions.ts#AgentErrorKind",
+    "type": "implements_contract",
+    "provenance": "deterministic",
+    "via": "declaration",
+    "symbol": "AgentErrorKind"
+   },
+   "verdict": "verified",
+   "reasons": [
+    "provider side: unchanged"
+   ]
+  },
+  {
+   "edge": {
+    "from": "code_unit:apps/assistant/src/aal/scope.loader.ts",
+    "to": "contract:apps/assistant/src/aal/scope.schema.ts#ScopeManifestSchema",
+    "type": "consumes_contract",
+    "provenance": "deterministic",
+    "via": "import-symbol",
+    "symbol": "ScopeManifestSchema"
+   },
+   "verdict": "failed",
+   "reasons": [
+    "consumer reads key `data` that the provider does not declare",
+    "consumer reads key `error` that the provider does not declare",
+    "consumer reads key `success` that the provider does not declare"
+   ],
+   "projection": {
+    "bindings": [
+     "parsed"
+    ],
+    "keys_read": [
+     "data",
+     "error",
+     "success"
+    ],
+    "keys_sent": [],
+    "literals_sent": 0,
+    "values_used": [],
+    "complete": true,
+    "incomplete_reasons": []
+   }
+  },
+  {
+   "edge": {
+    "from": "code_unit:apps/assistant/src/aal/scope.schema.ts",
+    "to": "contract:apps/assistant/src/aal/scope.schema.ts#ScopeManifestSchema",
+    "type": "implements_contract",
+    "provenance": "deterministic",
+    "via": "declaration",
+    "symbol": "ScopeManifestSchema"
+   },
+   "verdict": "verified",
+   "reasons": [
+    "provider side: unchanged"
+   ]
+  },
+  {
+   "edge": {
+    "from": "code_unit:apps/assistant/src/aal/scope.schema.ts",
+    "to": "contract:apps/assistant/src/aal/scope.schema.ts#agentScopeEntrySchema",
+    "type": "implements_contract",
+    "provenance": "deterministic",
+    "via": "declaration",
+    "symbol": "agentScopeEntrySchema"
+   },
+   "verdict": "verified",
+   "reasons": [
+    "provider side: unchanged"
+   ]
+  },
+  {
+   "edge": {
+    "from": "code_unit:apps/assistant/src/aal/scope.schema.ts",
+    "to": "contract:apps/assistant/src/aal/scope.schema.ts#intentSchema",
+    "type": "implements_contract",
+    "provenance": "deterministic",
+    "via": "declaration",
+    "symbol": "intentSchema"
+   },
+   "verdict": "verified",
+   "reasons": [
+    "provider side: unchanged"
+   ]
+  },
+  {
+   "edge": {
+    "from": "code_unit:apps/assistant/src/aal/scope.schema.ts",
+    "to": "contract:apps/assistant/src/aal/scope.schema.ts#principalScopeEntrySchema",
+    "type": "implements_contract",
+    "provenance": "deterministic",
+    "via": "declaration",
+    "symbol": "principalScopeEntrySchema"
+   },
+   "verdict": "verified",
+   "reasons": [
+    "provider side: unchanged"
+   ]
+  },
+  {
+   "edge": {
+    "from": "code_unit:apps/assistant/src/agents/claude/claude.schemas.ts",
+    "to": "contract:apps/assistant/src/agents/claude/claude.schemas.ts#ClaudeContentBlockSchema",
+    "type": "implements_contract",
+    "provenance": "deterministic",
+    "via": "declaration",
+    "symbol": "ClaudeContentBlockSchema"
+   },
+   "verdict": "verified",
+   "reasons": [
+    "provider side: unchanged"
+   ]
+  },
+  {
+   "edge": {
+    "from": "code_unit:apps/assistant/src/agents/claude/claude.client.ts",
+    "to": "contract:apps/assistant/src/agents/claude/claude.schemas.ts#ClaudeResultSchema",
+    "type": "consumes_contract",
+    "provenance": "deterministic",
+    "via": "import-symbol",
+    "symbol": "ClaudeResultSchema"
+   },
+   "verdict": "verified",
+   "reasons": [
+    "no breaking change; consumer usage ⊆ provider (usage not fully narrowable: projection not defined for schema kind union — nothing changed to break it)"
+   ],
+   "projection": {
+    "bindings": [],
+    "keys_read": [],
+    "keys_sent": [],
+    "literals_sent": 0,
+    "values_used": [],
+    "complete": false,
+    "incomplete_reasons": [
+     "projection not defined for schema kind union"
+    ]
+   }
+  },
+  {
+   "edge": {
+    "from": "code_unit:apps/assistant/src/agents/claude/claude.schemas.ts",
+    "to": "contract:apps/assistant/src/agents/claude/claude.schemas.ts#ClaudeResultSchema",
+    "type": "implements_contract",
+    "provenance": "deterministic",
+    "via": "declaration",
+    "symbol": "ClaudeResultSchema"
+   },
+   "verdict": "verified",
+   "reasons": [
+    "provider side: unchanged"
+   ]
+  },
+  {
+   "edge": {
+    "from": "code_unit:apps/assistant/src/agents/dreamer/dreamer.client.ts",
+    "to": "contract:apps/assistant/src/agents/dreamer/dreamer.schemas.ts#DreamerResultSchema",
+    "type": "consumes_contract",
+    "provenance": "deterministic",
+    "via": "import-symbol",
+    "symbol": "DreamerResultSchema"
+   },
+   "verdict": "verified",
+   "reasons": [
+    "no breaking change; consumer usage ⊆ provider (usage not fully narrowable: projection not defined for schema kind union — nothing changed to break it)"
+   ],
+   "projection": {
+    "bindings": [],
+    "keys_read": [],
+    "keys_sent": [],
+    "literals_sent": 0,
+    "values_used": [],
+    "complete": false,
+    "incomplete_reasons": [
+     "projection not defined for schema kind union"
+    ]
+   }
+  },
+  {
+   "edge": {
+    "from": "code_unit:apps/assistant/src/agents/dreamer/dreamer.schemas.ts",
+    "to": "contract:apps/assistant/src/agents/dreamer/dreamer.schemas.ts#DreamerResultSchema",
+    "type": "implements_contract",
+    "provenance": "deterministic",
+    "via": "declaration",
+    "symbol": "DreamerResultSchema"
+   },
+   "verdict": "verified",
+   "reasons": [
+    "provider side: unchanged"
+   ]
+  },
+  {
+   "edge": {
+    "from": "code_unit:apps/assistant/src/agents/dreamer/dreamer.client.ts",
+    "to": "contract:apps/assistant/src/agents/dreamer/dreamer.schemas.ts#IndexPageOkSchema",
+    "type": "consumes_contract",
+    "provenance": "deterministic",
+    "via": "import-symbol",
+    "symbol": "IndexPageOkSchema"
+   },
+   "verdict": "verified",
+   "reasons": [
+    "no breaking change; consumer usage ⊆ provider (usage not fully narrowable: no binding of the contract type found in the consumer — nothing changed to break it)"
+   ],
+   "projection": {
+    "bindings": [],
+    "keys_read": [],
+    "keys_sent": [],
+    "literals_sent": 0,
+    "values_used": [],
+    "complete": false,
+    "incomplete_reasons": [
+     "no binding of the contract type found in the consumer"
+    ]
+   }
+  },
+  {
+   "edge": {
+    "from": "code_unit:apps/assistant/src/agents/dreamer/dreamer.schemas.ts",
+    "to": "contract:apps/assistant/src/agents/dreamer/dreamer.schemas.ts#IndexPageOkSchema",
+    "type": "implements_contract",
+    "provenance": "deterministic",
+    "via": "declaration",
+    "symbol": "IndexPageOkSchema"
+   },
+   "verdict": "verified",
+   "reasons": [
+    "provider side: unchanged"
+   ]
+  },
+  {
+   "edge": {
+    "from": "code_unit:apps/assistant/src/agents/dreamer/dreamer.client.ts",
+    "to": "contract:apps/assistant/src/agents/dreamer/dreamer.schemas.ts#LinkGraphOkSchema",
+    "type": "consumes_contract",
+    "provenance": "deterministic",
+    "via": "import-symbol",
+    "symbol": "LinkGraphOkSchema"
+   },
+   "verdict": "verified",
+   "reasons": [
+    "no breaking change; consumer usage ⊆ provider (usage not fully narrowable: no binding of the contract type found in the consumer — nothing changed to break it)"
+   ],
+   "projection": {
+    "bindings": [],
+    "keys_read": [],
+    "keys_sent": [],
+    "literals_sent": 0,
+    "values_used": [],
+    "complete": false,
+    "incomplete_reasons": [
+     "no binding of the contract type found in the consumer"
+    ]
+   }
+  },
+  {
+   "edge": {
+    "from": "code_unit:apps/assistant/src/agents/dreamer/dreamer.schemas.ts",
+    "to": "contract:apps/assistant/src/agents/dreamer/dreamer.schemas.ts#LinkGraphOkSchema",
+    "type": "implements_contract",
+    "provenance": "deterministic",
+    "via": "declaration",
+    "symbol": "LinkGraphOkSchema"
+   },
+   "verdict": "verified",
+   "reasons": [
+    "provider side: unchanged"
+   ]
+  },
+  {
+   "edge": {
+    "from": "code_unit:apps/assistant/src/agents/dreamer/dreamer.client.ts",
+    "to": "contract:apps/assistant/src/agents/dreamer/dreamer.schemas.ts#SummarizeOkSchema",
+    "type": "consumes_contract",
+    "provenance": "deterministic",
+    "via": "import-symbol",
+    "symbol": "SummarizeOkSchema"
+   },
+   "verdict": "verified",
+   "reasons": [
+    "no breaking change; consumer usage ⊆ provider (usage not fully narrowable: no binding of the contract type found in the consumer — nothing changed to break it)"
+   ],
+   "projection": {
+    "bindings": [],
+    "keys_read": [],
+    "keys_sent": [],
+    "literals_sent": 0,
+    "values_used": [],
+    "complete": false,
+    "incomplete_reasons": [
+     "no binding of the contract type found in the consumer"
+    ]
+   }
+  },
+  {
+   "edge": {
+    "from": "code_unit:apps/assistant/src/agents/dreamer/dreamer.schemas.ts",
+    "to": "contract:apps/assistant/src/agents/dreamer/dreamer.schemas.ts#SummarizeOkSchema",
+    "type": "implements_contract",
+    "provenance": "deterministic",
+    "via": "declaration",
+    "symbol": "SummarizeOkSchema"
+   },
+   "verdict": "verified",
+   "reasons": [
+    "provider side: unchanged"
+   ]
+  },
+  {
+   "edge": {
+    "from": "code_unit:apps/assistant/src/agents/munera/munera.client.ts",
+    "to": "contract:apps/assistant/src/agents/munera/munera.schemas.ts#MuneraTaskListSchema",
+    "type": "consumes_contract",
+    "provenance": "deterministic",
+    "via": "import-symbol",
+    "symbol": "MuneraTaskListSchema"
+   },
+   "verdict": "verified",
+   "reasons": [
+    "no breaking change; consumer usage ⊆ provider (usage not fully narrowable: projection not defined for schema kind array — nothing changed to break it)"
+   ],
+   "projection": {
+    "bindings": [
+     "parsed"
+    ],
+    "keys_read": [],
+    "keys_sent": [],
+    "literals_sent": 0,
+    "values_used": [],
+    "complete": false,
+    "incomplete_reasons": [
+     "projection not defined for schema kind array"
+    ]
+   }
+  },
+  {
+   "edge": {
+    "from": "code_unit:apps/assistant/src/agents/munera/munera.schemas.ts",
+    "to": "contract:apps/assistant/src/agents/munera/munera.schemas.ts#MuneraTaskListSchema",
+    "type": "implements_contract",
+    "provenance": "deterministic",
+    "via": "declaration",
+    "symbol": "MuneraTaskListSchema"
+   },
+   "verdict": "verified",
+   "reasons": [
+    "provider side: unchanged"
+   ]
+  },
+  {
+   "edge": {
+    "from": "code_unit:apps/assistant/src/agents/munera/munera.client.ts",
+    "to": "contract:apps/assistant/src/agents/munera/munera.schemas.ts#TaskListResultSchema",
+    "type": "consumes_contract",
+    "provenance": "deterministic",
+    "via": "import-symbol",
+    "symbol": "TaskListResultSchema"
+   },
+   "verdict": "verified",
+   "reasons": [
+    "no breaking change; consumer usage ⊆ provider (usage not fully narrowable: projection not defined for schema kind union — nothing changed to break it)"
+   ],
+   "projection": {
+    "bindings": [],
+    "keys_read": [],
+    "keys_sent": [],
+    "literals_sent": 0,
+    "values_used": [],
+    "complete": false,
+    "incomplete_reasons": [
+     "projection not defined for schema kind union"
+    ]
+   }
+  },
+  {
+   "edge": {
+    "from": "code_unit:apps/assistant/src/agents/munera/munera.schemas.ts",
+    "to": "contract:apps/assistant/src/agents/munera/munera.schemas.ts#TaskListResultSchema",
+    "type": "implements_contract",
+    "provenance": "deterministic",
+    "via": "declaration",
+    "symbol": "TaskListResultSchema"
+   },
+   "verdict": "verified",
+   "reasons": [
+    "provider side: unchanged"
+   ]
+  },
+  {
+   "edge": {
+    "from": "code_unit:apps/assistant/src/agents/munera/munera.client.ts",
+    "to": "contract:apps/assistant/src/agents/munera/munera.schemas.ts#TaskResultSchema",
+    "type": "consumes_contract",
+    "provenance": "deterministic",
+    "via": "import-symbol",
+    "symbol": "TaskResultSchema"
+   },
+   "verdict": "verified",
+   "reasons": [
+    "no breaking change; consumer usage ⊆ provider (usage not fully narrowable: projection not defined for schema kind union — nothing changed to break it)"
+   ],
+   "projection": {
+    "bindings": [],
+    "keys_read": [],
+    "keys_sent": [],
+    "literals_sent": 0,
+    "values_used": [],
+    "complete": false,
+    "incomplete_reasons": [
+     "projection not defined for schema kind union"
+    ]
+   }
+  },
+  {
+   "edge": {
+    "from": "code_unit:apps/assistant/src/agents/munera/munera.schemas.ts",
+    "to": "contract:apps/assistant/src/agents/munera/munera.schemas.ts#TaskResultSchema",
+    "type": "implements_contract",
+    "provenance": "deterministic",
+    "via": "declaration",
+    "symbol": "TaskResultSchema"
+   },
+   "verdict": "verified",
+   "reasons": [
+    "provider side: unchanged"
+   ]
+  },
+  {
+   "edge": {
+    "from": "code_unit:apps/assistant/src/agents/transcriber/transcriber.client.ts",
+    "to": "contract:apps/assistant/src/agents/transcriber/transcriber.schemas.ts#TranscribeResultSchema",
+    "type": "consumes_contract",
+    "provenance": "deterministic",
+    "via": "import-symbol",
+    "symbol": "TranscribeResultSchema"
+   },
+   "verdict": "verified",
+   "reasons": [
+    "no breaking change; consumer usage ⊆ provider (usage not fully narrowable: projection not defined for schema kind union — nothing changed to break it)"
+   ],
+   "projection": {
+    "bindings": [],
+    "keys_read": [],
+    "keys_sent": [],
+    "literals_sent": 0,
+    "values_used": [],
+    "complete": false,
+    "incomplete_reasons": [
+     "projection not defined for schema kind union"
+    ]
+   }
+  },
+  {
+   "edge": {
+    "from": "code_unit:apps/assistant/src/agents/transcriber/transcriber.schemas.ts",
+    "to": "contract:apps/assistant/src/agents/transcriber/transcriber.schemas.ts#TranscribeResultSchema",
+    "type": "implements_contract",
+    "provenance": "deterministic",
+    "via": "declaration",
+    "symbol": "TranscribeResultSchema"
+   },
+   "verdict": "verified",
+   "reasons": [
+    "provider side: unchanged"
+   ]
+  },
+  {
+   "edge": {
+    "from": "code_unit:apps/assistant/src/approval/approval.service.ts",
+    "to": "contract:apps/assistant/src/approval/redis-idempotency.service.ts#ClaimOutcome",
+    "type": "consumes_contract",
+    "provenance": "deterministic",
+    "via": "import-symbol",
+    "symbol": "ClaimOutcome"
+   },
+   "verdict": "verified",
+   "reasons": [
+    "no breaking change; consumer usage ⊆ provider"
+   ],
+   "projection": {
+    "bindings": [
+     "outcome"
+    ],
+    "keys_read": [],
+    "keys_sent": [],
+    "literals_sent": 0,
+    "values_used": [
+     "already",
+     "expired"
+    ],
+    "complete": true,
+    "incomplete_reasons": []
+   }
+  },
+  {
+   "edge": {
+    "from": "code_unit:apps/assistant/test/e2e/munera-task-create-hitl.e2e.spec.ts",
+    "to": "contract:apps/assistant/src/approval/redis-idempotency.service.ts#ClaimOutcome",
+    "type": "consumes_contract",
+    "provenance": "deterministic",
+    "via": "import-symbol",
+    "symbol": "ClaimOutcome"
+   },
+   "verdict": "verified",
+   "reasons": [
+    "no breaking change; consumer usage ⊆ provider"
+   ],
+   "projection": {
+    "bindings": [],
+    "keys_read": [],
+    "keys_sent": [],
+    "literals_sent": 0,
+    "values_used": [
+     "already",
+     "expired"
+    ],
+    "complete": true,
+    "incomplete_reasons": []
+   }
+  },
+  {
+   "edge": {
+    "from": "code_unit:apps/assistant/test/e2e/opsbot-bidirectional.e2e.spec.ts",
+    "to": "contract:apps/assistant/src/approval/redis-idempotency.service.ts#ClaimOutcome",
+    "type": "consumes_contract",
+    "provenance": "deterministic",
+    "via": "import-symbol",
+    "symbol": "ClaimOutcome"
+   },
+   "verdict": "verified",
+   "reasons": [
+    "no breaking change; consumer usage ⊆ provider"
+   ],
+   "projection": {
+    "bindings": [],
+    "keys_read": [],
+    "keys_sent": [],
+    "literals_sent": 0,
+    "values_used": [
+     "already",
+     "expired"
+    ],
+    "complete": true,
+    "incomplete_reasons": []
+   }
+  },
+  {
+   "edge": {
+    "from": "code_unit:apps/assistant/src/approval/redis-idempotency.service.ts",
+    "to": "contract:apps/assistant/src/approval/redis-idempotency.service.ts#ClaimOutcome",
+    "type": "implements_contract",
+    "provenance": "deterministic",
+    "via": "declaration",
+    "symbol": "ClaimOutcome"
+   },
+   "verdict": "verified",
+   "reasons": [
+    "provider side: unchanged"
+   ]
+  },
+  {
+   "edge": {
+    "from": "code_unit:apps/assistant/src/approval/telegram-callback.parser.ts",
+    "to": "contract:apps/assistant/src/approval/telegram-callback.parser.ts#ApprovalDecisionTag",
+    "type": "implements_contract",
+    "provenance": "deterministic",
+    "via": "declaration",
+    "symbol": "ApprovalDecisionTag"
+   },
+   "verdict": "verified",
+   "reasons": [
+    "provider side: unchanged"
+   ]
+  },
+  {
+   "edge": {
+    "from": "code_unit:apps/assistant/src/approval/telegram-callback.parser.ts",
+    "to": "contract:apps/assistant/src/approval/telegram-callback.parser.ts#ApprovalDecisionVerb",
+    "type": "implements_contract",
+    "provenance": "deterministic",
+    "via": "declaration",
+    "symbol": "ApprovalDecisionVerb"
+   },
+   "verdict": "verified",
+   "reasons": [
+    "provider side: unchanged"
+   ]
+  },
+  {
+   "edge": {
+    "from": "code_unit:apps/assistant/src/auth/auth.dispatcher.spec.ts",
+    "to": "contract:apps/assistant/src/auth/auth-strategy.interface.ts#AuthStrategyName",
+    "type": "consumes_contract",
+    "provenance": "deterministic",
+    "via": "import-symbol",
+    "symbol": "AuthStrategyName"
+   },
+   "verdict": "verified",
+   "reasons": [
+    "no breaking change; consumer usage ⊆ provider"
+   ],
+   "projection": {
+    "bindings": [
+     "name"
+    ],
+    "keys_read": [],
+    "keys_sent": [],
+    "literals_sent": 0,
+    "values_used": [
+     "auth-arcana-jwt",
+     "tailscale",
+     "vault-api-key"
+    ],
+    "complete": true,
+    "incomplete_reasons": []
+   }
+  },
+  {
+   "edge": {
+    "from": "code_unit:apps/assistant/src/auth/auth-strategy.interface.ts",
+    "to": "contract:apps/assistant/src/auth/auth-strategy.interface.ts#AuthStrategyName",
+    "type": "implements_contract",
+    "provenance": "deterministic",
+    "via": "declaration",
+    "symbol": "AuthStrategyName"
+   },
+   "verdict": "verified",
+   "reasons": [
+    "provider side: unchanged"
+   ]
+  },
+  {
+   "edge": {
+    "from": "code_unit:apps/assistant/src/config/claude.config.ts",
+    "to": "contract:apps/assistant/src/config/claude.config.ts#envSchema",
+    "type": "implements_contract",
+    "provenance": "deterministic",
+    "via": "declaration",
+    "symbol": "envSchema"
+   },
+   "verdict": "verified",
+   "reasons": [
+    "provider side: unchanged"
+   ]
+  },
+  {
+   "edge": {
+    "from": "code_unit:apps/assistant/src/app.module.ts",
+    "to": "contract:apps/assistant/src/config/configuration.ts#configurationSchema",
+    "type": "consumes_contract",
+    "provenance": "deterministic",
+    "via": "import-symbol",
+    "symbol": "configurationSchema"
+   },
+   "verdict": "verified",
+   "reasons": [
+    "no breaking change; consumer usage ⊆ provider (usage not fully narrowable: no binding of the contract type found in the consumer — nothing changed to break it)"
+   ],
+   "projection": {
+    "bindings": [],
+    "keys_read": [],
+    "keys_sent": [],
+    "literals_sent": 0,
+    "values_used": [],
+    "complete": false,
+    "incomplete_reasons": [
+     "no binding of the contract type found in the consumer"
+    ]
+   }
+  },
+  {
+   "edge": {
+    "from": "code_unit:apps/assistant/src/config/configuration.spec.ts",
+    "to": "contract:apps/assistant/src/config/configuration.ts#configurationSchema",
+    "type": "consumes_contract",
+    "provenance": "deterministic",
+    "via": "import-symbol",
+    "symbol": "configurationSchema"
+   },
+   "verdict": "verified",
+   "reasons": [
+    "no breaking change; consumer usage ⊆ provider (usage not fully narrowable: no binding of the contract type found in the consumer — nothing changed to break it)"
+   ],
+   "projection": {
+    "bindings": [],
+    "keys_read": [],
+    "keys_sent": [],
+    "literals_sent": 0,
+    "values_used": [],
+    "complete": false,
+    "incomplete_reasons": [
+     "no binding of the contract type found in the consumer"
+    ]
+   }
+  },
+  {
+   "edge": {
+    "from": "code_unit:apps/assistant/src/config/configuration.ts",
+    "to": "contract:apps/assistant/src/config/configuration.ts#configurationSchema",
+    "type": "implements_contract",
+    "provenance": "deterministic",
+    "via": "declaration",
+    "symbol": "configurationSchema"
+   },
+   "verdict": "verified",
+   "reasons": [
+    "provider side: unchanged"
+   ]
+  },
+  {
+   "edge": {
+    "from": "code_unit:apps/assistant/src/config/configuration.ts",
+    "to": "contract:apps/assistant/src/config/configuration.ts#hhmm",
+    "type": "implements_contract",
+    "provenance": "deterministic",
+    "via": "declaration",
+    "symbol": "hhmm"
+   },
+   "verdict": "verified",
+   "reasons": [
+    "provider side: unchanged"
+   ]
+  },
+  {
+   "edge": {
+    "from": "code_unit:apps/assistant/src/config/configuration.ts",
+    "to": "contract:apps/assistant/src/config/configuration.ts#httpOrHttpsUrl",
+    "type": "implements_contract",
+    "provenance": "deterministic",
+    "via": "declaration",
+    "symbol": "httpOrHttpsUrl"
+   },
+   "verdict": "verified",
+   "reasons": [
+    "provider side: unchanged"
+   ]
+  },
+  {
+   "edge": {
+    "from": "code_unit:apps/assistant/src/config/dreamer.config.ts",
+    "to": "contract:apps/assistant/src/config/dreamer.config.ts#envSchema",
+    "type": "implements_contract",
+    "provenance": "deterministic",
+    "via": "declaration",
+    "symbol": "envSchema"
+   },
+   "verdict": "verified",
+   "reasons": [
+    "provider side: unchanged"
+   ]
+  },
+  {
+   "edge": {
+    "from": "code_unit:apps/assistant/src/config/munera.config.ts",
+    "to": "contract:apps/assistant/src/config/munera.config.ts#envSchema",
+    "type": "implements_contract",
+    "provenance": "deterministic",
+    "via": "declaration",
+    "symbol": "envSchema"
+   },
+   "verdict": "verified",
+   "reasons": [
+    "provider side: unchanged"
+   ]
+  },
+  {
+   "edge": {
+    "from": "code_unit:apps/assistant/src/config/ops-bot.config.ts",
+    "to": "contract:apps/assistant/src/config/ops-bot.config.ts#opsBotEnvSchema",
+    "type": "implements_contract",
+    "provenance": "deterministic",
+    "via": "declaration",
+    "symbol": "opsBotEnvSchema"
+   },
+   "verdict": "verified",
+   "reasons": [
+    "provider side: unchanged"
+   ]
+  },
+  {
+   "edge": {
+    "from": "code_unit:apps/assistant/src/config/scrutator.config.ts",
+    "to": "contract:apps/assistant/src/config/scrutator.config.ts#scrutatorEnvSchema",
+    "type": "implements_contract",
+    "provenance": "deterministic",
+    "via": "declaration",
+    "symbol": "scrutatorEnvSchema"
+   },
+   "verdict": "verified",
+   "reasons": [
+    "provider side: unchanged"
+   ]
+  },
+  {
+   "edge": {
+    "from": "code_unit:apps/assistant/src/config/transcriber.config.ts",
+    "to": "contract:apps/assistant/src/config/transcriber.config.ts#envSchema",
+    "type": "implements_contract",
+    "provenance": "deterministic",
+    "via": "declaration",
+    "symbol": "envSchema"
+   },
+   "verdict": "verified",
+   "reasons": [
+    "provider side: unchanged"
+   ]
+  },
+  {
+   "edge": {
+    "from": "code_unit:apps/assistant/src/proactive/proactive.controller.ts",
+    "to": "contract:apps/assistant/src/proactive/proactive.controller.ts#TriggerSchema",
+    "type": "implements_contract",
+    "provenance": "deterministic",
+    "via": "declaration",
+    "symbol": "TriggerSchema"
+   },
+   "verdict": "verified",
+   "reasons": [
+    "provider side: unchanged"
+   ]
+  },
+  {
+   "edge": {
+    "from": "code_unit:apps/assistant/src/proactive/proactive-metrics.service.ts",
+    "to": "contract:apps/assistant/src/proactive/proactive.types.ts#DispatchOutcome",
+    "type": "consumes_contract",
+    "provenance": "deterministic",
+    "via": "import-symbol",
+    "symbol": "DispatchOutcome"
+   },
+   "verdict": "verified",
+   "reasons": [
+    "no breaking change; consumer usage ⊆ provider (usage not fully narrowable: no literal of the enum used in the consumer (exhaustiveness unknown) — nothing changed to break it)"
+   ],
+   "projection": {
+    "bindings": [
+     "outcome"
+    ],
+    "keys_read": [],
+    "keys_sent": [],
+    "literals_sent": 0,
+    "values_used": [],
+    "complete": false,
+    "incomplete_reasons": [
+     "no literal of the enum used in the consumer (exhaustiveness unknown)"
+    ]
+   }
+  },
+  {
+   "edge": {
+    "from": "code_unit:apps/assistant/src/proactive/proactive.types.ts",
+    "to": "contract:apps/assistant/src/proactive/proactive.types.ts#DispatchOutcome",
+    "type": "implements_contract",
+    "provenance": "deterministic",
+    "via": "declaration",
+    "symbol": "DispatchOutcome"
+   },
+   "verdict": "verified",
+   "reasons": [
+    "provider side: unchanged"
+   ]
+  },
+  {
+   "edge": {
+    "from": "code_unit:apps/assistant/src/proactive/proactive-config.service.ts",
+    "to": "contract:apps/assistant/src/proactive/proactive.types.ts#ProactiveConfigSchema",
+    "type": "consumes_contract",
+    "provenance": "deterministic",
+    "via": "import-symbol",
+    "symbol": "ProactiveConfigSchema"
+   },
+   "verdict": "failed",
+   "reasons": [
+    "consumer reads key `data` that the provider does not declare",
+    "consumer reads key `error` that the provider does not declare",
+    "consumer reads key `success` that the provider does not declare"
+   ],
+   "projection": {
+    "bindings": [
+     "result"
+    ],
+    "keys_read": [
+     "data",
+     "error",
+     "success"
+    ],
+    "keys_sent": [],
+    "literals_sent": 0,
+    "values_used": [],
+    "complete": true,
+    "incomplete_reasons": []
+   }
+  },
+  {
+   "edge": {
+    "from": "code_unit:apps/assistant/src/proactive/proactive.types.spec.ts",
+    "to": "contract:apps/assistant/src/proactive/proactive.types.ts#ProactiveConfigSchema",
+    "type": "consumes_contract",
+    "provenance": "deterministic",
+    "via": "import-symbol",
+    "symbol": "ProactiveConfigSchema"
+   },
+   "verdict": "failed",
+   "reasons": [
+    "consumer reads key `data` that the provider does not declare",
+    "consumer reads key `success` that the provider does not declare"
+   ],
+   "projection": {
+    "bindings": [
+     "result"
+    ],
+    "keys_read": [
+     "data",
+     "success"
+    ],
+    "keys_sent": [],
+    "literals_sent": 0,
+    "values_used": [],
+    "complete": true,
+    "incomplete_reasons": []
+   }
+  },
+  {
+   "edge": {
+    "from": "code_unit:apps/assistant/src/proactive/proactive.types.ts",
+    "to": "contract:apps/assistant/src/proactive/proactive.types.ts#ProactiveConfigSchema",
+    "type": "implements_contract",
+    "provenance": "deterministic",
+    "via": "declaration",
+    "symbol": "ProactiveConfigSchema"
+   },
+   "verdict": "verified",
+   "reasons": [
+    "provider side: unchanged"
+   ]
+  },
+  {
+   "edge": {
+    "from": "code_unit:apps/assistant/src/proactive/proactive-dispatcher.service.ts",
+    "to": "contract:apps/assistant/src/proactive/proactive.types.ts#ProactiveKind",
+    "type": "consumes_contract",
+    "provenance": "deterministic",
+    "via": "import-symbol",
+    "symbol": "ProactiveKind"
+   },
+   "verdict": "verified",
+   "reasons": [
+    "no breaking change; consumer usage ⊆ provider (usage not fully narrowable: no literal of the enum used in the consumer (exhaustiveness unknown) — nothing changed to break it)"
+   ],
+   "projection": {
+    "bindings": [
+     "kind"
+    ],
+    "keys_read": [],
+    "keys_sent": [],
+    "literals_sent": 0,
+    "values_used": [],
+    "complete": false,
+    "incomplete_reasons": [
+     "no literal of the enum used in the consumer (exhaustiveness unknown)"
+    ]
+   }
+  },
+  {
+   "edge": {
+    "from": "code_unit:apps/assistant/src/proactive/proactive-metrics.service.ts",
+    "to": "contract:apps/assistant/src/proactive/proactive.types.ts#ProactiveKind",
+    "type": "consumes_contract",
+    "provenance": "deterministic",
+    "via": "import-symbol",
+    "symbol": "ProactiveKind"
+   },
+   "verdict": "verified",
+   "reasons": [
+    "no breaking change; consumer usage ⊆ provider (usage not fully narrowable: no literal of the enum used in the consumer (exhaustiveness unknown) — nothing changed to break it)"
+   ],
+   "projection": {
+    "bindings": [
+     "kind"
+    ],
+    "keys_read": [],
+    "keys_sent": [],
+    "literals_sent": 0,
+    "values_used": [],
+    "complete": false,
+    "incomplete_reasons": [
+     "no literal of the enum used in the consumer (exhaustiveness unknown)"
+    ]
+   }
+  },
+  {
+   "edge": {
+    "from": "code_unit:apps/assistant/src/proactive/proactive.module.ts",
+    "to": "contract:apps/assistant/src/proactive/proactive.types.ts#ProactiveKind",
+    "type": "consumes_contract",
+    "provenance": "deterministic",
+    "via": "import-symbol",
+    "symbol": "ProactiveKind"
+   },
+   "verdict": "verified",
+   "reasons": [
+    "no breaking change; consumer usage ⊆ provider"
+   ],
+   "projection": {
+    "bindings": [
+     "kind"
+    ],
+    "keys_read": [],
+    "keys_sent": [],
+    "literals_sent": 0,
+    "values_used": [
+     "briefing",
+     "digest"
+    ],
+    "complete": true,
+    "incomplete_reasons": []
+   }
+  },
+  {
+   "edge": {
+    "from": "code_unit:apps/assistant/src/proactive/proactive.processor.ts",
+    "to": "contract:apps/assistant/src/proactive/proactive.types.ts#ProactiveKind",
+    "type": "consumes_contract",
+    "provenance": "deterministic",
+    "via": "import-symbol",
+    "symbol": "ProactiveKind"
+   },
+   "verdict": "verified",
+   "reasons": [
+    "no breaking change; consumer usage ⊆ provider"
+   ],
+   "projection": {
+    "bindings": [
+     "kind"
+    ],
+    "keys_read": [],
+    "keys_sent": [],
+    "literals_sent": 0,
+    "values_used": [
+     "briefing"
+    ],
+    "complete": true,
+    "incomplete_reasons": []
+   }
+  },
+  {
+   "edge": {
+    "from": "code_unit:apps/assistant/src/proactive/proactive.types.ts",
+    "to": "contract:apps/assistant/src/proactive/proactive.types.ts#ProactiveKind",
+    "type": "implements_contract",
+    "provenance": "deterministic",
+    "via": "declaration",
+    "symbol": "ProactiveKind"
+   },
+   "verdict": "verified",
+   "reasons": [
+    "provider side: unchanged"
+   ]
+  },
+  {
+   "edge": {
+    "from": "code_unit:packages/core/src/clients/index.ts",
+    "to": "contract:packages/core/src/clients/ops-bot.types.ts#EcosystemSnapshotSchema",
+    "type": "consumes_contract",
+    "provenance": "deterministic",
+    "via": "import-symbol",
+    "symbol": "EcosystemSnapshotSchema"
+   },
+   "verdict": "verified",
+   "reasons": [
+    "no breaking change; consumer usage ⊆ provider (usage not fully narrowable: no binding of the contract type found in the consumer — nothing changed to break it)"
+   ],
+   "projection": {
+    "bindings": [],
+    "keys_read": [],
+    "keys_sent": [],
+    "literals_sent": 0,
+    "values_used": [],
+    "complete": false,
+    "incomplete_reasons": [
+     "no binding of the contract type found in the consumer"
+    ]
+   }
+  },
+  {
+   "edge": {
+    "from": "code_unit:packages/core/src/clients/ops-bot.client.ts",
+    "to": "contract:packages/core/src/clients/ops-bot.types.ts#EcosystemSnapshotSchema",
+    "type": "consumes_contract",
+    "provenance": "deterministic",
+    "via": "import-symbol",
+    "symbol": "EcosystemSnapshotSchema"
+   },
+   "verdict": "failed",
+   "reasons": [
+    "consumer reads key `data` that the provider does not declare",
+    "consumer reads key `error` that the provider does not declare",
+    "consumer reads key `success` that the provider does not declare"
+   ],
+   "projection": {
+    "bindings": [
+     "parsed",
+     "validated"
+    ],
+    "keys_read": [
+     "data",
+     "error",
+     "success"
+    ],
+    "keys_sent": [],
+    "literals_sent": 0,
+    "values_used": [],
+    "complete": true,
+    "incomplete_reasons": []
+   }
+  },
+  {
+   "edge": {
+    "from": "code_unit:packages/core/src/clients/ops-bot.types.spec.ts",
+    "to": "contract:packages/core/src/clients/ops-bot.types.ts#EcosystemSnapshotSchema",
+    "type": "consumes_contract",
+    "provenance": "deterministic",
+    "via": "import-symbol",
+    "symbol": "EcosystemSnapshotSchema"
+   },
+   "verdict": "failed",
+   "reasons": [
+    "consumer reads key `success` that the provider does not declare"
+   ],
+   "projection": {
+    "bindings": [
+     "result"
+    ],
+    "keys_read": [
+     "success"
+    ],
+    "keys_sent": [],
+    "literals_sent": 0,
+    "values_used": [],
+    "complete": true,
+    "incomplete_reasons": []
+   }
+  },
+  {
+   "edge": {
+    "from": "code_unit:packages/core/src/clients/ops-bot.types.ts",
+    "to": "contract:packages/core/src/clients/ops-bot.types.ts#EcosystemSnapshotSchema",
+    "type": "implements_contract",
+    "provenance": "deterministic",
+    "via": "declaration",
+    "symbol": "EcosystemSnapshotSchema"
+   },
+   "verdict": "verified",
+   "reasons": [
+    "provider side: unchanged"
+   ]
+  },
+  {
+   "edge": {
+    "from": "code_unit:packages/core/src/clients/index.ts",
+    "to": "contract:packages/core/src/clients/ops-bot.types.ts#EmitEventResponseSchema",
+    "type": "consumes_contract",
+    "provenance": "deterministic",
+    "via": "import-symbol",
+    "symbol": "EmitEventResponseSchema"
+   },
+   "verdict": "verified",
+   "reasons": [
+    "no breaking change; consumer usage ⊆ provider (usage not fully narrowable: no binding of the contract type found in the consumer — nothing changed to break it)"
+   ],
+   "projection": {
+    "bindings": [],
+    "keys_read": [],
+    "keys_sent": [],
+    "literals_sent": 0,
+    "values_used": [],
+    "complete": false,
+    "incomplete_reasons": [
+     "no binding of the contract type found in the consumer"
+    ]
+   }
+  },
+  {
+   "edge": {
+    "from": "code_unit:packages/core/src/clients/ops-bot.client.ts",
+    "to": "contract:packages/core/src/clients/ops-bot.types.ts#EmitEventResponseSchema",
+    "type": "consumes_contract",
+    "provenance": "deterministic",
+    "via": "import-symbol",
+    "symbol": "EmitEventResponseSchema"
+   },
+   "verdict": "failed",
+   "reasons": [
+    "consumer reads key `data` that the provider does not declare",
+    "consumer reads key `error` that the provider does not declare",
+    "consumer reads key `success` that the provider does not declare"
+   ],
+   "projection": {
+    "bindings": [
+     "ack"
+    ],
+    "keys_read": [
+     "data",
+     "error",
+     "success"
+    ],
+    "keys_sent": [],
+    "literals_sent": 0,
+    "values_used": [],
+    "complete": true,
+    "incomplete_reasons": []
+   }
+  },
+  {
+   "edge": {
+    "from": "code_unit:packages/core/src/clients/ops-bot.types.spec.ts",
+    "to": "contract:packages/core/src/clients/ops-bot.types.ts#EmitEventResponseSchema",
+    "type": "consumes_contract",
+    "provenance": "deterministic",
+    "via": "import-symbol",
+    "symbol": "EmitEventResponseSchema"
+   },
+   "verdict": "failed",
+   "reasons": [
+    "consumer reads key `success` that the provider does not declare"
+   ],
+   "projection": {
+    "bindings": [
+     "result"
+    ],
+    "keys_read": [
+     "success"
+    ],
+    "keys_sent": [],
+    "literals_sent": 0,
+    "values_used": [],
+    "complete": true,
+    "incomplete_reasons": []
+   }
+  },
+  {
+   "edge": {
+    "from": "code_unit:packages/core/src/clients/ops-bot.types.ts",
+    "to": "contract:packages/core/src/clients/ops-bot.types.ts#EmitEventResponseSchema",
+    "type": "implements_contract",
+    "provenance": "deterministic",
+    "via": "declaration",
+    "symbol": "EmitEventResponseSchema"
+   },
+   "verdict": "verified",
+   "reasons": [
+    "provider side: unchanged"
+   ]
+  },
+  {
+   "edge": {
+    "from": "code_unit:apps/assistant/src/agents/ops-agent/ops-agent.service.ts",
+    "to": "contract:packages/core/src/clients/ops-bot.types.ts#ExecuteCommandInputSchema",
+    "type": "consumes_contract",
+    "provenance": "deterministic",
+    "via": "import-symbol",
+    "symbol": "ExecuteCommandInputSchema"
+   },
+   "verdict": "failed",
+   "reasons": [
+    "consumer reads key `data` that the provider does not declare",
+    "consumer reads key `error` that the provider does not declare",
+    "consumer reads key `success` that the provider does not declare"
+   ],
+   "projection": {
+    "bindings": [
+     "parsed"
+    ],
+    "keys_read": [
+     "data",
+     "error",
+     "success"
+    ],
+    "keys_sent": [],
+    "literals_sent": 0,
+    "values_used": [],
+    "complete": true,
+    "incomplete_reasons": []
+   }
+  },
+  {
+   "edge": {
+    "from": "code_unit:packages/core/src/clients/index.ts",
+    "to": "contract:packages/core/src/clients/ops-bot.types.ts#ExecuteCommandInputSchema",
+    "type": "consumes_contract",
+    "provenance": "deterministic",
+    "via": "import-symbol",
+    "symbol": "ExecuteCommandInputSchema"
+   },
+   "verdict": "verified",
+   "reasons": [
+    "no breaking change; consumer usage ⊆ provider (usage not fully narrowable: no binding of the contract type found in the consumer — nothing changed to break it)"
+   ],
+   "projection": {
+    "bindings": [],
+    "keys_read": [],
+    "keys_sent": [],
+    "literals_sent": 0,
+    "values_used": [],
+    "complete": false,
+    "incomplete_reasons": [
+     "no binding of the contract type found in the consumer"
+    ]
+   }
+  },
+  {
+   "edge": {
+    "from": "code_unit:packages/core/src/clients/ops-bot.client.ts",
+    "to": "contract:packages/core/src/clients/ops-bot.types.ts#ExecuteCommandInputSchema",
+    "type": "consumes_contract",
+    "provenance": "deterministic",
+    "via": "import-symbol",
+    "symbol": "ExecuteCommandInputSchema"
+   },
+   "verdict": "failed",
+   "reasons": [
+    "consumer reads key `data` that the provider does not declare",
+    "consumer reads key `error` that the provider does not declare",
+    "consumer reads key `success` that the provider does not declare"
+   ],
+   "projection": {
+    "bindings": [
+     "parsed"
+    ],
+    "keys_read": [
+     "cmd",
+     "data",
+     "error",
+     "idempotencyKey",
+     "payload",
+     "success"
+    ],
+    "keys_sent": [],
+    "literals_sent": 0,
+    "values_used": [],
+    "complete": true,
+    "incomplete_reasons": []
+   }
+  },
+  {
+   "edge": {
+    "from": "code_unit:packages/core/src/clients/ops-bot.types.ts",
+    "to": "contract:packages/core/src/clients/ops-bot.types.ts#ExecuteCommandInputSchema",
+    "type": "implements_contract",
+    "provenance": "deterministic",
+    "via": "declaration",
+    "symbol": "ExecuteCommandInputSchema"
+   },
+   "verdict": "verified",
+   "reasons": [
+    "provider side: unchanged"
+   ]
+  },
+  {
+   "edge": {
+    "from": "code_unit:packages/core/src/clients/index.ts",
+    "to": "contract:packages/core/src/clients/ops-bot.types.ts#ExecuteCommandResponseSchema",
+    "type": "consumes_contract",
+    "provenance": "deterministic",
+    "via": "import-symbol",
+    "symbol": "ExecuteCommandResponseSchema"
+   },
+   "verdict": "verified",
+   "reasons": [
+    "no breaking change; consumer usage ⊆ provider (usage not fully narrowable: no binding of the contract type found in the consumer — nothing changed to break it)"
+   ],
+   "projection": {
+    "bindings": [],
+    "keys_read": [],
+    "keys_sent": [],
+    "literals_sent": 0,
+    "values_used": [],
+    "complete": false,
+    "incomplete_reasons": [
+     "no binding of the contract type found in the consumer"
+    ]
+   }
+  },
+  {
+   "edge": {
+    "from": "code_unit:packages/core/src/clients/ops-bot.client.ts",
+    "to": "contract:packages/core/src/clients/ops-bot.types.ts#ExecuteCommandResponseSchema",
+    "type": "consumes_contract",
+    "provenance": "deterministic",
+    "via": "import-symbol",
+    "symbol": "ExecuteCommandResponseSchema"
+   },
+   "verdict": "failed",
+   "reasons": [
+    "consumer reads key `data` that the provider does not declare",
+    "consumer reads key `error` that the provider does not declare",
+    "consumer reads key `success` that the provider does not declare"
+   ],
+   "projection": {
+    "bindings": [
+     "ack"
+    ],
+    "keys_read": [
+     "data",
+     "error",
+     "success"
+    ],
+    "keys_sent": [],
+    "literals_sent": 0,
+    "values_used": [],
+    "complete": true,
+    "incomplete_reasons": []
+   }
+  },
+  {
+   "edge": {
+    "from": "code_unit:packages/core/src/clients/ops-bot.types.ts",
+    "to": "contract:packages/core/src/clients/ops-bot.types.ts#ExecuteCommandResponseSchema",
+    "type": "implements_contract",
+    "provenance": "deterministic",
+    "via": "declaration",
+    "symbol": "ExecuteCommandResponseSchema"
+   },
+   "verdict": "verified",
+   "reasons": [
+    "provider side: unchanged"
+   ]
+  },
+  {
+   "edge": {
+    "from": "code_unit:packages/core/src/clients/index.ts",
+    "to": "contract:packages/core/src/clients/ops-bot.types.ts#OpsBotCommandKindSchema",
+    "type": "consumes_contract",
+    "provenance": "deterministic",
+    "via": "import-symbol",
+    "symbol": "OpsBotCommandKindSchema"
+   },
+   "verdict": "verified",
+   "reasons": [
+    "no breaking change; consumer usage ⊆ provider (usage not fully narrowable: no literal of the enum used in the consumer (exhaustiveness unknown) — nothing changed to break it)"
+   ],
+   "projection": {
+    "bindings": [],
+    "keys_read": [],
+    "keys_sent": [],
+    "literals_sent": 0,
+    "values_used": [],
+    "complete": false,
+    "incomplete_reasons": [
+     "no literal of the enum used in the consumer (exhaustiveness unknown)"
+    ]
+   }
+  },
+  {
+   "edge": {
+    "from": "code_unit:packages/core/src/clients/ops-bot.types.ts",
+    "to": "contract:packages/core/src/clients/ops-bot.types.ts#OpsBotCommandKindSchema",
+    "type": "implements_contract",
+    "provenance": "deterministic",
+    "via": "declaration",
+    "symbol": "OpsBotCommandKindSchema"
+   },
+   "verdict": "verified",
+   "reasons": [
+    "provider side: unchanged"
+   ]
+  },
+  {
+   "edge": {
+    "from": "code_unit:packages/core/src/clients/ops-bot.client.spec.ts",
+    "to": "contract:packages/core/src/clients/ops-bot.types.ts#OpsBotWireEventSchema",
+    "type": "consumes_contract",
+    "provenance": "deterministic",
+    "via": "import-symbol",
+    "symbol": "OpsBotWireEventSchema"
+   },
+   "verdict": "verified",
+   "reasons": [
+    "no breaking change; consumer usage ⊆ provider (usage not fully narrowable: no binding of the contract type found in the consumer — nothing changed to break it)"
+   ],
+   "projection": {
+    "bindings": [],
+    "keys_read": [],
+    "keys_sent": [],
+    "literals_sent": 0,
+    "values_used": [],
+    "complete": false,
+    "incomplete_reasons": [
+     "no binding of the contract type found in the consumer"
+    ]
+   }
+  },
+  {
+   "edge": {
+    "from": "code_unit:packages/core/src/clients/ops-bot.types.spec.ts",
+    "to": "contract:packages/core/src/clients/ops-bot.types.ts#OpsBotWireEventSchema",
+    "type": "consumes_contract",
+    "provenance": "deterministic",
+    "via": "import-symbol",
+    "symbol": "OpsBotWireEventSchema"
+   },
+   "verdict": "verified",
+   "reasons": [
+    "no breaking change; consumer usage ⊆ provider (usage not fully narrowable: no binding of the contract type found in the consumer — nothing changed to break it)"
+   ],
+   "projection": {
+    "bindings": [],
+    "keys_read": [],
+    "keys_sent": [],
+    "literals_sent": 0,
+    "values_used": [],
+    "complete": false,
+    "incomplete_reasons": [
+     "no binding of the contract type found in the consumer"
+    ]
+   }
+  },
+  {
+   "edge": {
+    "from": "code_unit:packages/core/src/clients/ops-bot.types.ts",
+    "to": "contract:packages/core/src/clients/ops-bot.types.ts#OpsBotWireEventSchema",
+    "type": "implements_contract",
+    "provenance": "deterministic",
+    "via": "declaration",
+    "symbol": "OpsBotWireEventSchema"
+   },
+   "verdict": "verified",
+   "reasons": [
+    "provider side: unchanged"
+   ]
+  },
+  {
+   "edge": {
+    "from": "code_unit:packages/core/src/clients/http-health.client.ts",
+    "to": "contract:packages/core/src/clients/scrutator.types.ts#HealthResponseSchema",
+    "type": "consumes_contract",
+    "provenance": "deterministic",
+    "via": "import-symbol",
+    "symbol": "HealthResponseSchema"
+   },
+   "verdict": "failed",
+   "reasons": [
+    "consumer reads key `data` that the provider does not declare",
+    "consumer reads key `success` that the provider does not declare"
+   ],
+   "projection": {
+    "bindings": [
+     "parsed"
+    ],
+    "keys_read": [
+     "data",
+     "success"
+    ],
+    "keys_sent": [],
+    "literals_sent": 0,
+    "values_used": [],
+    "complete": true,
+    "incomplete_reasons": []
+   }
+  },
+  {
+   "edge": {
+    "from": "code_unit:packages/core/src/clients/index.ts",
+    "to": "contract:packages/core/src/clients/scrutator.types.ts#HealthResponseSchema",
+    "type": "consumes_contract",
+    "provenance": "deterministic",
+    "via": "import-symbol",
+    "symbol": "HealthResponseSchema"
+   },
+   "verdict": "verified",
+   "reasons": [
+    "no breaking change; consumer usage ⊆ provider (usage not fully narrowable: no binding of the contract type found in the consumer — nothing changed to break it)"
+   ],
+   "projection": {
+    "bindings": [],
+    "keys_read": [],
+    "keys_sent": [],
+    "literals_sent": 0,
+    "values_used": [],
+    "complete": false,
+    "incomplete_reasons": [
+     "no binding of the contract type found in the consumer"
+    ]
+   }
+  },
+  {
+   "edge": {
+    "from": "code_unit:packages/core/src/clients/ops-bot.client.ts",
+    "to": "contract:packages/core/src/clients/scrutator.types.ts#HealthResponseSchema",
+    "type": "consumes_contract",
+    "provenance": "deterministic",
+    "via": "import-symbol",
+    "symbol": "HealthResponseSchema"
+   },
+   "verdict": "failed",
+   "reasons": [
+    "consumer reads key `data` that the provider does not declare",
+    "consumer reads key `success` that the provider does not declare"
+   ],
+   "projection": {
+    "bindings": [
+     "parsed"
+    ],
+    "keys_read": [
+     "data",
+     "success"
+    ],
+    "keys_sent": [],
+    "literals_sent": 0,
+    "values_used": [],
+    "complete": true,
+    "incomplete_reasons": []
+   }
+  },
+  {
+   "edge": {
+    "from": "code_unit:packages/core/src/clients/scrutator.client.ts",
+    "to": "contract:packages/core/src/clients/scrutator.types.ts#HealthResponseSchema",
+    "type": "consumes_contract",
+    "provenance": "deterministic",
+    "via": "import-symbol",
+    "symbol": "HealthResponseSchema"
+   },
+   "verdict": "failed",
+   "reasons": [
+    "consumer reads key `data` that the provider does not declare",
+    "consumer reads key `success` that the provider does not declare"
+   ],
+   "projection": {
+    "bindings": [
+     "parsed"
+    ],
+    "keys_read": [
+     "data",
+     "success"
+    ],
+    "keys_sent": [],
+    "literals_sent": 0,
+    "values_used": [],
+    "complete": true,
+    "incomplete_reasons": []
+   }
+  },
+  {
+   "edge": {
+    "from": "code_unit:packages/core/src/clients/scrutator.types.ts",
+    "to": "contract:packages/core/src/clients/scrutator.types.ts#HealthResponseSchema",
+    "type": "implements_contract",
+    "provenance": "deterministic",
+    "via": "declaration",
+    "symbol": "HealthResponseSchema"
+   },
+   "verdict": "verified",
+   "reasons": [
+    "provider side: unchanged"
+   ]
+  },
+  {
+   "edge": {
+    "from": "code_unit:packages/core/src/clients/index.ts",
+    "to": "contract:packages/core/src/clients/scrutator.types.ts#IngestRequestSchema",
+    "type": "consumes_contract",
+    "provenance": "deterministic",
+    "via": "import-symbol",
+    "symbol": "IngestRequestSchema"
+   },
+   "verdict": "verified",
+   "reasons": [
+    "no breaking change; consumer usage ⊆ provider (usage not fully narrowable: no binding of the contract type found in the consumer — nothing changed to break it)"
+   ],
+   "projection": {
+    "bindings": [],
+    "keys_read": [],
+    "keys_sent": [],
+    "literals_sent": 0,
+    "values_used": [],
+    "complete": false,
+    "incomplete_reasons": [
+     "no binding of the contract type found in the consumer"
+    ]
+   }
+  },
+  {
+   "edge": {
+    "from": "code_unit:packages/core/src/clients/scrutator.client.ts",
+    "to": "contract:packages/core/src/clients/scrutator.types.ts#IngestRequestSchema",
+    "type": "consumes_contract",
+    "provenance": "deterministic",
+    "via": "import-symbol",
+    "symbol": "IngestRequestSchema"
+   },
+   "verdict": "failed",
+   "reasons": [
+    "consumer reads key `data` that the provider does not declare",
+    "consumer reads key `error` that the provider does not declare",
+    "consumer reads key `success` that the provider does not declare"
+   ],
+   "projection": {
+    "bindings": [
+     "parsed"
+    ],
+    "keys_read": [
+     "data",
+     "error",
+     "success"
+    ],
+    "keys_sent": [],
+    "literals_sent": 0,
+    "values_used": [],
+    "complete": true,
+    "incomplete_reasons": []
+   }
+  },
+  {
+   "edge": {
+    "from": "code_unit:packages/core/src/clients/scrutator.types.ts",
+    "to": "contract:packages/core/src/clients/scrutator.types.ts#IngestRequestSchema",
+    "type": "implements_contract",
+    "provenance": "deterministic",
+    "via": "declaration",
+    "symbol": "IngestRequestSchema"
+   },
+   "verdict": "verified",
+   "reasons": [
+    "provider side: unchanged"
+   ]
+  },
+  {
+   "edge": {
+    "from": "code_unit:packages/core/src/clients/index.ts",
+    "to": "contract:packages/core/src/clients/scrutator.types.ts#IngestResultSchema",
+    "type": "consumes_contract",
+    "provenance": "deterministic",
+    "via": "import-symbol",
+    "symbol": "IngestResultSchema"
+   },
+   "verdict": "verified",
+   "reasons": [
+    "no breaking change; consumer usage ⊆ provider (usage not fully narrowable: no binding of the contract type found in the consumer — nothing changed to break it)"
+   ],
+   "projection": {
+    "bindings": [],
+    "keys_read": [],
+    "keys_sent": [],
+    "literals_sent": 0,
+    "values_used": [],
+    "complete": false,
+    "incomplete_reasons": [
+     "no binding of the contract type found in the consumer"
+    ]
+   }
+  },
+  {
+   "edge": {
+    "from": "code_unit:packages/core/src/clients/scrutator.client.ts",
+    "to": "contract:packages/core/src/clients/scrutator.types.ts#IngestResultSchema",
+    "type": "consumes_contract",
+    "provenance": "deterministic",
+    "via": "import-symbol",
+    "symbol": "IngestResultSchema"
+   },
+   "verdict": "verified",
+   "reasons": [
+    "no breaking change; consumer usage ⊆ provider (usage not fully narrowable: no binding of the contract type found in the consumer — nothing changed to break it)"
+   ],
+   "projection": {
+    "bindings": [],
+    "keys_read": [],
+    "keys_sent": [],
+    "literals_sent": 0,
+    "values_used": [],
+    "complete": false,
+    "incomplete_reasons": [
+     "no binding of the contract type found in the consumer"
+    ]
+   }
+  },
+  {
+   "edge": {
+    "from": "code_unit:packages/core/src/clients/scrutator.types.ts",
+    "to": "contract:packages/core/src/clients/scrutator.types.ts#IngestResultSchema",
+    "type": "implements_contract",
+    "provenance": "deterministic",
+    "via": "declaration",
+    "symbol": "IngestResultSchema"
+   },
+   "verdict": "verified",
+   "reasons": [
+    "provider side: unchanged"
+   ]
+  },
+  {
+   "edge": {
+    "from": "code_unit:packages/core/src/clients/index.ts",
+    "to": "contract:packages/core/src/clients/scrutator.types.ts#RecallHitSchema",
+    "type": "consumes_contract",
+    "provenance": "deterministic",
+    "via": "import-symbol",
+    "symbol": "RecallHitSchema"
+   },
+   "verdict": "verified",
+   "reasons": [
+    "no breaking change; consumer usage ⊆ provider (usage not fully narrowable: no binding of the contract type found in the consumer — nothing changed to break it)"
+   ],
+   "projection": {
+    "bindings": [],
+    "keys_read": [],
+    "keys_sent": [],
+    "literals_sent": 0,
+    "values_used": [],
+    "complete": false,
+    "incomplete_reasons": [
+     "no binding of the contract type found in the consumer"
+    ]
+   }
+  },
+  {
+   "edge": {
+    "from": "code_unit:packages/core/src/clients/scrutator.types.ts",
+    "to": "contract:packages/core/src/clients/scrutator.types.ts#RecallHitSchema",
+    "type": "implements_contract",
+    "provenance": "deterministic",
+    "via": "declaration",
+    "symbol": "RecallHitSchema"
+   },
+   "verdict": "verified",
+   "reasons": [
+    "provider side: unchanged"
+   ]
+  },
+  {
+   "edge": {
+    "from": "code_unit:packages/core/src/clients/index.ts",
+    "to": "contract:packages/core/src/clients/scrutator.types.ts#RecallRequestSchema",
+    "type": "consumes_contract",
+    "provenance": "deterministic",
+    "via": "import-symbol",
+    "symbol": "RecallRequestSchema"
+   },
+   "verdict": "verified",
+   "reasons": [
+    "no breaking change; consumer usage ⊆ provider (usage not fully narrowable: no binding of the contract type found in the consumer — nothing changed to break it)"
+   ],
+   "projection": {
+    "bindings": [],
+    "keys_read": [],
+    "keys_sent": [],
+    "literals_sent": 0,
+    "values_used": [],
+    "complete": false,
+    "incomplete_reasons": [
+     "no binding of the contract type found in the consumer"
+    ]
+   }
+  },
+  {
+   "edge": {
+    "from": "code_unit:packages/core/src/clients/scrutator.client.ts",
+    "to": "contract:packages/core/src/clients/scrutator.types.ts#RecallRequestSchema",
+    "type": "consumes_contract",
+    "provenance": "deterministic",
+    "via": "import-symbol",
+    "symbol": "RecallRequestSchema"
+   },
+   "verdict": "failed",
+   "reasons": [
+    "consumer reads key `data` that the provider does not declare",
+    "consumer reads key `error` that the provider does not declare",
+    "consumer reads key `success` that the provider does not declare"
+   ],
+   "projection": {
+    "bindings": [
+     "parsed"
+    ],
+    "keys_read": [
+     "data",
+     "error",
+     "success"
+    ],
+    "keys_sent": [],
+    "literals_sent": 0,
+    "values_used": [],
+    "complete": true,
+    "incomplete_reasons": []
+   }
+  },
+  {
+   "edge": {
+    "from": "code_unit:packages/core/src/clients/scrutator.types.ts",
+    "to": "contract:packages/core/src/clients/scrutator.types.ts#RecallRequestSchema",
+    "type": "implements_contract",
+    "provenance": "deterministic",
+    "via": "declaration",
+    "symbol": "RecallRequestSchema"
+   },
+   "verdict": "verified",
+   "reasons": [
+    "provider side: unchanged"
+   ]
+  },
+  {
+   "edge": {
+    "from": "code_unit:packages/core/src/clients/index.ts",
+    "to": "contract:packages/core/src/clients/scrutator.types.ts#RecallResultSchema",
+    "type": "consumes_contract",
+    "provenance": "deterministic",
+    "via": "import-symbol",
+    "symbol": "RecallResultSchema"
+   },
+   "verdict": "verified",
+   "reasons": [
+    "no breaking change; consumer usage ⊆ provider (usage not fully narrowable: no binding of the contract type found in the consumer — nothing changed to break it)"
+   ],
+   "projection": {
+    "bindings": [],
+    "keys_read": [],
+    "keys_sent": [],
+    "literals_sent": 0,
+    "values_used": [],
+    "complete": false,
+    "incomplete_reasons": [
+     "no binding of the contract type found in the consumer"
+    ]
+   }
+  },
+  {
+   "edge": {
+    "from": "code_unit:packages/core/src/clients/scrutator.client.ts",
+    "to": "contract:packages/core/src/clients/scrutator.types.ts#RecallResultSchema",
+    "type": "consumes_contract",
+    "provenance": "deterministic",
+    "via": "import-symbol",
+    "symbol": "RecallResultSchema"
+   },
+   "verdict": "failed",
+   "reasons": [
+    "consumer reads key `data` that the provider does not declare",
+    "consumer reads key `error` that the provider does not declare",
+    "consumer reads key `success` that the provider does not declare"
+   ],
+   "projection": {
+    "bindings": [
+     "validated"
+    ],
+    "keys_read": [
+     "data",
+     "error",
+     "success"
+    ],
+    "keys_sent": [],
+    "literals_sent": 0,
+    "values_used": [],
+    "complete": true,
+    "incomplete_reasons": []
+   }
+  },
+  {
+   "edge": {
+    "from": "code_unit:packages/core/src/clients/scrutator.types.ts",
+    "to": "contract:packages/core/src/clients/scrutator.types.ts#RecallResultSchema",
+    "type": "implements_contract",
+    "provenance": "deterministic",
+    "via": "declaration",
+    "symbol": "RecallResultSchema"
+   },
+   "verdict": "verified",
+   "reasons": [
+    "provider side: unchanged"
+   ]
+  },
+  {
+   "edge": {
+    "from": "code_unit:packages/core/src/clients/index.ts",
+    "to": "contract:packages/core/src/clients/scrutator.types.ts#SearchHitSchema",
+    "type": "consumes_contract",
+    "provenance": "deterministic",
+    "via": "import-symbol",
+    "symbol": "SearchHitSchema"
+   },
+   "verdict": "verified",
+   "reasons": [
+    "no breaking change; consumer usage ⊆ provider (usage not fully narrowable: no binding of the contract type found in the consumer — nothing changed to break it)"
+   ],
+   "projection": {
+    "bindings": [],
+    "keys_read": [],
+    "keys_sent": [],
+    "literals_sent": 0,
+    "values_used": [],
+    "complete": false,
+    "incomplete_reasons": [
+     "no binding of the contract type found in the consumer"
+    ]
+   }
+  },
+  {
+   "edge": {
+    "from": "code_unit:packages/core/src/clients/scrutator.types.ts",
+    "to": "contract:packages/core/src/clients/scrutator.types.ts#SearchHitSchema",
+    "type": "implements_contract",
+    "provenance": "deterministic",
+    "via": "declaration",
+    "symbol": "SearchHitSchema"
+   },
+   "verdict": "verified",
+   "reasons": [
+    "provider side: unchanged"
+   ]
+  },
+  {
+   "edge": {
+    "from": "code_unit:packages/core/src/clients/index.ts",
+    "to": "contract:packages/core/src/clients/scrutator.types.ts#SearchRequestSchema",
+    "type": "consumes_contract",
+    "provenance": "deterministic",
+    "via": "import-symbol",
+    "symbol": "SearchRequestSchema"
+   },
+   "verdict": "verified",
+   "reasons": [
+    "no breaking change; consumer usage ⊆ provider (usage not fully narrowable: no binding of the contract type found in the consumer — nothing changed to break it)"
+   ],
+   "projection": {
+    "bindings": [],
+    "keys_read": [],
+    "keys_sent": [],
+    "literals_sent": 0,
+    "values_used": [],
+    "complete": false,
+    "incomplete_reasons": [
+     "no binding of the contract type found in the consumer"
+    ]
+   }
+  },
+  {
+   "edge": {
+    "from": "code_unit:packages/core/src/clients/scrutator.client.ts",
+    "to": "contract:packages/core/src/clients/scrutator.types.ts#SearchRequestSchema",
+    "type": "consumes_contract",
+    "provenance": "deterministic",
+    "via": "import-symbol",
+    "symbol": "SearchRequestSchema"
+   },
+   "verdict": "failed",
+   "reasons": [
+    "consumer reads key `data` that the provider does not declare",
+    "consumer reads key `error` that the provider does not declare",
+    "consumer reads key `success` that the provider does not declare"
+   ],
+   "projection": {
+    "bindings": [
+     "parsed"
+    ],
+    "keys_read": [
+     "data",
+     "error",
+     "success"
+    ],
+    "keys_sent": [],
+    "literals_sent": 0,
+    "values_used": [],
+    "complete": true,
+    "incomplete_reasons": []
+   }
+  },
+  {
+   "edge": {
+    "from": "code_unit:packages/core/src/clients/scrutator.types.ts",
+    "to": "contract:packages/core/src/clients/scrutator.types.ts#SearchRequestSchema",
+    "type": "implements_contract",
+    "provenance": "deterministic",
+    "via": "declaration",
+    "symbol": "SearchRequestSchema"
+   },
+   "verdict": "verified",
+   "reasons": [
+    "provider side: unchanged"
+   ]
+  },
+  {
+   "edge": {
+    "from": "code_unit:packages/core/src/clients/index.ts",
+    "to": "contract:packages/core/src/clients/scrutator.types.ts#SearchResultSchema",
+    "type": "consumes_contract",
+    "provenance": "deterministic",
+    "via": "import-symbol",
+    "symbol": "SearchResultSchema"
+   },
+   "verdict": "verified",
+   "reasons": [
+    "no breaking change; consumer usage ⊆ provider (usage not fully narrowable: no binding of the contract type found in the consumer — nothing changed to break it)"
+   ],
+   "projection": {
+    "bindings": [],
+    "keys_read": [],
+    "keys_sent": [],
+    "literals_sent": 0,
+    "values_used": [],
+    "complete": false,
+    "incomplete_reasons": [
+     "no binding of the contract type found in the consumer"
+    ]
+   }
+  },
+  {
+   "edge": {
+    "from": "code_unit:packages/core/src/clients/scrutator.client.ts",
+    "to": "contract:packages/core/src/clients/scrutator.types.ts#SearchResultSchema",
+    "type": "consumes_contract",
+    "provenance": "deterministic",
+    "via": "import-symbol",
+    "symbol": "SearchResultSchema"
+   },
+   "verdict": "failed",
+   "reasons": [
+    "consumer reads key `data` that the provider does not declare",
+    "consumer reads key `error` that the provider does not declare",
+    "consumer reads key `success` that the provider does not declare"
+   ],
+   "projection": {
+    "bindings": [
+     "validated"
+    ],
+    "keys_read": [
+     "data",
+     "error",
+     "success"
+    ],
+    "keys_sent": [],
+    "literals_sent": 0,
+    "values_used": [],
+    "complete": true,
+    "incomplete_reasons": []
+   }
+  },
+  {
+   "edge": {
+    "from": "code_unit:packages/core/src/clients/scrutator.types.ts",
+    "to": "contract:packages/core/src/clients/scrutator.types.ts#SearchResultSchema",
+    "type": "implements_contract",
+    "provenance": "deterministic",
+    "via": "declaration",
+    "symbol": "SearchResultSchema"
+   },
+   "verdict": "verified",
+   "reasons": [
+    "provider side: unchanged"
+   ]
+  },
+  {
+   "edge": {
+    "from": "code_unit:packages/core/src/health/index.ts",
+    "to": "contract:packages/core/src/health/dep-probe.ts#ProbeStatus",
+    "type": "consumes_contract",
+    "provenance": "deterministic",
+    "via": "import-symbol",
+    "symbol": "ProbeStatus"
+   },
+   "verdict": "verified",
+   "reasons": [
+    "no breaking change; consumer usage ⊆ provider (usage not fully narrowable: no literal of the enum used in the consumer (exhaustiveness unknown) — nothing changed to break it)"
+   ],
+   "projection": {
+    "bindings": [],
+    "keys_read": [],
+    "keys_sent": [],
+    "literals_sent": 0,
+    "values_used": [],
+    "complete": false,
+    "incomplete_reasons": [
+     "no literal of the enum used in the consumer (exhaustiveness unknown)"
+    ]
+   }
+  },
+  {
+   "edge": {
+    "from": "code_unit:packages/core/src/health/dep-probe.ts",
+    "to": "contract:packages/core/src/health/dep-probe.ts#ProbeStatus",
+    "type": "implements_contract",
+    "provenance": "deterministic",
+    "via": "declaration",
+    "symbol": "ProbeStatus"
+   },
+   "verdict": "verified",
+   "reasons": [
+    "provider side: unchanged"
+   ]
+  },
+  {
+   "edge": {
+    "from": "code_unit:packages/core/src/clients/index.ts",
+    "to": "contract:packages/core/src/types/schemas.ts#OpsBotEventSchema",
+    "type": "consumes_contract",
+    "provenance": "deterministic",
+    "via": "import-symbol",
+    "symbol": "OpsBotEventSchema"
+   },
+   "verdict": "verified",
+   "reasons": [
+    "no breaking change; consumer usage ⊆ provider (usage not fully narrowable: no binding of the contract type found in the consumer — nothing changed to break it)"
+   ],
+   "projection": {
+    "bindings": [],
+    "keys_read": [],
+    "keys_sent": [],
+    "literals_sent": 0,
+    "values_used": [],
+    "complete": false,
+    "incomplete_reasons": [
+     "no binding of the contract type found in the consumer"
+    ]
+   }
+  },
+  {
+   "edge": {
+    "from": "code_unit:packages/core/src/clients/ops-bot.types.ts",
+    "to": "contract:packages/core/src/types/schemas.ts#OpsBotEventSchema",
+    "type": "consumes_contract",
+    "provenance": "deterministic",
+    "via": "import-symbol",
+    "symbol": "OpsBotEventSchema"
+   },
+   "verdict": "verified",
+   "reasons": [
+    "no breaking change; consumer usage ⊆ provider (usage not fully narrowable: no binding of the contract type found in the consumer — nothing changed to break it)"
+   ],
+   "projection": {
+    "bindings": [],
+    "keys_read": [],
+    "keys_sent": [],
+    "literals_sent": 0,
+    "values_used": [],
+    "complete": false,
+    "incomplete_reasons": [
+     "no binding of the contract type found in the consumer"
+    ]
+   }
+  },
+  {
+   "edge": {
+    "from": "code_unit:packages/core/src/types/index.ts",
+    "to": "contract:packages/core/src/types/schemas.ts#OpsBotEventSchema",
+    "type": "consumes_contract",
+    "provenance": "deterministic",
+    "via": "import-symbol",
+    "symbol": "OpsBotEventSchema"
+   },
+   "verdict": "verified",
+   "reasons": [
+    "no breaking change; consumer usage ⊆ provider (usage not fully narrowable: no binding of the contract type found in the consumer — nothing changed to break it)"
+   ],
+   "projection": {
+    "bindings": [],
+    "keys_read": [],
+    "keys_sent": [],
+    "literals_sent": 0,
+    "values_used": [],
+    "complete": false,
+    "incomplete_reasons": [
+     "no binding of the contract type found in the consumer"
+    ]
+   }
+  },
+  {
+   "edge": {
+    "from": "code_unit:packages/core/src/types/schemas.spec.ts",
+    "to": "contract:packages/core/src/types/schemas.ts#OpsBotEventSchema",
+    "type": "consumes_contract",
+    "provenance": "deterministic",
+    "via": "import-symbol",
+    "symbol": "OpsBotEventSchema"
+   },
+   "verdict": "failed",
+   "reasons": [
+    "consumer reads key `success` that the provider does not declare"
+   ],
+   "projection": {
+    "bindings": [
+     "result"
+    ],
+    "keys_read": [
+     "success"
+    ],
+    "keys_sent": [],
+    "literals_sent": 0,
+    "values_used": [],
+    "complete": true,
+    "incomplete_reasons": []
+   }
+  },
+  {
+   "edge": {
+    "from": "code_unit:packages/core/src/types/schemas.ts",
+    "to": "contract:packages/core/src/types/schemas.ts#OpsBotEventSchema",
+    "type": "implements_contract",
+    "provenance": "deterministic",
+    "via": "declaration",
+    "symbol": "OpsBotEventSchema"
+   },
+   "verdict": "verified",
+   "reasons": [
+    "provider side: unchanged"
+   ]
+  },
+  {
+   "edge": {
+    "from": "code_unit:packages/core/src/types/index.ts",
+    "to": "contract:packages/core/src/types/schemas.ts#TelegramUpdateStubSchema",
+    "type": "consumes_contract",
+    "provenance": "deterministic",
+    "via": "import-symbol",
+    "symbol": "TelegramUpdateStubSchema"
+   },
+   "verdict": "verified",
+   "reasons": [
+    "no breaking change; consumer usage ⊆ provider (usage not fully narrowable: no binding of the contract type found in the consumer — nothing changed to break it)"
+   ],
+   "projection": {
+    "bindings": [],
+    "keys_read": [],
+    "keys_sent": [],
+    "literals_sent": 0,
+    "values_used": [],
+    "complete": false,
+    "incomplete_reasons": [
+     "no binding of the contract type found in the consumer"
+    ]
+   }
+  },
+  {
+   "edge": {
+    "from": "code_unit:packages/core/src/types/schemas.spec.ts",
+    "to": "contract:packages/core/src/types/schemas.ts#TelegramUpdateStubSchema",
+    "type": "consumes_contract",
+    "provenance": "deterministic",
+    "via": "import-symbol",
+    "symbol": "TelegramUpdateStubSchema"
+   },
+   "verdict": "failed",
+   "reasons": [
+    "consumer reads key `success` that the provider does not declare"
+   ],
+   "projection": {
+    "bindings": [
+     "result"
+    ],
+    "keys_read": [
+     "success"
+    ],
+    "keys_sent": [],
+    "literals_sent": 0,
+    "values_used": [],
+    "complete": true,
+    "incomplete_reasons": []
+   }
+  },
+  {
+   "edge": {
+    "from": "code_unit:packages/core/src/types/schemas.ts",
+    "to": "contract:packages/core/src/types/schemas.ts#TelegramUpdateStubSchema",
+    "type": "implements_contract",
+    "provenance": "deterministic",
+    "via": "declaration",
+    "symbol": "TelegramUpdateStubSchema"
+   },
+   "verdict": "verified",
+   "reasons": [
+    "provider side: unchanged"
+   ]
+  }
+ ],
+ "limitations": [],
+ "summary": {
+  "contracts_base": 54,
+  "contracts_head": 54,
+  "statuses": {
+   "unchanged": 54
+  },
+  "codes": {},
+  "breaking": 0,
+  "edges": 114,
+  "edge_verdicts": {
+   "failed": 20,
+   "verified": 94
+  }
+ }
+}
