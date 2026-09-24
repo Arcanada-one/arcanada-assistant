@@ -6,12 +6,17 @@ import {
   MuneraGlobalErrorEnvelopeSchema,
   MuneraJwtUnauthorizedEnvelopeSchema,
   MuneraTaskListSchema,
+  MuneraTaskPageSchema,
+  MuneraTaskQuerySchema,
   MuneraTaskSchema,
   TaskListResultSchema,
+  TaskPageResultSchema,
   TaskResultSchema,
   UpdateTaskStatusRequestSchema,
   type CreateTaskRequest,
+  type MuneraTaskQuery,
   type TaskListResult,
+  type TaskPageResult,
   type TaskResult,
   type UpdateTaskStatusRequest,
 } from './munera.schemas.js';
@@ -44,9 +49,15 @@ export interface MuneraClientOptions {
    */
   baseUrl: string;
   /**
-   * Bearer JWT issued via Munera `POST /api/v1/auth/telegram` (or, post
-   * AUTH-* migration, Auth Arcana OIDC client_credentials). Stored in Vault
-   * `secret/munera/assistant-token` and refreshed by M7 hybrid-auth path.
+   * The credential sent as `Authorization: Bearer <apiToken>`. Muneral accepts
+   * two kinds on the same header and nothing else (`JwtOrApiKeyGuard`): a user
+   * JWT, or an agent key with the `mun_sk_` prefix.
+   *
+   * A2-281 — an unattended process holds the AGENT KEY, read from the file
+   * named by `MUNERAL_AGENT_KEY_FILE`, never a value in the environment. What
+   * the key may reach is narrower than a JWT: `AgentTaskScopeGuard` refuses an
+   * API key on every route not explicitly marked `@AgentScope(...)`. See
+   * `MuneralWorkItemsReader` for the one route this matters on.
    */
   apiToken: string;
   logger?: MuneraLogger;
@@ -55,6 +66,12 @@ export interface MuneraClientOptions {
   retry?: MuneraRetryOptions;
   circuit?: MuneraCircuitOptions;
   serviceName?: string;
+  /**
+   * A2-281 — AGENTS.md § Operating rules requires `aup-orchestrator/1.0` on
+   * every Muneral call, and this client sent no User-Agent at all, so its
+   * traffic was indistinguishable from a stray curl in any access log.
+   */
+  userAgent?: string;
 }
 
 export interface IMuneraClient {
@@ -62,6 +79,7 @@ export interface IMuneraClient {
   updateTaskStatus(taskId: string, req: UpdateTaskStatusRequest): Promise<TaskResult>;
   getTask(taskId: string): Promise<TaskResult>;
   listTasksByProject(projectId: string): Promise<TaskListResult>;
+  queryTasks(query: MuneraTaskQuery): Promise<TaskPageResult>;
   isCircuitOpen(): boolean;
 }
 
@@ -104,6 +122,19 @@ const DEFAULT_RETRY: MuneraRetryOptions = { maxAttempts: 2, baseDelayMs: 200 };
 
 const TASKS_PATH = '/api/v1/tasks';
 
+/**
+ * A2-281 — the canonical Muneral address in AGENTS.md is
+ * `https://api.muneral.com/api/v1`, but every path in this client already
+ * carries `/api/v1`. Configuring the canonical form therefore produced
+ * `…/api/v1/api/v1/tasks` and a 404 that looks exactly like an empty board.
+ * Both spellings are accepted and normalised to the origin.
+ */
+export function normaliseMuneraBaseUrl(raw: string): string {
+  return raw.replace(/\/+$/, '').replace(/\/api\/v1$/, '');
+}
+
+export const DEFAULT_MUNERA_USER_AGENT = 'aup-orchestrator/1.0';
+
 export class MuneraClient implements IMuneraClient {
   private readonly baseUrl: string;
   private readonly apiToken: string;
@@ -112,16 +143,18 @@ export class MuneraClient implements IMuneraClient {
   private readonly timeoutMs: number;
   private readonly retry: MuneraRetryOptions;
   private readonly serviceName: string;
+  private readonly userAgent: string;
   private readonly breaker: CircuitBreaker<[RequestPlan], HttpResult>;
 
   constructor(opts: MuneraClientOptions) {
-    this.baseUrl = opts.baseUrl.replace(/\/+$/, '');
+    this.baseUrl = normaliseMuneraBaseUrl(opts.baseUrl);
     this.apiToken = opts.apiToken;
     this.logger = opts.logger;
     this.fetchImpl = opts.fetchImpl ?? globalThis.fetch.bind(globalThis);
     this.timeoutMs = opts.timeoutMs ?? 10_000;
     this.retry = opts.retry ?? DEFAULT_RETRY;
     this.serviceName = opts.serviceName ?? 'arcanada-assistant';
+    this.userAgent = opts.userAgent ?? DEFAULT_MUNERA_USER_AGENT;
     const cb = opts.circuit ?? DEFAULT_CIRCUIT;
     this.breaker = new CircuitBreaker(this.executeRequest.bind(this), {
       timeout: false,
@@ -197,6 +230,56 @@ export class MuneraClient implements IMuneraClient {
     } catch (err) {
       return TaskListResultSchema.parse(this.buildUnavailable(err, 'task_list'));
     }
+  }
+
+  /**
+   * A2-281 — `GET /api/v1/tasks`, the cross-project filter Muneral added for
+   * exactly this consumer: "what is in progress", "what reached done today",
+   * "what is queued" without enumerating projects and without reading a
+   * Markdown snapshot off a disk.
+   *
+   * Returns `unavailable` with the HTTP status for anything that is not a
+   * well-formed 2xx page. It never degrades to an empty list: a 401/403 and
+   * "no work items matched" are different answers and the caller renders them
+   * differently.
+   */
+  async queryTasks(query: MuneraTaskQuery): Promise<TaskPageResult> {
+    const parsed = MuneraTaskQuerySchema.safeParse(query);
+    if (!parsed.success) {
+      throw new MuneraClientError(`Invalid queryTasks request: ${parsed.error.message}`, {
+        cause: parsed.error,
+      });
+    }
+    const search = new URLSearchParams();
+    for (const [key, value] of Object.entries(parsed.data)) {
+      if (value !== undefined) search.set(key, String(value));
+    }
+    const qs = search.toString();
+    try {
+      const result = await this.breaker.fire({
+        url: `${this.baseUrl}${TASKS_PATH}${qs ? `?${qs}` : ''}`,
+        method: 'GET',
+        body: null,
+        retryable: true,
+      });
+      return this.mapPageResponse(result);
+    } catch (err) {
+      return TaskPageResultSchema.parse(this.buildUnavailable(err, 'task_query'));
+    }
+  }
+
+  private mapPageResponse(result: HttpResult): TaskPageResult {
+    if (result.status >= 200 && result.status < 300) {
+      const parsed = MuneraTaskPageSchema.safeParse(result.body);
+      if (!parsed.success) {
+        throw new MuneraClientError(`Invalid Munera task page envelope: ${parsed.error.message}`, {
+          cause: parsed.error,
+          httpStatus: result.status,
+        });
+      }
+      return TaskPageResultSchema.parse({ kind: 'ok', page: parsed.data });
+    }
+    throw this.classifyHttpError(result);
   }
 
   private async callTaskEndpoint(req: RequestPlan): Promise<TaskResult> {
@@ -330,6 +413,7 @@ export class MuneraClient implements IMuneraClient {
     try {
       const headers: Record<string, string> = {
         authorization: `Bearer ${this.apiToken}`,
+        'user-agent': this.userAgent,
       };
       if (req.body !== null) headers['content-type'] = 'application/json';
       const res = await this.fetchImpl(req.url, {

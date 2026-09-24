@@ -87,8 +87,17 @@ services:
       # sight. http:// is accepted for mesh hosts by url-schemas.ts.
       OPSBOT_BASE_URL: ${OPSBOT_BASE_URL:-http://100.90.7.20:3600}
       OPSBOT_API_KEY: ${OPSBOT_API_KEY:-changeme}
-      MUNERA_BASE_URL: ${MUNERA_BASE_URL:-https://muneral.com}
-      MUNERA_API_TOKEN: ${MUNERA_API_TOKEN:-changeme}
+      # A2-281: the canonical Muneral address (AGENTS.md § Operating rules).
+      # `https://muneral.com` was the SITE, not the API — every call under it
+      # 404s, and the token beside it was the literal string `changeme`.
+      MUNERA_BASE_URL: ${MUNERA_BASE_URL:-https://api.muneral.com/api/v1}
+      # A2-281: the agent key is read from a FILE, never from the environment.
+      # The path below is the read-only mount added at the bottom of this
+      # service; a missing file degrades every Muneral read to a marker naming
+      # the cause, it does not fake an empty board.
+      MUNERAL_AGENT_KEY_FILE: ${MUNERAL_AGENT_KEY_FILE:-/run/secrets/muneral-agent-key}
+      # Optional: narrows the proactive reads to one Muneral project.
+      MUNERAL_PROJECT_ID: ${MUNERAL_PROJECT_ID:-}
       # INFRA-0240: mesh-auth API key (Zod .optional(); placeholder satisfies min(1) Zod check для dev/test).
       MESH_VAULT_API_KEY: ${MESH_VAULT_API_KEY:-arc_api_placeholder_dev_not_set_value_padding_padding}
       BRIEFING_TIMEZONE: Europe/Istanbul
@@ -97,12 +106,6 @@ services:
       # ARCA-0010 proactive config — file-backed (Vault SDK deferred per task-description § Implementation Notes #3).
       # Module loads YAML at boot + 5-min poll; missing path ⇒ module idle.
       PROACTIVE_CONFIG_PATH: /etc/arcanada/proactive-config.yaml
-      # ARCA-0154: datarim KB root delivered to the host by rsync (see
-      # task-description § Deploy-runbook). DatarimReaderService resolves
-      # DATARIM_PATH; readArchivedToday climbs to <root>/../documentation/archive,
-      # so the bind below mounts the KB ROOT (/data/arcanada-kb), not just datarim/.
-      # Missing host dir ⇒ sourceAvailable()=false ⇒ degraded marker (not silent empty).
-      DATARIM_PATH: ${DATARIM_PATH:-/data/arcanada-kb/datarim}
     ports:
       - '127.0.0.1:3800:3800'
     networks:
@@ -115,10 +118,19 @@ services:
       # where /etc/arcanada/proactive-config.yaml is absent — ProactiveModule
       # then catches ENOENT and stays idle (graceful degradation).
       - /etc/arcanada:/etc/arcanada:ro
-      # ARCA-0154: read-only KB root (datarim/ + documentation/archive/). Same
-      # dir-bind rationale as above: a missing host dir degrades gracefully
-      # (sourceAvailable()=false) rather than creating an empty masking dir.
-      - /data/arcanada-kb:/data/arcanada-kb:ro
+      # A2-281: the KB bind `/data/arcanada-kb:ro` was REMOVED with the reader
+      # that used it. The rsync that filled it came from arcana-agents, which
+      # INFRA-0417 decommissioned on 2026-09-17; the host directory has been
+      # empty since, so the briefing and the digest rendered «источник
+      # недоступен» in every section, every day. Work items live in Muneral.
+      #
+      # Read-only bind for the Muneral agent key. Dir-bind, same rationale as
+      # /etc/arcanada above: a missing host directory must not be silently
+      # created as an empty one at the FILE path, which would turn "no key" into
+      # "unreadable key" and cost a deploy to diagnose. The host file is
+      # /etc/arcanada/secrets/muneral-agent-key, mode 0400, owned by the
+      # container user; it is never in git and never in the environment.
+      - ${MUNERAL_SECRETS_DIR:-/etc/arcanada/secrets}:/run/secrets:ro
 
 networks:
   default: {}

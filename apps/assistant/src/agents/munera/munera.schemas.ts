@@ -11,7 +11,20 @@ export const MUNERA_TASK_STATUSES = [
 
 export const MUNERA_TASK_PRIORITIES = ['critical', 'high', 'medium', 'low'] as const;
 
+/**
+ * A2-281 — what a READ may legally come back with. `archived` is a real
+ * Muneral status (`TASK_TRANSITIONS` in `@muneral/types`, terminal and NOT a
+ * synonym for `done` — MUN-0043), but it was missing from the list above, and
+ * the list above is what `MuneraTaskSchema` validated against. One archived
+ * row anywhere in a page therefore failed the whole parse, and a failed parse
+ * is reported as `unavailable` — an outage invented by our own enum. The write
+ * enums keep the narrower list on purpose: this client never asks for a move
+ * to `archived`.
+ */
+export const MUNERA_TASK_STATUSES_READ = [...MUNERA_TASK_STATUSES, 'archived'] as const;
+
 export type MuneraTaskStatus = (typeof MUNERA_TASK_STATUSES)[number];
+export type MuneraTaskStatusRead = (typeof MUNERA_TASK_STATUSES_READ)[number];
 export type MuneraTaskPriority = (typeof MUNERA_TASK_PRIORITIES)[number];
 
 export const CreateTaskRequestSchema = z
@@ -43,7 +56,7 @@ export const MuneraTaskSchema = z
     projectId: z.string().uuid(),
     title: z.string(),
     description: z.string().nullable().optional(),
-    status: z.enum(MUNERA_TASK_STATUSES),
+    status: z.enum(MUNERA_TASK_STATUSES_READ),
     priority: z.enum(MUNERA_TASK_PRIORITIES).nullable().optional(),
     createdAt: z.string(),
     updatedAt: z.string(),
@@ -122,3 +135,49 @@ export const TaskListResultSchema = z.discriminatedUnion('kind', [
   }),
 ]);
 export type TaskListResult = z.infer<typeof TaskListResultSchema>;
+
+/**
+ * A2-281 — the envelope of `GET /api/v1/tasks` (Muneral `TasksService.query`,
+ * `apps/api/src/tasks/tasks.service.ts`). `total` is the count BEFORE paging,
+ * and it is the reason this route exists: an empty page with no count is
+ * exactly the shape that reads as a clean bill of health.
+ */
+export const MuneraTaskPageSchema = z
+  .object({
+    items: MuneraTaskListSchema,
+    total: z.number().int().nonnegative(),
+    limit: z.number().int().nonnegative(),
+    offset: z.number().int().nonnegative(),
+  })
+  .passthrough();
+export type MuneraTaskPage = z.infer<typeof MuneraTaskPageSchema>;
+
+export const TaskPageResultSchema = z.discriminatedUnion('kind', [
+  z.object({
+    kind: z.literal('ok'),
+    page: MuneraTaskPageSchema,
+  }),
+  z.object({
+    kind: z.literal('unavailable'),
+    reason: z.string().min(1),
+    statusCode: z.number().int().optional(),
+    errorCode: z.string().optional(),
+    detail: z.string().optional(),
+  }),
+]);
+export type TaskPageResult = z.infer<typeof TaskPageResultSchema>;
+
+/** Filters accepted by `GET /api/v1/tasks` — `QueryTasksDto` in Muneral. */
+export const MuneraTaskQuerySchema = z
+  .object({
+    status: z.enum(MUNERA_TASK_STATUSES_READ).optional(),
+    projectId: z.string().uuid().optional(),
+    /** ISO-8601, inclusive: `updatedAt >= updatedSince`. */
+    updatedSince: z.string().min(1).optional(),
+    /** ISO-8601, exclusive: `updatedAt < updatedBefore`. */
+    updatedBefore: z.string().min(1).optional(),
+    limit: z.number().int().min(1).max(200).optional(),
+    offset: z.number().int().min(0).optional(),
+  })
+  .strict();
+export type MuneraTaskQuery = z.infer<typeof MuneraTaskQuerySchema>;
