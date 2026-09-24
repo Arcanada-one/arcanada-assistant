@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { resolveMuneraCredential } from './munera.config.js';
+import { resolveMuneraCredential, withoutBlanks } from './munera.config.js';
 
 describe('resolveMuneraCredential (A2-281)', () => {
   it('reads the agent key from the file named by MUNERAL_AGENT_KEY_FILE', () => {
@@ -45,5 +45,13 @@ describe('resolveMuneraCredential (A2-281)', () => {
 
   it('answers "none" with a reason when nothing is configured', () => {
     expect(resolveMuneraCredential({})).toMatchObject({ token: null, source: 'none' });
+  });
+});
+
+describe('withoutBlanks (A2-281)', () => {
+  it('drops an empty env var so `${VAR:-}` in compose reads as unset', () => {
+    expect(withoutBlanks({ MUNERAL_PROJECT_ID: '', MUNERA_TIMEOUT_MS: '5000' })).toEqual({
+      MUNERA_TIMEOUT_MS: '5000',
+    });
   });
 });
