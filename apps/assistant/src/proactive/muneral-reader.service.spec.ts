@@ -139,7 +139,11 @@ describe('MuneralWorkItemsReader', () => {
      */
     it('never reports an unauthorised read as an empty board (mutant: 401 → [])', async () => {
       const client = stubMuneraClient({
-        unavailable: { kind: 'unavailable', reason: 'munera_api_key_unauthorized', statusCode: 401 },
+        unavailable: {
+          kind: 'unavailable',
+          reason: 'munera_api_key_unauthorized',
+          statusCode: 401,
+        },
       });
       const result = await reader(client).readCompletedToday(RUN_DATE);
       expect(result.ok).toBe(false);
@@ -179,9 +183,9 @@ describe('MuneralWorkItemsReader', () => {
       expect(referenceOf({ id: 'ffffffff-1111-2222-3333-444444444444', title: 'A2-281 — x' })).toBe(
         'A2-281',
       );
-      expect(referenceOf({ id: 'ffffffff-1111-2222-3333-444444444444', title: 'без префикса' })).toBe(
-        'ffffffff',
-      );
+      expect(
+        referenceOf({ id: 'ffffffff-1111-2222-3333-444444444444', title: 'без префикса' }),
+      ).toBe('ffffffff');
     });
 
     it('computes midnight in the configured zone, not in UTC', () => {

@@ -1,9 +1,5 @@
 import type { IMuneraClient } from './munera.client.js';
-import type {
-  TaskListResult,
-  TaskPageResult,
-  TaskResult,
-} from './munera.schemas.js';
+import type { TaskListResult, TaskPageResult, TaskResult } from './munera.schemas.js';
 
 /**
  * A2-281 — the client used when no Muneral credential is configured.

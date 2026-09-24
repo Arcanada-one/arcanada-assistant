@@ -14,9 +14,9 @@ function jsonResponse(status: number, body: unknown): Response {
 
 describe('MuneraClient.queryTasks (A2-281)', () => {
   it('calls GET /api/v1/tasks with the filters and the required User-Agent', async () => {
-    const fetchImpl = vi.fn().mockResolvedValue(
-      jsonResponse(200, { items: [], total: 0, limit: 200, offset: 0 }),
-    );
+    const fetchImpl = vi
+      .fn()
+      .mockResolvedValue(jsonResponse(200, { items: [], total: 0, limit: 200, offset: 0 }));
     const client = new MuneraClient({
       baseUrl: 'https://api.muneral.com/api/v1',
       apiToken: 'mun_sk_test',
@@ -45,7 +45,9 @@ describe('MuneraClient.queryTasks (A2-281)', () => {
       apiToken: 'mun_sk_test',
       fetchImpl: vi
         .fn()
-        .mockResolvedValue(jsonResponse(403, AGENT_KEY_FORBIDDEN_ENVELOPE)) as unknown as typeof fetch,
+        .mockResolvedValue(
+          jsonResponse(403, AGENT_KEY_FORBIDDEN_ENVELOPE),
+        ) as unknown as typeof fetch,
     });
     const result = await client.queryTasks({ status: 'in_progress' });
     expect(result.kind).toBe('unavailable');
@@ -96,8 +98,12 @@ describe('MuneraClient.queryTasks (A2-281)', () => {
 
 describe('normaliseMuneraBaseUrl', () => {
   it('accepts both the canonical API URL and a bare origin', () => {
-    expect(normaliseMuneraBaseUrl('https://api.muneral.com/api/v1')).toBe('https://api.muneral.com');
-    expect(normaliseMuneraBaseUrl('https://api.muneral.com/api/v1/')).toBe('https://api.muneral.com');
+    expect(normaliseMuneraBaseUrl('https://api.muneral.com/api/v1')).toBe(
+      'https://api.muneral.com',
+    );
+    expect(normaliseMuneraBaseUrl('https://api.muneral.com/api/v1/')).toBe(
+      'https://api.muneral.com',
+    );
     expect(normaliseMuneraBaseUrl('http://localhost:3500')).toBe('http://localhost:3500');
   });
 });

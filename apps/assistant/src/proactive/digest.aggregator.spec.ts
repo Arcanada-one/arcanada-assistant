@@ -10,9 +10,7 @@ import type { IWorkItemsReader, SourceResult } from './work-items.reader.js';
 const RUN_DATE = '2026-09-24';
 
 // MarkdownV2 escapes `-`, so a reference reads `A2\-276` in the wire text.
-function fixedReader(opts: {
-  completed?: SourceResult<CompletedTask>;
-}): IWorkItemsReader {
+function fixedReader(opts: { completed?: SourceResult<CompletedTask> }): IWorkItemsReader {
   const empty = { ok: true as const, items: [], total: 0, truncated: false };
   return {
     readActiveTasks: () => Promise.resolve(empty),

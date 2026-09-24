@@ -2,7 +2,11 @@ import { Injectable, Logger } from '@nestjs/common';
 
 import type { IMuneraClient } from '../agents/munera/munera.client.js';
 import { MUNERA_CREDENTIAL_NOT_CONFIGURED } from '../agents/munera/munera-unconfigured.client.js';
-import type { MuneraTask, MuneraTaskQuery, TaskPageResult } from '../agents/munera/munera.schemas.js';
+import type {
+  MuneraTask,
+  MuneraTaskQuery,
+  TaskPageResult,
+} from '../agents/munera/munera.schemas.js';
 
 import type { ActiveTask, ArchivedItem, BacklogItem, CompletedTask } from './proactive.types.js';
 import type { IWorkItemsReader, SourceResult } from './work-items.reader.js';
@@ -229,9 +233,7 @@ function priorityLabel(priority: string | null | undefined): string {
 }
 
 /** The operator-facing cause. An HTTP status is the most useful thing we know. */
-function describeUnavailable(
-  result: Extract<TaskPageResult, { kind: 'unavailable' }>,
-): string {
+function describeUnavailable(result: Extract<TaskPageResult, { kind: 'unavailable' }>): string {
   if (result.reason === MUNERA_CREDENTIAL_NOT_CONFIGURED) {
     return 'ключ не настроен (MUNERAL_AGENT_KEY_FILE)';
   }

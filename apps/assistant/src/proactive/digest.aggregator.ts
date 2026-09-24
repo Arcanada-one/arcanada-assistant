@@ -9,7 +9,11 @@ import type {
   CompletedTask,
   ProactiveConfig,
 } from './proactive.types.js';
-import { WORK_ITEMS_READER, type IWorkItemsReader, type SourceResult } from './work-items.reader.js';
+import {
+  WORK_ITEMS_READER,
+  type IWorkItemsReader,
+  type SourceResult,
+} from './work-items.reader.js';
 
 export interface DigestInput {
   runDate: string;

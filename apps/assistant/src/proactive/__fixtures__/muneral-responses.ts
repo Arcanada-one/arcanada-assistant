@@ -1,5 +1,9 @@
 import type { IMuneraClient } from '../../agents/munera/munera.client.js';
-import type { MuneraTask, MuneraTaskQuery, TaskPageResult } from '../../agents/munera/munera.schemas.js';
+import type {
+  MuneraTask,
+  MuneraTaskQuery,
+  TaskPageResult,
+} from '../../agents/munera/munera.schemas.js';
 
 /**
  * A2-281 — Muneral responses, and a stub that answers them the way the server
@@ -64,17 +68,71 @@ function row(
  * and 20:00Z on the 23rd sit on OPPOSITE sides of the boundary.
  */
 export const MUNERAL_BOARD: readonly MuneraTask[] = [
-  row('0f1c4d8a-1111-4aaa-9bbb-000000000001', 'A2-281 — брифинг читает Muneral', 'in_progress', 'critical', '2026-09-24T06:10:00.000Z'),
-  row('0f1c4d8a-1111-4aaa-9bbb-000000000002', 'A2-277 — ключи агентов в файлах', 'in_progress', 'high', '2026-09-24T05:00:00.000Z'),
-  row('0f1c4d8a-1111-4aaa-9bbb-000000000003', 'A2-260 — вычистить rsync-остатки', 'todo', 'high', '2026-09-22T11:00:00.000Z'),
-  row('0f1c4d8a-1111-4aaa-9bbb-000000000004', 'A2-261 — переписать runbook', 'todo', 'critical', '2026-09-21T08:30:00.000Z'),
-  row('0f1c4d8a-1111-4aaa-9bbb-000000000005', 'Мелкая правка без префикса', 'todo', 'low', '2026-09-20T08:30:00.000Z'),
+  row(
+    '0f1c4d8a-1111-4aaa-9bbb-000000000001',
+    'A2-281 — брифинг читает Muneral',
+    'in_progress',
+    'critical',
+    '2026-09-24T06:10:00.000Z',
+  ),
+  row(
+    '0f1c4d8a-1111-4aaa-9bbb-000000000002',
+    'A2-277 — ключи агентов в файлах',
+    'in_progress',
+    'high',
+    '2026-09-24T05:00:00.000Z',
+  ),
+  row(
+    '0f1c4d8a-1111-4aaa-9bbb-000000000003',
+    'A2-260 — вычистить rsync-остатки',
+    'todo',
+    'high',
+    '2026-09-22T11:00:00.000Z',
+  ),
+  row(
+    '0f1c4d8a-1111-4aaa-9bbb-000000000004',
+    'A2-261 — переписать runbook',
+    'todo',
+    'critical',
+    '2026-09-21T08:30:00.000Z',
+  ),
+  row(
+    '0f1c4d8a-1111-4aaa-9bbb-000000000005',
+    'Мелкая правка без префикса',
+    'todo',
+    'low',
+    '2026-09-20T08:30:00.000Z',
+  ),
   // Done INSIDE the Istanbul day of 2026-09-24 (23rd 21:30Z is already the 24th locally).
-  row('0f1c4d8a-1111-4aaa-9bbb-000000000006', 'A2-276 — ARAS читает расписки', 'done', 'high', '2026-09-23T21:30:00.000Z'),
-  row('0f1c4d8a-1111-4aaa-9bbb-000000000007', 'A2-275 — расписка допуска', 'done', 'medium', '2026-09-24T15:00:00.000Z'),
+  row(
+    '0f1c4d8a-1111-4aaa-9bbb-000000000006',
+    'A2-276 — ARAS читает расписки',
+    'done',
+    'high',
+    '2026-09-23T21:30:00.000Z',
+  ),
+  row(
+    '0f1c4d8a-1111-4aaa-9bbb-000000000007',
+    'A2-275 — расписка допуска',
+    'done',
+    'medium',
+    '2026-09-24T15:00:00.000Z',
+  ),
   // Done BEFORE that day started (20:00Z on the 23rd is 23:00 local on the 23rd).
-  row('0f1c4d8a-1111-4aaa-9bbb-000000000008', 'A2-269 — контур из одиннадцати проектов', 'done', 'high', '2026-09-23T20:00:00.000Z'),
-  row('0f1c4d8a-1111-4aaa-9bbb-000000000009', 'A2-240 — карточка снята с доски', 'archived', 'low', '2026-09-24T09:00:00.000Z'),
+  row(
+    '0f1c4d8a-1111-4aaa-9bbb-000000000008',
+    'A2-269 — контур из одиннадцати проектов',
+    'done',
+    'high',
+    '2026-09-23T20:00:00.000Z',
+  ),
+  row(
+    '0f1c4d8a-1111-4aaa-9bbb-000000000009',
+    'A2-240 — карточка снята с доски',
+    'archived',
+    'low',
+    '2026-09-24T09:00:00.000Z',
+  ),
 ];
 
 export interface StubOptions {
@@ -105,10 +163,16 @@ export function stubMuneraClient(opts: StubOptions = {}): IMuneraClient {
       const matched = board.filter((t) => {
         if (query.status !== undefined && t.status !== query.status) return false;
         if (query.projectId !== undefined && t.projectId !== query.projectId) return false;
-        if (query.updatedSince !== undefined && Date.parse(t.updatedAt) < Date.parse(query.updatedSince)) {
+        if (
+          query.updatedSince !== undefined &&
+          Date.parse(t.updatedAt) < Date.parse(query.updatedSince)
+        ) {
           return false;
         }
-        if (query.updatedBefore !== undefined && Date.parse(t.updatedAt) >= Date.parse(query.updatedBefore)) {
+        if (
+          query.updatedBefore !== undefined &&
+          Date.parse(t.updatedAt) >= Date.parse(query.updatedBefore)
+        ) {
           return false;
         }
         return true;
@@ -117,7 +181,12 @@ export function stubMuneraClient(opts: StubOptions = {}): IMuneraClient {
       const offset = query.offset ?? 0;
       return Promise.resolve({
         kind: 'ok',
-        page: { items: matched.slice(offset, offset + limit), total: matched.length, limit, offset },
+        page: {
+          items: matched.slice(offset, offset + limit),
+          total: matched.length,
+          limit,
+          offset,
+        },
       });
     },
   };

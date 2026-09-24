@@ -4,8 +4,17 @@ import type { EcosystemSnapshot, IOpsBotClient } from '@arcanada/core';
 import { OPS_BOT_CLIENT } from '../agents/ops-agent/ops-agent.service.js';
 
 import { escapeMd, bold } from './markdown-v2.js';
-import type { ActiveTask, BacklogItem, ComposedMessage, ProactiveConfig } from './proactive.types.js';
-import { WORK_ITEMS_READER, type IWorkItemsReader, type SourceResult } from './work-items.reader.js';
+import type {
+  ActiveTask,
+  BacklogItem,
+  ComposedMessage,
+  ProactiveConfig,
+} from './proactive.types.js';
+import {
+  WORK_ITEMS_READER,
+  type IWorkItemsReader,
+  type SourceResult,
+} from './work-items.reader.js';
 
 export interface BriefingInput {
   runDate: string;
@@ -77,7 +86,8 @@ export class BriefingAggregator {
     if (result.total === 0) return `${header} ${escapeMd('нет')}`;
     const shown = result.items.slice(0, MAX_LISTED_IDS);
     const ids = shown.map((t) => escapeMd(t.id)).join(', ');
-    const more = result.total > shown.length ? escapeMd(`, …ещё ${result.total - shown.length}`) : '';
+    const more =
+      result.total > shown.length ? escapeMd(`, …ещё ${result.total - shown.length}`) : '';
     return `${header} ${escapeMd(String(result.total))} \\(${ids}${more}\\)`;
   }
 
