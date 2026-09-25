@@ -6,8 +6,14 @@ on:
   pull_request:
     branches: [main]
 
+# A2-384: only the push to main that deploys shares the serialising group; every other run (pull
+# requests, feature/fix/chore pushes) gets a group of its own. With one constant group for every event,
+# a main run whose `test`/`smoke` wait on the `deploy-gate` lane (no runner yet, or both slots down) held
+# the group, every pull-request run queued behind it, and each newer waiting run cancelled the older
+# one. Main runs stay serial as a whole run — deploy N and verify N both finish before deploy N+1 — so
+# the deployed-build gate in `verify` never compares against a newer commit's container.
 concurrency:
-  group: deploy-arcanada-assistant
+  group: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/main') && 'deploy-arcanada-assistant' || format('ci-arcanada-assistant-{0}', github.run_id) }}
   cancel-in-progress: false
 
 env:
