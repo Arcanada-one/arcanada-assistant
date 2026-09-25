@@ -6,11 +6,23 @@ import helmet from '@fastify/helmet';
 import rateLimit from '@fastify/rate-limit';
 import { Logger } from 'nestjs-pino';
 
-import { AppModule } from './app.module.js';
 import { AuthDispatcher } from './auth/auth.dispatcher.js';
 import { registerAuthPreflight } from './auth/auth.preflight.js';
+import { checkMuneraBoot, formatBootRefusal } from './config/munera-boot-gate.js';
 
 async function bootstrap(): Promise<void> {
+  // A2-374 — the Munera config is checked BEFORE app.module is imported (its
+  // ConfigModule.forRoot validates at import time), so a refusal exits with
+  // its own code (78, EX_CONFIG) and one greppable line, not exit 1 + a stack
+  // from inside Nest. Nothing here touches the network.
+  const gate = checkMuneraBoot(process.env);
+  if (!gate.ok) {
+    // eslint-disable-next-line no-console -- pino is not wired before Nest
+    console.error(`[bootstrap] ${formatBootRefusal(gate)}`);
+    process.exit(gate.exitCode);
+  }
+  const { AppModule } = await import('./app.module.js');
+
   const adapter = new FastifyAdapter({
     logger: false,
     trustProxy: true,
