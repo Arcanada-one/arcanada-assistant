@@ -36,7 +36,10 @@ jobs:
       - run: pnpm -r lint
 
   test:
-    runs-on: [self-hosted, Linux, X64, arcana-ai]
+    # A2-315: pre-deploy gates run on the dedicated `deploy-gate` lane, not on `arcana-ai` (the same machines as `ci-general`), where
+    # KC2 batteries held all five slots for hours (argana 95 min, muneral 150 min in the queue on
+    # 2026-09-24/25). The lane's runners carry ONLY that label (--no-default-labels): nothing else lands there.
+    runs-on: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/main') && fromJSON('["deploy-gate"]') || fromJSON('["self-hosted","Linux","X64","arcana-ai"]') }}
     # The published host ports are deliberately left for the runner to assign
     # (`'5432/tcp'`, not `'5432:5432'`). These are SHARED self-hosted runners:
     # a fixed host port makes any two concurrent jobs -- or the host's own
@@ -111,7 +114,8 @@ jobs:
 
   smoke:
     needs: [lint, test, audit]
-    runs-on: [self-hosted, Linux, X64, arcana-ai]
+    # A2-315: same lane rule as `test` above.
+    runs-on: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/main') && fromJSON('["deploy-gate"]') || fromJSON('["self-hosted","Linux","X64","arcana-ai"]') }}
     # Same rule as `test` above, and for a harder reason than a race: this job
     # used to publish `'5432:5432'`, and the arcana-ai label resolves to a
     # runner on arcana-prd, where 127.0.0.1:5432 is held permanently by
