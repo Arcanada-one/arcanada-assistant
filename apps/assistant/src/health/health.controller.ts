@@ -108,6 +108,10 @@ export class HealthController {
               : muneraSnapshot.state === 'degraded'
                 ? 'degraded'
                 : 'fail',
+          // A2-374 — WHICH munera fault: `munera_credential_rejected` (our key)
+          // and `circuit_open` (Muneral not answering) must not both read as a
+          // bare status. The reason is a fixed token, never a credential.
+          ...(muneraSnapshot.reason ? { error: muneraSnapshot.reason } : {}),
         }
       : { status: 'fail', error: 'munera agent not registered in mesh' };
 

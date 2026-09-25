@@ -46,6 +46,16 @@ export class MuneraAgentService implements IAgent, IAgentHealth {
 
   healthSnapshot(): AgentHealthSnapshot {
     const open = this.client.isCircuitOpen();
+    // A2-313 — a closed breaker is not a working key: 401s do not trip it.
+    if (!open && this.client.credentialState?.() === 'rejected') {
+      return {
+        agent: this.name,
+        state: 'degraded',
+        circuit: 'closed',
+        reason: 'munera_credential_rejected',
+        checkedAt: new Date().toISOString(),
+      };
+    }
     return {
       agent: this.name,
       state: open ? 'unavailable' : 'ok',

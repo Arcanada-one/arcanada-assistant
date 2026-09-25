@@ -9,12 +9,16 @@ import { ConfigService } from '@nestjs/config';
 import { BullModule, getQueueToken } from '@nestjs/bullmq';
 import { Worker, type Queue, type Job } from 'bullmq';
 
+import { MuneraAgentModule } from '../agents/munera/munera-agent.module.js';
+import { MUNERA_CLIENT } from '../agents/munera/munera-agent.service.js';
+import type { IMuneraClient } from '../agents/munera/munera.client.js';
 import { OpsAgentModule } from '../agents/ops-agent/ops-agent.module.js';
+import { MUNERA_CONFIG, type MuneraConfig } from '../config/munera.config.js';
 import { DatabaseModule } from '../database/database.module.js';
 
 import { BriefingAggregator } from './briefing.aggregator.js';
-import { DatarimReaderService } from './datarim-reader.service.js';
 import { DigestAggregator } from './digest.aggregator.js';
+import { MuneralWorkItemsReader } from './muneral-reader.service.js';
 import { ProactiveConfigService } from './proactive-config.service.js';
 import { PROACTIVE_QUEUE, ProactiveController } from './proactive.controller.js';
 import { ProactiveDispatcherService } from './proactive-dispatcher.service.js';
@@ -22,6 +26,7 @@ import { ProactiveMetricsService } from './proactive-metrics.service.js';
 import { ProactiveProcessor } from './proactive.processor.js';
 import { PROACTIVE_TELEGRAM_SENDER, ProactiveTelegramSender } from './proactive-telegram.sender.js';
 import type { ProactiveConfig, ProactiveKind } from './proactive.types.js';
+import { WORK_ITEMS_READER } from './work-items.reader.js';
 
 const QUEUE_NAME = 'proactive';
 const BRIEFING_JOB_ID = 'proactive:briefing:daily';
@@ -58,6 +63,7 @@ function parseRedisUrl(url: string): {
   imports: [
     DatabaseModule,
     OpsAgentModule,
+    MuneraAgentModule,
     BullModule.registerQueueAsync({
       name: QUEUE_NAME,
       inject: [ConfigService],
@@ -74,7 +80,20 @@ function parseRedisUrl(url: string): {
   ],
   controllers: [ProactiveController],
   providers: [
-    DatarimReaderService,
+    {
+      // A2-281: the briefing and the digest read work items from Muneral,
+      // through the SAME client the munera agent uses — one credential, one
+      // circuit breaker, one place where the base URL is normalised.
+      provide: WORK_ITEMS_READER,
+      inject: [MUNERA_CLIENT, ConfigService],
+      useFactory: (client: IMuneraClient, config: ConfigService) => {
+        const ns = config.getOrThrow<MuneraConfig>(MUNERA_CONFIG);
+        return new MuneralWorkItemsReader(client, {
+          ...(ns.projectId ? { projectId: ns.projectId } : {}),
+          timeZone: config.get<string>('BRIEFING_TIMEZONE') ?? 'Europe/Istanbul',
+        });
+      },
+    },
     {
       provide: PROACTIVE_TELEGRAM_SENDER,
       useClass: ProactiveTelegramSender,

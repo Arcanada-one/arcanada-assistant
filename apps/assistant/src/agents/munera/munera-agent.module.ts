@@ -7,6 +7,7 @@ import { AgentRegistry } from '../../orchestrator/agent.registry.js';
 import { OrchestratorModule } from '../../orchestrator/orchestrator.module.js';
 
 import { MuneraClient, type IMuneraClient, type MuneraLogger } from './munera.client.js';
+import { UnconfiguredMuneraClient } from './munera-unconfigured.client.js';
 import { MUNERA_CLIENT, MuneraAgentService } from './munera-agent.service.js';
 
 function adaptLogger(pino: PinoLogger): MuneraLogger {
@@ -27,9 +28,22 @@ function adaptLogger(pino: PinoLogger): MuneraLogger {
       inject: [ConfigService, PinoLogger],
       useFactory: (config: ConfigService, pino: PinoLogger): IMuneraClient => {
         const ns = config.getOrThrow<MuneraConfig>(MUNERA_CONFIG);
+        // A2-281: no credential ⇒ a client that says so, not one that sends a
+        // placeholder to api.muneral.com and reports the 401 as an outage.
+        if (ns.credential.token === null) {
+          pino.warn(
+            { source: ns.credential.source, detail: ns.credential.detail },
+            'munera credential not configured — calls will answer unavailable',
+          );
+          return new UnconfiguredMuneraClient();
+        }
+        pino.info(
+          { source: ns.credential.source, baseUrl: ns.baseUrl },
+          'munera credential loaded',
+        );
         return new MuneraClient({
           baseUrl: ns.baseUrl,
-          apiToken: ns.apiToken,
+          apiToken: ns.credential.token,
           logger: adaptLogger(pino),
           timeoutMs: ns.timeoutMs,
           serviceName: 'arcanada-assistant',

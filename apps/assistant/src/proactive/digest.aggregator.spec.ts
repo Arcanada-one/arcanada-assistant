@@ -1,142 +1,85 @@
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
+import { stubMuneraClient } from './__fixtures__/muneral-responses.js';
+import { baseProactiveConfig } from './__fixtures__/proactive-config.fixture.js';
 import { DigestAggregator } from './digest.aggregator.js';
-import type { DatarimReaderService } from './datarim-reader.service.js';
-import type { ProactiveConfig } from './proactive.types.js';
+import { MuneralWorkItemsReader } from './muneral-reader.service.js';
+import type { CompletedTask } from './proactive.types.js';
+import type { IWorkItemsReader, SourceResult } from './work-items.reader.js';
 
-const baseConfig: ProactiveConfig = {
-  enabled: true,
-  timezone: 'Europe/Istanbul',
-  channels: {
-    briefing: {
-      enabled: true,
-      cron: '0 8 * * *',
-      chat_id: 100,
-      include_active_tasks: true,
-      include_backlog_top_n: 3,
-      include_ecosystem_snapshot: true,
-      include_night_events_section: false,
-    },
-    digest: {
-      enabled: true,
-      cron: '0 21 * * *',
-      chat_id: 100,
-      include_completed_tasks: true,
-      include_archived_items: true,
-      include_key_events: false,
-    },
-  },
-  dispatch: {
-    max_attempts: 3,
-    base_backoff_ms: 1000,
-    self_heal_threshold: 3,
-    fallback_to_plain_text_on_md_error: true,
-  },
-  observability: { pino_level: 'info', prometheus_counter: 'assistant_proactive_dispatched_total' },
-};
+const RUN_DATE = '2026-09-24';
 
-function stubReader(opts: {
-  completed?: Array<{ id: string; title: string }>;
-  archived?: Array<{ id: string; subdir: string; mtime: Date }>;
-  backlog?: Array<{ id: string; title: string; priority: string; complexity: string }>;
-  sourceAvailable?: boolean;
-  kbFreshness?: { stale: boolean; lastSyncIso: string; ageHours: number };
-}): DatarimReaderService {
+// MarkdownV2 escapes `-`, so a reference reads `A2\-276` in the wire text.
+function fixedReader(opts: { completed?: SourceResult<CompletedTask> }): IWorkItemsReader {
+  const empty = { ok: true as const, items: [], total: 0, truncated: false };
   return {
-    readActiveTasks: vi.fn().mockResolvedValue([]),
-    readBacklogTopN: vi.fn().mockResolvedValue(opts.backlog ?? []),
-    readCompletedToday: vi.fn().mockResolvedValue(opts.completed ?? []),
-    readArchivedToday: vi.fn().mockResolvedValue(opts.archived ?? []),
-    sourceAvailable: vi.fn().mockResolvedValue(opts.sourceAvailable ?? true),
-    kbFreshness: vi
-      .fn()
-      .mockResolvedValue(
-        opts.kbFreshness ?? { stale: false, lastSyncIso: new Date().toISOString(), ageHours: 0.1 },
-      ),
-  } as unknown as DatarimReaderService;
+    readActiveTasks: () => Promise.resolve(empty),
+    readBacklogTopN: () => Promise.resolve(empty),
+    readCompletedToday: () => Promise.resolve(opts.completed ?? empty),
+    readArchivedToday: () => Promise.resolve(empty),
+  };
+}
+
+function liveReader(): IWorkItemsReader {
+  return new MuneralWorkItemsReader(stubMuneraClient(), { timeZone: 'Europe/Istanbul' });
 }
 
 describe('DigestAggregator', () => {
-  it('produces three section headers per V-AC-2', async () => {
-    const agg = new DigestAggregator(
-      stubReader({
-        completed: [{ id: 'ARCA-0009', title: 'Agent Mesh' }],
-        archived: [{ id: 'TRANS-0060', subdir: 'transcribator', mtime: new Date() }],
-        backlog: [{ id: 'INFRA-0235', title: 'X', priority: 'P0', complexity: 'L2' }],
-      }),
-    );
-    const out = await agg.compose({ runDate: '2026-05-18', config: baseConfig });
-    expect(out.text).toContain('*Завершено сегодня*');
-    expect(out.text).toContain('*Архив сегодня*');
-    expect(out.text).toContain('*В очереди на завтра*');
+  it('reports what reached done inside the local day, with titles', async () => {
+    const agg = new DigestAggregator(liveReader());
+    const out = await agg.compose({ runDate: RUN_DATE, config: baseProactiveConfig });
+
     expect(out.sections).toEqual(['completed_today', 'archived_today', 'backlog_tomorrow']);
+    expect(out.text).toContain('A2\\-276');
+    expect(out.text).toContain('ARAS читает расписки');
+    // Finished at 23:00 local on the 23rd — yesterday's work, not today's.
+    expect(out.text).not.toContain('A2\\-269');
   });
 
-  it('renders "— нет" / "— пусто" placeholders when sections empty but source available', async () => {
-    const agg = new DigestAggregator(stubReader({ sourceAvailable: true }));
-    const out = await agg.compose({ runDate: '2026-05-18', config: baseConfig });
+  it('renders the archive section from Muneral status archived', async () => {
+    const agg = new DigestAggregator(liveReader());
+    const out = await agg.compose({ runDate: RUN_DATE, config: baseProactiveConfig });
+    expect(out.text).toContain('Архив сегодня');
+    expect(out.text).toContain('A2\\-240');
+  });
+
+  it('says «нет» only when Muneral answered and nothing finished', async () => {
+    const agg = new DigestAggregator(fixedReader({}));
+    const out = await agg.compose({ runDate: RUN_DATE, config: baseProactiveConfig });
+    expect(out.text).toContain('Завершено сегодня');
     expect(out.text).toContain('— нет');
-    expect(out.text).toContain('— пусто');
-    expect(out.text).not.toContain('источник недоступен');
+    expect(out.text).not.toContain('⚠️');
   });
 
-  // ARCA-0154 wish #4: broken datarim source → degraded marker, not "— нет".
-  it('renders degraded marker for datarim sections when source unavailable', async () => {
-    const agg = new DigestAggregator(stubReader({ sourceAvailable: false }));
-    const out = await agg.compose({ runDate: '2026-05-18', config: baseConfig });
-    expect(out.text).toContain('источник недоступен');
+  it('names the cause when Muneral refuses, instead of «нет»', async () => {
+    const agg = new DigestAggregator(fixedReader({ completed: { ok: false, reason: 'HTTP 403' } }));
+    const out = await agg.compose({ runDate: RUN_DATE, config: baseProactiveConfig });
+    expect(out.text).toContain('Muneral недоступен');
+    expect(out.text).toContain('HTTP 403');
+    expect(out.text).not.toMatch(/Завершено сегодня\n— нет/);
   });
 
-  it('escapes task IDs in MarkdownV2', async () => {
-    const agg = new DigestAggregator(
-      stubReader({
-        completed: [{ id: 'ARCA-0009', title: 'done' }],
-      }),
-    );
-    const out = await agg.compose({ runDate: '2026-05-18', config: baseConfig });
-    expect(out.text).toContain('ARCA\\-0009');
+  /**
+   * A2-281 — the ARCA-0163 staleness banner is gone on purpose: it measured the
+   * mtime of a Markdown file against an rsync interval, and there is neither a
+   * file nor an rsync any more. The test pins its absence so a revert has to be
+   * deliberate.
+   */
+  it('no longer prints a KB-staleness banner', async () => {
+    const agg = new DigestAggregator(liveReader());
+    const out = await agg.compose({ runDate: RUN_DATE, config: baseProactiveConfig });
+    expect(out.text).not.toContain('KB устарел');
   });
 
-  // ARCA-0163: KB staleness banner
-  describe('kbFreshness banner', () => {
-    it('does not add staleness banner when KB is fresh', async () => {
-      const agg = new DigestAggregator(
-        stubReader({
-          kbFreshness: { stale: false, lastSyncIso: new Date().toISOString(), ageHours: 0.5 },
-        }),
-      );
-      const out = await agg.compose({ runDate: '2026-05-18', config: baseConfig });
-      expect(out.text).not.toContain('KB устарел');
-    });
-
-    it('prepends staleness banner when KB is stale', async () => {
-      const fiveHoursAgo = new Date(Date.now() - 5 * 60 * 60 * 1000);
-      const agg = new DigestAggregator(
-        stubReader({
-          kbFreshness: {
-            stale: true,
-            lastSyncIso: fiveHoursAgo.toISOString(),
-            ageHours: 5,
-          },
-        }),
-      );
-      const out = await agg.compose({ runDate: '2026-05-18', config: baseConfig });
-      expect(out.text).toContain('KB устарел');
-      expect(out.text).toContain('5ч назад');
-    });
-
-    it('does not call kbFreshness when source is unavailable (degraded mode)', async () => {
-      const mockFreshness = vi
-        .fn()
-        .mockResolvedValue({ stale: true, lastSyncIso: '', ageHours: 99 });
-      const reader = {
-        ...stubReader({ sourceAvailable: false }),
-        kbFreshness: mockFreshness,
-      } as unknown as DatarimReaderService;
-      const agg = new DigestAggregator(reader);
-      await agg.compose({ runDate: '2026-05-18', config: baseConfig });
-      // kbFreshness should not have been called since source is unavailable
-      expect(mockFreshness).not.toHaveBeenCalled();
-    });
+  it('omits the archive section when the config switches it off', async () => {
+    const config = {
+      ...baseProactiveConfig,
+      channels: {
+        ...baseProactiveConfig.channels,
+        digest: { ...baseProactiveConfig.channels.digest, include_archived_items: false },
+      },
+    };
+    const out = await new DigestAggregator(liveReader()).compose({ runDate: RUN_DATE, config });
+    expect(out.sections).toEqual(['completed_today', 'backlog_tomorrow']);
   });
 });
