@@ -8,7 +8,14 @@ import {
   MUNERAL_BOARD,
   stubMuneraClient,
 } from './__fixtures__/muneral-responses.js';
-import { MuneralWorkItemsReader, referenceOf, zonedStartOfDay } from './muneral-reader.service.js';
+import {
+  DIGEST_GRANT_EXPIRED_MARKER,
+  DIGEST_GRANT_REQUIRED_MARKER,
+  DIGEST_ROUTE_UNSCOPED_MARKER,
+  MuneralWorkItemsReader,
+  referenceOf,
+  zonedStartOfDay,
+} from './muneral-reader.service.js';
 
 const RUN_DATE = '2026-09-24';
 const TZ = 'Europe/Istanbul';
@@ -79,8 +86,8 @@ describe('MuneralWorkItemsReader', () => {
     it('goes red if the day bounds are not sent (mutant: no date filter)', async () => {
       const calls: MuneraTaskQuery[] = [];
       const mutant = stubMuneraClient({ calls });
-      const original = mutant.queryTasks.bind(mutant);
-      mutant.queryTasks = (query) => {
+      const original = mutant.queryWorkspaceDigest.bind(mutant);
+      mutant.queryWorkspaceDigest = (query) => {
         const rest: MuneraTaskQuery = { ...query };
         delete rest.updatedSince;
         delete rest.updatedBefore;
@@ -126,7 +133,10 @@ describe('MuneralWorkItemsReader', () => {
         },
       });
       const result = await reader(client).readActiveTasks();
-      expect(result).toEqual({ ok: false, reason: 'HTTP 403' });
+      // A2-294 — an unclassified 403 is now named as a scope refusal and says
+      // it is NOT an empty list. The previous expectation was the literal
+      // «HTTP 403», which the operator could not act on.
+      expect(result).toEqual({ ok: false, reason: DIGEST_ROUTE_UNSCOPED_MARKER });
     });
 
     /**
@@ -203,6 +213,90 @@ describe('MuneralWorkItemsReader', () => {
       expect(zonedStartOfDay('2026-03-30', 'Europe/Berlin').toISOString()).toBe(
         '2026-03-29T22:00:00.000Z',
       );
+    });
+  });
+
+  // A2-294 — the degraded markers. The failure this guards is not a crash: it is
+  // a well-formed, authorised, completely false "nothing happened today". Every
+  // one of these must be distinguishable from `{ok: true, items: []}`.
+  describe('the digest grant refusals (A2-294)', () => {
+    const readerOf = (unavailable: Parameters<typeof stubMuneraClient>[0]['unavailable']) =>
+      new MuneralWorkItemsReader(stubMuneraClient({ unavailable }), {
+        timeZone: 'Europe/Istanbul',
+      });
+
+    it('names a missing grant, and does not call it «недоступен»', async () => {
+      const result = await readerOf({
+        kind: 'unavailable',
+        reason: 'workspace_digest_forbidden',
+        statusCode: 403,
+        errorCode: 'digest_grant_required',
+      }).readActiveTasks();
+
+      expect(result).toEqual({ ok: false, reason: DIGEST_GRANT_REQUIRED_MARKER });
+      expect(result.ok).toBe(false);
+      // The word the operator must NOT see on a route that answered correctly.
+      expect(DIGEST_GRANT_REQUIRED_MARKER).not.toContain('недоступен');
+      expect(DIGEST_GRANT_REQUIRED_MARKER).toContain('Это НЕ пустой список');
+    });
+
+    it('names an expired grant with its `until` and decision', async () => {
+      const result = await readerOf({
+        kind: 'unavailable',
+        reason: 'workspace_digest_forbidden',
+        statusCode: 403,
+        errorCode: 'digest_grant_expired',
+        grantUntil: '2026-10-25T00:00:00Z',
+        grantDecision: 'DEC-AUP-0049',
+      }).readCompletedToday('2026-09-25');
+
+      expect(result.ok).toBe(false);
+      const reason = (result as { reason: string }).reason;
+      expect(reason).toContain(DIGEST_GRANT_EXPIRED_MARKER);
+      expect(reason).toContain('2026-10-25T00:00:00Z');
+      expect(reason).toContain('DEC-AUP-0049');
+    });
+
+    it('tells the three 403s apart', async () => {
+      const required = await readerOf({
+        kind: 'unavailable',
+        reason: 'x',
+        statusCode: 403,
+        errorCode: 'digest_grant_required',
+      }).readActiveTasks();
+      const expired = await readerOf({
+        kind: 'unavailable',
+        reason: 'x',
+        statusCode: 403,
+        errorCode: 'digest_grant_expired',
+      }).readActiveTasks();
+      const unscoped = await readerOf({
+        kind: 'unavailable',
+        reason: 'x',
+        statusCode: 403,
+      }).readActiveTasks();
+
+      const reasons = [required, expired, unscoped].map((r) => (r as { reason: string }).reason);
+      expect(new Set(reasons).size).toBe(3);
+      expect(reasons[2]).toBe(DIGEST_ROUTE_UNSCOPED_MARKER);
+    });
+
+    it('a refusal is never the same answer as an empty board', async () => {
+      const refused = await readerOf({
+        kind: 'unavailable',
+        reason: 'x',
+        statusCode: 403,
+        errorCode: 'digest_grant_required',
+      }).readActiveTasks();
+      // An empty board: the stub filters a real board, so `in_progress` on an
+      // empty board is `{ok: true, items: [], total: 0}`.
+      const empty = await new MuneralWorkItemsReader(stubMuneraClient({ board: [] }), {
+        timeZone: 'Europe/Istanbul',
+      }).readActiveTasks();
+
+      expect(empty).toEqual({ ok: true, items: [], total: 0, truncated: false });
+      expect(refused.ok).toBe(false);
+      expect(refused).not.toEqual(empty);
     });
   });
 });

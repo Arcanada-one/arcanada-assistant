@@ -6,6 +6,7 @@ import {
   MuneraGlobalErrorEnvelopeSchema,
   MuneraJwtUnauthorizedEnvelopeSchema,
   MuneraTaskListSchema,
+  MuneraDigestRefusalEnvelopeSchema,
   MuneraTaskPageSchema,
   MuneraTaskQuerySchema,
   MuneraTaskSchema,
@@ -16,6 +17,9 @@ import {
   type CreateTaskRequest,
   type MuneraTaskQuery,
   type TaskListResult,
+  DIGEST_GRANT_EXPIRED,
+  DIGEST_GRANT_REQUIRED,
+  type MuneraDigestRefusalEnvelope,
   type TaskPageResult,
   type TaskResult,
   type UpdateTaskStatusRequest,
@@ -79,7 +83,7 @@ export interface IMuneraClient {
   updateTaskStatus(taskId: string, req: UpdateTaskStatusRequest): Promise<TaskResult>;
   getTask(taskId: string): Promise<TaskResult>;
   listTasksByProject(projectId: string): Promise<TaskListResult>;
-  queryTasks(query: MuneraTaskQuery): Promise<TaskPageResult>;
+  queryWorkspaceDigest(query: MuneraTaskQuery): Promise<TaskPageResult>;
   isCircuitOpen(): boolean;
 }
 
@@ -87,15 +91,25 @@ export class MuneraClientError extends Error {
   readonly cause?: unknown;
   readonly httpStatus?: number;
   readonly errorCode?: string;
+  /** A2-294 — the parsed digest refusal, when that is what this error is. Kept
+   *  whole so `until` and `decision` reach the operator-facing message without
+   *  being re-parsed out of prose. */
+  readonly digestRefusal?: MuneraDigestRefusalEnvelope;
   constructor(
     message: string,
-    opts?: { cause?: unknown; httpStatus?: number; errorCode?: string },
+    opts?: {
+      cause?: unknown;
+      httpStatus?: number;
+      errorCode?: string;
+      digestRefusal?: MuneraDigestRefusalEnvelope;
+    },
   ) {
     super(message);
     this.name = 'MuneraClientError';
     this.cause = opts?.cause;
     this.httpStatus = opts?.httpStatus;
     this.errorCode = opts?.errorCode;
+    this.digestRefusal = opts?.digestRefusal;
   }
 }
 
@@ -121,6 +135,19 @@ const DEFAULT_CIRCUIT: MuneraCircuitOptions = {
 const DEFAULT_RETRY: MuneraRetryOptions = { maxAttempts: 2, baseDelayMs: 200 };
 
 const TASKS_PATH = '/api/v1/tasks';
+
+/**
+ * A2-294 — the digest is its own route, not a filter on `GET /api/v1/tasks`.
+ * That route is unmarked in Muneral and an unmarked route refuses an API key by
+ * default: measured live 2026-09-24, `403 "This route is not available to an
+ * agent API key… (MUN-0043)"`. `GET /tasks/digest` is `@AgentScope('workspace-digest')`
+ * and answers the key's OWN workspace, narrowed in the query itself rather than
+ * conditionally — see `apps/api/docs/agent-workspace-digest.md`.
+ *
+ * The envelope's first four keys and every filter are unchanged, so this is the
+ * whole change on the wire.
+ */
+const WORKSPACE_DIGEST_PATH = '/api/v1/tasks/digest';
 
 /**
  * A2-281 — the canonical Muneral address in AGENTS.md is
@@ -233,20 +260,27 @@ export class MuneraClient implements IMuneraClient {
   }
 
   /**
-   * A2-281 — `GET /api/v1/tasks`, the cross-project filter Muneral added for
-   * exactly this consumer: "what is in progress", "what reached done today",
-   * "what is queued" without enumerating projects and without reading a
-   * Markdown snapshot off a disk.
+   * A2-294 — `GET /api/v1/tasks/digest`: what moved in the key's own workspace.
+   *
+   * A2-281 pointed this at `GET /api/v1/tasks` and measured the answer: `403
+   * "This route is not available to an agent API key… (MUN-0043)"` every time.
+   * The two alternatives were measured and rejected then and are unchanged now
+   * — `GET /tasks/project/:id` answers an agent key the tasks it is ASSIGNED
+   * to, so for this key it is `200 []` on a board of 880+ rows (a well-formed,
+   * authorised, completely false "nothing happened today"), and
+   * `GET /tasks/project/:id/index` answers a sha256 of each title and no titles.
    *
    * Returns `unavailable` with the HTTP status for anything that is not a
-   * well-formed 2xx page. It never degrades to an empty list: a 401/403 and
-   * "no work items matched" are different answers and the caller renders them
-   * differently.
+   * well-formed 2xx page. It never degrades to an empty list: a 403 and "no
+   * work items matched" are different answers and the caller renders them
+   * differently. The two grant refusals arrive with an `errorCode` of ours —
+   * `DIGEST_GRANT_REQUIRED` / `DIGEST_GRANT_EXPIRED` — so the caller branches on
+   * a value rather than on Muneral's prose.
    */
-  async queryTasks(query: MuneraTaskQuery): Promise<TaskPageResult> {
+  async queryWorkspaceDigest(query: MuneraTaskQuery): Promise<TaskPageResult> {
     const parsed = MuneraTaskQuerySchema.safeParse(query);
     if (!parsed.success) {
-      throw new MuneraClientError(`Invalid queryTasks request: ${parsed.error.message}`, {
+      throw new MuneraClientError(`Invalid queryWorkspaceDigest request: ${parsed.error.message}`, {
         cause: parsed.error,
       });
     }
@@ -257,14 +291,14 @@ export class MuneraClient implements IMuneraClient {
     const qs = search.toString();
     try {
       const result = await this.breaker.fire({
-        url: `${this.baseUrl}${TASKS_PATH}${qs ? `?${qs}` : ''}`,
+        url: `${this.baseUrl}${WORKSPACE_DIGEST_PATH}${qs ? `?${qs}` : ''}`,
         method: 'GET',
         body: null,
         retryable: true,
       });
       return this.mapPageResponse(result);
     } catch (err) {
-      return TaskPageResultSchema.parse(this.buildUnavailable(err, 'task_query'));
+      return TaskPageResultSchema.parse(this.buildUnavailable(err, 'workspace_digest'));
     }
   }
 
@@ -299,6 +333,8 @@ export class MuneraClient implements IMuneraClient {
     reason: string;
     statusCode?: number;
     errorCode?: string;
+    grantUntil?: string;
+    grantDecision?: string;
     detail?: string;
   } {
     if (this.breaker.opened) {
@@ -314,6 +350,11 @@ export class MuneraClient implements IMuneraClient {
         reason: classifyReason(err, operationLabel),
         ...(err.httpStatus !== undefined ? { statusCode: err.httpStatus } : {}),
         ...(err.errorCode ? { errorCode: err.errorCode } : {}),
+        // A2-294: `until` is what makes an expired grant actionable rather than
+        // merely reported, so it travels with the refusal instead of being
+        // recovered from the message text.
+        ...(err.digestRefusal?.until ? { grantUntil: err.digestRefusal.until } : {}),
+        ...(err.digestRefusal?.decision ? { grantDecision: err.digestRefusal.decision } : {}),
         detail: err.message,
       };
     }
@@ -362,6 +403,22 @@ export class MuneraClient implements IMuneraClient {
   }
 
   private classifyHttpError(result: HttpResult): MuneraClientError {
+    // A2-294 — FIRST, because the digest's refusal body carries neither `error`
+    // nor `statusCode` and therefore matches none of the envelopes below: before
+    // this, a missing or expired grant arrived as `HTTP 403: <raw body>` with no
+    // `errorCode`, i.e. indistinguishable from any other 403 to the caller that
+    // has to tell the operator which one it was.
+    const digestRefusal = MuneraDigestRefusalEnvelopeSchema.safeParse(result.body);
+    if (digestRefusal.success) {
+      return new MuneraClientError(digestRefusal.data.message, {
+        httpStatus: result.status,
+        errorCode:
+          digestRefusal.data.code === 'GRANT_EXPIRED'
+            ? DIGEST_GRANT_EXPIRED
+            : DIGEST_GRANT_REQUIRED,
+        digestRefusal: digestRefusal.data,
+      });
+    }
     const jwt401 = MuneraJwtUnauthorizedEnvelopeSchema.safeParse(result.body);
     if (jwt401.success) {
       return new MuneraClientError(jwt401.data.message, {

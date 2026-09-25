@@ -34,6 +34,45 @@ export const AGENT_KEY_FORBIDDEN_ENVELOPE = {
   statusCode: 403,
 } as const;
 
+/**
+ * A2-294 — captured live from api.muneral.com on 2026-09-25 with a valid
+ * in-workspace `mun_sk_` key holding no digest grant
+ * (`runs/A2-294/out/live-digest-403-20260925T002*.txt`), and byte-compared with
+ * the object the guard throws (`agent-task-scope.guard.ts:308-317`).
+ *
+ * This is NOT the NestJS `{statusCode, error, message}` envelope: there is no
+ * `error` and no `statusCode` in the body. Written down from the real response
+ * rather than from the shape this repository expected, because a fixture
+ * invented by the same hand as the parser agrees with the parser's bug.
+ */
+export const DIGEST_GRANT_REQUIRED_ENVELOPE = {
+  code: 'DIGEST_GRANT_REQUIRED',
+  scope: 'workspace-digest',
+  message:
+    'The workspace task digest is available only to an agent API key named in ' +
+    "Muneral's workspace digest grant list (A2-284). Scoping the route grants nothing " +
+    'by itself: the grant is per agent and merges as its own pull request.',
+  workspaceId: '05f8cddf-e91f-430b-81e3-d67965aa4de3',
+} as const;
+
+/**
+ * A2-294 — the expired-grant refusal. Transcribed from the guard
+ * (`agent-task-scope.guard.ts:296-305`) and NOT captured live: producing it
+ * would require a grant that has already lapsed, which does not exist yet.
+ * `not measured` against the live service; the field names and the `code` are
+ * read from the source that emits them.
+ */
+export const DIGEST_GRANT_EXPIRED_ENVELOPE = {
+  code: 'GRANT_EXPIRED',
+  scope: 'workspace-digest',
+  message:
+    'The workspace digest grant for this key expired at 2026-10-25T00:00:00Z. ' +
+    'It is renewed by a pull request citing a program decision, not by an environment edit (A2-284).',
+  workspaceId: '05f8cddf-e91f-430b-81e3-d67965aa4de3',
+  until: '2026-10-25T00:00:00Z',
+  decision: 'DEC-AUP-0049',
+} as const;
+
 /** Captured live 2026-09-24: same route, key sent on `X-API-Key` (Muneral reads `Authorization` only). */
 export const UNAUTHORIZED_ENVELOPE = {
   message: 'Unauthorized',
@@ -141,6 +180,8 @@ export interface StubOptions {
   unavailable?: Extract<TaskPageResult, { kind: 'unavailable' }>;
   /** Records every query the reader sent, in order. */
   calls?: MuneraTaskQuery[];
+  /** A2-294 — override the `grant` object the stub answers with. */
+  grant?: { decision: string; until: string; renewalDueAt?: string };
 }
 
 /**
@@ -157,7 +198,7 @@ export function stubMuneraClient(opts: StubOptions = {}): IMuneraClient {
   const board = opts.board ?? MUNERAL_BOARD;
   const client: Partial<IMuneraClient> = {
     isCircuitOpen: () => false,
-    queryTasks: (query: MuneraTaskQuery) => {
+    queryWorkspaceDigest: (query: MuneraTaskQuery) => {
       opts.calls?.push(query);
       if (opts.unavailable) return Promise.resolve(opts.unavailable);
       const matched = board.filter((t) => {
@@ -186,6 +227,17 @@ export function stubMuneraClient(opts: StubOptions = {}): IMuneraClient {
           total: matched.length,
           limit,
           offset,
+          // A2-294 — the real route answers these four additive keys on every
+          // 200. The stub answers them too, so a reader that ignores `grant`
+          // fails a test here rather than in production on day 23.
+          counted: "every task of the key's own workspace matching the filters, before paging",
+          generatedAt: '2026-09-25T06:00:00.000Z',
+          auditEventId: '11111111-2222-3333-4444-555555555555',
+          grant: opts.grant ?? {
+            decision: 'DEC-AUP-0049',
+            until: '2026-10-25T00:00:00.000Z',
+            renewalDueAt: '2026-10-18T00:00:00.000Z',
+          },
         },
       });
     },

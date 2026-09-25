@@ -42,7 +42,7 @@ export class UnconfiguredMuneraClient implements IMuneraClient {
     return Promise.resolve(unavailable);
   }
 
-  queryTasks(): Promise<TaskPageResult> {
+  queryWorkspaceDigest(): Promise<TaskPageResult> {
     return Promise.resolve(unavailable);
   }
 }

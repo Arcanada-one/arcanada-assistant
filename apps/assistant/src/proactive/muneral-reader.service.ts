@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 
 import type { IMuneraClient } from '../agents/munera/munera.client.js';
 import { MUNERA_CREDENTIAL_NOT_CONFIGURED } from '../agents/munera/munera-unconfigured.client.js';
+import { DIGEST_GRANT_EXPIRED, DIGEST_GRANT_REQUIRED } from '../agents/munera/munera.schemas.js';
 import type {
   MuneraTask,
   MuneraTaskQuery,
@@ -13,6 +14,23 @@ import type { IWorkItemsReader, SourceResult } from './work-items.reader.js';
 
 /** Muneral's `QueryTasksDto` caps a page at 200. Asking for more is a 400. */
 const MAX_PAGE = 200;
+
+/**
+ * A2-294 — the degraded markers. A refused digest and an empty digest must not
+ * render the same line, and «недоступен» is the wrong word for a route that
+ * answered promptly and correctly that this key may not read it.
+ *
+ * Each one says «Это НЕ пустой список» in so many words, because the failure
+ * this whole card exists to prevent is a well-formed, authorised, completely
+ * false "nothing happened today" — and the operator is the only detector of it
+ * we actually have.
+ */
+export const DIGEST_GRANT_REQUIRED_MARKER =
+  'грант digest не выдан (DIGEST_GRANT_REQUIRED) — Это НЕ пустой список задач, это отказ в доступе';
+export const DIGEST_GRANT_EXPIRED_MARKER =
+  'грант digest истёк (GRANT_EXPIRED) — Это НЕ пустой список задач, это отказ в доступе; продлевается pull request-ом';
+export const DIGEST_ROUTE_UNSCOPED_MARKER =
+  'маршрут digest не разрешён этому ключу (HTTP 403, MUN-0043) — Это НЕ пустой список задач';
 
 /**
  * Muneral priorities, highest first. The Datarim `P0..P3` spelling the
@@ -181,7 +199,7 @@ export class MuneralWorkItemsReader implements IWorkItemsReader {
     }
     let result: TaskPageResult;
     try {
-      result = await this.client.queryTasks({
+      result = await this.client.queryWorkspaceDigest({
         ...query,
         ...(this.projectId ? { projectId: this.projectId } : {}),
         limit: MAX_PAGE,
@@ -195,11 +213,33 @@ export class MuneralWorkItemsReader implements IWorkItemsReader {
     }
     if (result.kind === 'unavailable') {
       this.logger.warn(
-        `muneral unavailable: reason=${result.reason} status=${result.statusCode ?? 'n/a'}`,
+        `muneral digest unavailable: reason=${result.reason} status=${result.statusCode ?? 'n/a'}` +
+          ` code=${result.errorCode ?? 'n/a'} until=${result.grantUntil ?? 'n/a'}` +
+          ` decision=${result.grantDecision ?? 'n/a'}`,
       );
       return { ok: false, reason: describeUnavailable(result) };
     }
-    const { items, total } = result.page;
+    const { items, total, grant } = result.page;
+    // A2-294 — `grant.renewalDueAt` rides every successful read precisely so a
+    // lapse is visible BEFORE it happens: DEC-AUP-0029's first grant expired and
+    // the board read simply went quiet for two days. It is a SIGNAL, not a gate
+    // — nothing here blocks on it, and nothing wakes anybody up when it passes.
+    // Logged on every read so the warning exists in a place that is written
+    // whether or not anyone is watching.
+    if (grant) {
+      const dueAt = grant.renewalDueAt;
+      const overdue = dueAt !== undefined && Date.now() >= Date.parse(dueAt);
+      const line =
+        `muneral digest grant: decision=${grant.decision} until=${grant.until}` +
+        ` renewalDueAt=${dueAt ?? 'n/a'}`;
+      if (overdue) this.logger.warn(`${line} RENEWAL DUE`);
+      else this.logger.log(line);
+    } else {
+      // The grant object is optional in the schema because `GET /tasks` never
+      // carried one. On the digest route its absence means the envelope changed
+      // under us, which is worth a line rather than silence.
+      this.logger.warn('muneral digest answered 200 with no grant object');
+    }
     return { ok: true, items, total, truncated: total > items.length };
   }
 
@@ -237,6 +277,18 @@ function describeUnavailable(result: Extract<TaskPageResult, { kind: 'unavailabl
   if (result.reason === MUNERA_CREDENTIAL_NOT_CONFIGURED) {
     return 'ключ не настроен (MUNERAL_AGENT_KEY_FILE)';
   }
+  // A2-294 — `errorCode` is consulted BEFORE `statusCode`, which is the whole
+  // point of the change: every 403 used to collapse to «HTTP 403» and the
+  // operator could not tell a grant that was never issued from one that lapsed
+  // from a route that is not scoped for this key at all. The three have three
+  // different fixes and only one of them is a pull request.
+  if (result.errorCode === DIGEST_GRANT_REQUIRED) return DIGEST_GRANT_REQUIRED_MARKER;
+  if (result.errorCode === DIGEST_GRANT_EXPIRED) {
+    const until = result.grantUntil ? `, истёк ${result.grantUntil}` : '';
+    const decision = result.grantDecision ? `, решение ${result.grantDecision}` : '';
+    return `${DIGEST_GRANT_EXPIRED_MARKER}${until}${decision}`;
+  }
+  if (result.statusCode === 403) return DIGEST_ROUTE_UNSCOPED_MARKER;
   if (result.statusCode !== undefined) return `HTTP ${result.statusCode}`;
   if (result.reason === 'munera_circuit_open') return 'circuit open';
   return result.reason;
