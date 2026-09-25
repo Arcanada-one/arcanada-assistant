@@ -111,8 +111,10 @@ async function readBodyCode(res: Response): Promise<string | undefined> {
 }
 
 function networkDetail(err: unknown): string {
-  const e = err as { name?: string; message?: string; cause?: { code?: string } };
-  return e.cause?.code ?? e.name ?? e.message ?? 'fetch failed';
+  // undici: TypeError('fetch failed') whose cause is the socket error — or an
+  // AggregateError of them when the name resolves to several addresses.
+  const e = err as { name?: string; cause?: { code?: string; errors?: { code?: string }[] } };
+  return e.cause?.code ?? e.cause?.errors?.[0]?.code ?? e.name ?? 'fetch failed';
 }
 
 if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {

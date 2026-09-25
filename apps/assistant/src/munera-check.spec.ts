@@ -75,6 +75,7 @@ describe('munera-check (A2-374)', () => {
     );
     expect(r.exitCode).toBe(EX_UNAVAILABLE);
     expect(r.line).toMatchObject({ ok: false, code: 'MUNERA_UNREACHABLE', source: 'key-file' });
+    expect(r.line.detail).toBe('ECONNREFUSED');
   });
 
   it('the two faults are distinguishable by exit status AND by code', async () => {
