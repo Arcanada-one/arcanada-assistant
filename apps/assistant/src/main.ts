@@ -1,4 +1,6 @@
 import 'reflect-metadata';
+// A2-374 — must stay before app.module: exits 78 on a Munera config refusal.
+import './munera-boot-preflight.js';
 import { NestFactory } from '@nestjs/core';
 import { FastifyAdapter, type NestFastifyApplication } from '@nestjs/platform-fastify';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';

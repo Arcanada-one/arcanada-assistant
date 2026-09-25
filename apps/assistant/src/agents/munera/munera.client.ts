@@ -503,7 +503,21 @@ export class MuneraClient implements IMuneraClient {
         headers,
         body: req.body ?? undefined,
         signal: controller.signal,
+        // A2-360 — the API does not redirect. A redirect means MUNERA_BASE_URL
+        // is not the API (the site answers 302 to its HTML), and following it
+        // turned the site's page into a 2xx that read as an ACCEPTED key.
+        redirect: 'manual',
       });
+      if (res.status >= 300 && res.status < 400) {
+        this.logger?.warn(
+          { status: res.status, method: req.method, url: req.url, service: this.serviceName },
+          'munera redirect — MUNERA_BASE_URL is not the API',
+        );
+        throw new MuneraClientError(
+          `HTTP ${res.status} redirect (${req.method} ${req.url}): MUNERA_BASE_URL is not the Muneral API`,
+          { httpStatus: res.status },
+        );
+      }
       const result = await readJson(res);
       if (result.status === 401) this.lastCredentialState = 'rejected';
       else if ((result.status >= 200 && result.status < 300) || result.status === 403)
