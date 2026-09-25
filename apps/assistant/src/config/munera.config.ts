@@ -3,12 +3,28 @@ import { readFileSync } from 'node:fs';
 import { registerAs } from '@nestjs/config';
 import { z } from 'zod';
 
+/**
+ * A2-313 — hosts that answer on the Muneral name but are not its API. Production
+ * ran with `MUNERA_BASE_URL=https://muneral.com` (the site): measured 2026-09-25,
+ * `GET https://muneral.com/api/v1/tasks/digest` → 302 to the site, never an API
+ * answer. `normaliseMuneraBaseUrl` repairs a duplicated `/api/v1` on the right
+ * host; it cannot repair the wrong host, so the wrong host is refused at boot.
+ */
+const MUNERAL_SITE_HOSTS = new Set(['muneral.com', 'www.muneral.com']);
+
+/**
+ * Accepts the canonical `https://api.muneral.com/api/v1` from AGENTS.md as well
+ * as a bare origin — `normaliseMuneraBaseUrl` strips the duplicate path.
+ */
+export const muneraBaseUrlSchema = z
+  .string()
+  .url()
+  .refine((u) => !MUNERAL_SITE_HOSTS.has(new URL(u).hostname.toLowerCase()), {
+    message: 'points at the Muneral SITE, not its API — use https://api.muneral.com/api/v1',
+  });
+
 const envSchema = z.object({
-  /**
-   * Accepts the canonical `https://api.muneral.com/api/v1` from AGENTS.md as
-   * well as a bare origin — `normaliseMuneraBaseUrl` strips the duplicate path.
-   */
-  MUNERA_BASE_URL: z.string().url().default('https://api.muneral.com/api/v1'),
+  MUNERA_BASE_URL: muneraBaseUrlSchema.default('https://api.muneral.com/api/v1'),
   /**
    * A2-281 — path to a file holding the agent key (`mun_sk_…`), mounted
    * read-only into the container. A KEY IS NOT AN ENVIRONMENT VARIABLE: env is
@@ -101,6 +117,32 @@ export function resolveMuneraCredential(
 }
 
 /**
+ * A2-313 — with the integration ON, no usable credential is a refusal to boot.
+ *
+ * Production ran 36 hours `healthy` on `MUNERA_API_TOKEN=changeme`: every call
+ * got 401, 401 is a client fault the breaker does not count, so `/health`
+ * reported munera `ok` the whole time. A2-281 made the placeholder degrade each
+ * CALL; that still lets the process come up and report itself healthy. A
+ * deployment that asks for Muneral and supplies no key is misconfigured, and the
+ * place to say so is the boot log of a container that did not start.
+ *
+ * Running WITHOUT Muneral stays possible, and explicit:
+ * `ECOSYSTEM_MUNERA_INTEGRATION=false`. The thrown message carries the
+ * resolver's `detail`, which never contains the credential.
+ */
+export function assertUsableCredential(
+  credential: MuneraCredential,
+  integrationEnabled: boolean,
+): void {
+  if (!integrationEnabled || credential.token !== null) return;
+  throw new Error(
+    `Invalid Munera configuration: no usable Muneral credential (${credential.detail}). ` +
+      'Set MUNERAL_AGENT_KEY_FILE to the agent key file, or ECOSYSTEM_MUNERA_INTEGRATION=false ' +
+      'to run without Muneral.',
+  );
+}
+
+/**
  * An env var set to the empty string is UNSET, not invalid. Compose writes `''`
  * for `${VAR:-}`, so a blank `MUNERAL_PROJECT_ID` — the normal "no narrowing"
  * case — would otherwise fail uuid validation and take the whole app down at
@@ -121,9 +163,11 @@ export default registerAs(MUNERA_CONFIG, (): MuneraConfig => {
         .join('; ')}`,
     );
   }
+  const credential = resolveMuneraCredential(parsed.data);
+  assertUsableCredential(credential, parsed.data.ECOSYSTEM_MUNERA_INTEGRATION);
   return {
     baseUrl: parsed.data.MUNERA_BASE_URL,
-    credential: resolveMuneraCredential(parsed.data),
+    credential,
     ...(parsed.data.MUNERAL_PROJECT_ID ? { projectId: parsed.data.MUNERAL_PROJECT_ID } : {}),
     timeoutMs: parsed.data.MUNERA_TIMEOUT_MS,
     integrationEnabled: parsed.data.ECOSYSTEM_MUNERA_INTEGRATION,

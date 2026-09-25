@@ -85,7 +85,20 @@ export interface IMuneraClient {
   listTasksByProject(projectId: string): Promise<TaskListResult>;
   queryWorkspaceDigest(query: MuneraTaskQuery): Promise<TaskPageResult>;
   isCircuitOpen(): boolean;
+  /**
+   * A2-313 — what Muneral last said about the credential itself. Optional so a
+   * test double need not model it; a client that does not report it is read as
+   * `unverified`, never as `accepted`.
+   */
+  credentialState?(): MuneraCredentialState;
 }
+
+/**
+ * `unverified` — no answer yet; `accepted` — Muneral authenticated the key
+ * (2xx, or a 403 about WHAT it may read, which is authorisation, not identity);
+ * `rejected` — 401, the key itself is not a credential Muneral knows.
+ */
+export type MuneraCredentialState = 'unverified' | 'accepted' | 'rejected';
 
 export class MuneraClientError extends Error {
   readonly cause?: unknown;
@@ -172,6 +185,7 @@ export class MuneraClient implements IMuneraClient {
   private readonly serviceName: string;
   private readonly userAgent: string;
   private readonly breaker: CircuitBreaker<[RequestPlan], HttpResult>;
+  private lastCredentialState: MuneraCredentialState = 'unverified';
 
   constructor(opts: MuneraClientOptions) {
     this.baseUrl = normaliseMuneraBaseUrl(opts.baseUrl);
@@ -195,6 +209,17 @@ export class MuneraClient implements IMuneraClient {
 
   isCircuitOpen(): boolean {
     return this.breaker.opened;
+  }
+
+  /**
+   * A2-313 — a 401 is a client fault, so the breaker (rightly) does not count
+   * it and stays closed. That is how production answered `munera: ok` for 36
+   * hours on a placeholder key: the only signal that the key was dead lived in
+   * individual call results. This keeps the last word on the key where
+   * `/health` can read it.
+   */
+  credentialState(): MuneraCredentialState {
+    return this.lastCredentialState;
   }
 
   async createTask(req: CreateTaskRequest): Promise<TaskResult> {
@@ -480,6 +505,9 @@ export class MuneraClient implements IMuneraClient {
         signal: controller.signal,
       });
       const result = await readJson(res);
+      if (result.status === 401) this.lastCredentialState = 'rejected';
+      else if ((result.status >= 200 && result.status < 300) || result.status === 403)
+        this.lastCredentialState = 'accepted';
       if (result.status >= 500 || result.status === 408 || result.status === 429) {
         this.logger?.warn(
           {
