@@ -246,15 +246,15 @@ describe('MuneralWorkItemsReader', () => {
         reason: 'workspace_digest_forbidden',
         statusCode: 403,
         errorCode: 'digest_grant_expired',
-        grantUntil: '2026-10-25T00:00:00Z',
-        grantDecision: 'DEC-AUP-0049',
+        grantUntil: '2099-03-01T00:00:00Z',
+        grantDecision: 'DEC-AUP-9999',
       }).readCompletedToday('2026-09-25');
 
       expect(result.ok).toBe(false);
       const reason = (result as { reason: string }).reason;
       expect(reason).toContain(DIGEST_GRANT_EXPIRED_MARKER);
-      expect(reason).toContain('2026-10-25T00:00:00Z');
-      expect(reason).toContain('DEC-AUP-0049');
+      expect(reason).toContain('2099-03-01T00:00:00Z');
+      expect(reason).toContain('DEC-AUP-9999');
     });
 
     it('tells the three 403s apart', async () => {

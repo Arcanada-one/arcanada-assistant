@@ -162,8 +162,8 @@ describe('UnconfiguredMuneraClient', () => {
       kind: 'unavailable',
       statusCode: 403,
       errorCode: DIGEST_GRANT_EXPIRED,
-      grantUntil: '2026-10-25T00:00:00Z',
-      grantDecision: 'DEC-AUP-0049',
+      grantUntil: '2099-03-01T00:00:00Z',
+      grantDecision: 'DEC-AUP-9999',
     });
   });
 
@@ -195,9 +195,9 @@ describe('UnconfiguredMuneraClient', () => {
         generatedAt: '2026-09-25T06:00:00.000Z',
         auditEventId: '11111111-2222-3333-4444-555555555555',
         grant: {
-          decision: 'DEC-AUP-0049',
-          until: '2026-10-25T00:00:00.000Z',
-          renewalDueAt: '2026-10-18T00:00:00.000Z',
+          decision: 'DEC-AUP-9999',
+          until: '2099-03-01T00:00:00.000Z',
+          renewalDueAt: '2099-02-22T00:00:00.000Z',
         },
       }),
     );
@@ -214,7 +214,7 @@ describe('UnconfiguredMuneraClient', () => {
       page: {
         total: 0,
         auditEventId: '11111111-2222-3333-4444-555555555555',
-        grant: { decision: 'DEC-AUP-0049', renewalDueAt: '2026-10-18T00:00:00.000Z' },
+        grant: { decision: 'DEC-AUP-9999', renewalDueAt: '2099-02-22T00:00:00.000Z' },
       },
     });
   });

@@ -61,16 +61,23 @@ export const DIGEST_GRANT_REQUIRED_ENVELOPE = {
  * would require a grant that has already lapsed, which does not exist yet.
  * `not measured` against the live service; the field names and the `code` are
  * read from the source that emits them.
+ *
+ * The `until` and `decision` here are deliberately SYNTHETIC — a year 2099 date
+ * and `DEC-AUP-9999`, which is not a decision. An earlier draft used the real
+ * DEC-AUP-0049 with a 30-day `until`, while that decision and Muneral's own
+ * literal say 14 days: three values for one grant, and a reader of these tests
+ * would have taken the wrong one. A fixture must not assert a governance fact it
+ * does not own.
  */
 export const DIGEST_GRANT_EXPIRED_ENVELOPE = {
   code: 'GRANT_EXPIRED',
   scope: 'workspace-digest',
   message:
-    'The workspace digest grant for this key expired at 2026-10-25T00:00:00Z. ' +
+    'The workspace digest grant for this key expired at 2099-03-01T00:00:00Z. ' +
     'It is renewed by a pull request citing a program decision, not by an environment edit (A2-284).',
   workspaceId: '05f8cddf-e91f-430b-81e3-d67965aa4de3',
-  until: '2026-10-25T00:00:00Z',
-  decision: 'DEC-AUP-0049',
+  until: '2099-03-01T00:00:00Z',
+  decision: 'DEC-AUP-9999',
 } as const;
 
 /** Captured live 2026-09-24: same route, key sent on `X-API-Key` (Muneral reads `Authorization` only). */
@@ -234,9 +241,9 @@ export function stubMuneraClient(opts: StubOptions = {}): IMuneraClient {
           generatedAt: '2026-09-25T06:00:00.000Z',
           auditEventId: '11111111-2222-3333-4444-555555555555',
           grant: opts.grant ?? {
-            decision: 'DEC-AUP-0049',
-            until: '2026-10-25T00:00:00.000Z',
-            renewalDueAt: '2026-10-18T00:00:00.000Z',
+            decision: 'DEC-AUP-9999',
+            until: '2099-03-01T00:00:00.000Z',
+            renewalDueAt: '2099-02-22T00:00:00.000Z',
           },
         },
       });
