@@ -113,6 +113,14 @@ describe('boot with the Muneral environment (A2-313)', () => {
     ).not.toThrow();
   });
 
+  it('A2-374: boots with MUNERA_BASE_URL omitted — the canonical API address is the default', () => {
+    // Measured before the fix: the Munera namespace defaulted the address, the
+    // global schema still required it, and `node dist/main.js` exited 1 with
+    // `MUNERA_BASE_URL: Invalid input: expected string, received undefined`.
+    expect(() => boot({ ...BASE, MUNERAL_AGENT_KEY_FILE: keyFile })).not.toThrow();
+    expect(validateConfig({ ...BASE }).MUNERA_BASE_URL).toBe('https://api.muneral.com/api/v1');
+  });
+
   it('boots without any credential only when the integration is explicitly off', () => {
     expect(() =>
       boot({

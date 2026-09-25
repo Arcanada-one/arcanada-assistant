@@ -220,3 +220,23 @@ describe('HealthController', () => {
     expect(result.statusCode).toBe(503);
   });
 });
+
+// ── A2-374: /health names WHICH munera fault, fed by the REAL agent snapshot ──
+describe('HealthController — munera fault reason (A2-374)', () => {
+  async function healthFor(client: Record<string, unknown>) {
+    const { MuneraAgentService } = await import('../agents/munera/munera-agent.service.js');
+    const snap = new MuneraAgentService(client as never).healthSnapshot();
+    const mesh = makeMesh({ status: 'degraded', agents: [snap] } as never);
+    return (await makeController({ mesh }).check()).body.dependencies.munera;
+  }
+
+  it('rejected key → error munera_credential_rejected', async () => {
+    const dep = await healthFor({ isCircuitOpen: () => false, credentialState: () => 'rejected' });
+    expect(dep).toEqual({ status: 'degraded', error: 'munera_credential_rejected' });
+  });
+
+  it('Muneral not answering (breaker open) → error circuit_open, a different token', async () => {
+    const dep = await healthFor({ isCircuitOpen: () => true, credentialState: () => 'unverified' });
+    expect(dep).toEqual({ status: 'fail', error: 'circuit_open' });
+  });
+});
