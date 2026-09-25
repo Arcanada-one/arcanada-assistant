@@ -1,0 +1,40 @@
+name: deploy-lag
+
+# A2-371 — is production running main? Asked from OUTSIDE the deploy pipeline, on a schedule.
+#
+# On 2026-09-23 CI on main (f3ab0d7) failed in `audit` on a registry ECONNRESET; `deploy` and
+# `verify` need audit, were skipped, nobody re-ran the run, and main stood undeployed for two days.
+# The deploy gate (scripts/ci/deployed-build-gate.py) could not catch it: it runs inside a deploy,
+# and a deploy that never starts never fails its gate. This workflow reuses that gate's digest
+# against the PUBLIC /health and goes red when production has lacked an image change on main for
+# longer than --max-lag. See scripts/ci/deploy-lag-watchdog.py for the verdicts.
+#
+# Read-only: it never deploys, never reaches the production host or the broker, and holds no
+# secret. The fix it asks for is a human (or agent) re-running the failed CI run.
+
+on:
+  schedule:
+    - cron: '17 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Its own group, NOT `deploy-arcanada-assistant`: sharing the CI workflow's group would put this
+# check in the queue of the very deploys it watches, and a pending run in a group is replaced by
+# the next one — an hourly watchdog would silently cancel queued deploys.
+concurrency:
+  group: deploy-lag-arcanada-assistant
+  cancel-in-progress: true
+
+jobs:
+  watchdog:
+    runs-on: [self-hosted, Linux, X64]
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          # The watchdog walks main's image-input history to date the oldest undeployed change.
+          fetch-depth: 0
+      - name: Production runs main's image (or the gap is younger than 2h)
+        run: python3 scripts/ci/deploy-lag-watchdog.py --max-lag 7200

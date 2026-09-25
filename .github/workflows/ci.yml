@@ -37,9 +37,12 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: pnpm
-      - run: pnpm install --frozen-lockfile
+      - run: bash scripts/ci/retry-network.sh 3 pnpm install --frozen-lockfile
       - run: pnpm format:check
       - run: pnpm -r lint
+      # A2-371 — the CI scripts that guard the deploy are tested where they are changed.
+      - run: bash scripts/ci/retry-network.test.sh
+      - run: python3 scripts/ci/test_deploy_lag_watchdog.py
 
   test:
     # A2-315: pre-deploy gates run on the dedicated `deploy-gate` lane, not on `arcana-ai` (the same machines as `ci-general`), where
@@ -97,12 +100,17 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: pnpm
-      - run: pnpm install --frozen-lockfile
+      - run: bash scripts/ci/retry-network.sh 3 pnpm install --frozen-lockfile
       - run: pnpm --filter @arcanada/core build
       - run: cd apps/assistant && pnpm exec prisma generate
       - run: pnpm -r typecheck
       - run: pnpm -r test:coverage
 
+  # A2-371 — every job that downloads from the registry runs its download through
+  # scripts/ci/retry-network.sh. `deploy` needs all of them, so before this a single registry
+  # ECONNRESET skipped the release (f3ab0d7, 2026-09-23: main undeployed for two days). The audit
+  # stays a deploy precondition on purpose — it is the security-policy-mandate CI floor for
+  # `typescript_pnpm` — so the fix is to make it answer, not to take it off the path.
   audit:
     runs-on: [self-hosted, Linux, X64]
     steps:
@@ -115,8 +123,10 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm audit --prod --audit-level=high
+      - run: bash scripts/ci/retry-network.sh 3 pnpm install --frozen-lockfile
+      # A2-371 — retried ONLY on a network-error signature; a finding fails on the first attempt
+      # with pnpm's own exit code, so the security-policy-mandate floor is unchanged.
+      - run: bash scripts/ci/retry-network.sh 3 pnpm audit --prod --audit-level=high
 
   smoke:
     needs: [lint, test, audit]
@@ -221,7 +231,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: pnpm
-      - run: pnpm install --frozen-lockfile
+      - run: bash scripts/ci/retry-network.sh 3 pnpm install --frozen-lockfile
       - run: cd apps/assistant && pnpm exec prisma generate
       - run: pnpm --filter @arcanada/core build
       - run: pnpm --filter assistant build

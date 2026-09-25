@@ -62,11 +62,17 @@ export interface ComposedMessage {
   sections: string[];
 }
 
+/**
+ * A2-281 — `complexity` (the Datarim `L<n>` level) has no counterpart in
+ * Muneral and is gone from both work-item shapes rather than filled with a
+ * plausible constant. `id` is the human reference: the `ABC-1234` token a
+ * Muneral title starts with when it has one, else a short prefix of the row's
+ * UUID (Muneral tasks have no human key column — see `MuneralWorkItemsReader`).
+ */
 export interface ActiveTask {
   id: string;
   title: string;
   priority: string;
-  complexity: string;
   status: string;
 }
 
@@ -74,7 +80,6 @@ export interface BacklogItem {
   id: string;
   title: string;
   priority: string;
-  complexity: string;
 }
 
 export interface CompletedTask {
@@ -82,8 +87,17 @@ export interface CompletedTask {
   title: string;
 }
 
+/**
+ * A2-281 — an item that reached Muneral status `archived`. It used to be a
+ * `archive-<ID>.md` file under `documentation/archive/<subdir>/`, which is why
+ * it carried `subdir` and the file's `mtime`. Muneral has no such file and no
+ * such subdirectory: `archived` is a terminal status meaning the card left the
+ * board unverified, and MUN-0043 is explicit that it is NOT a synonym for
+ * `done`. So the section keeps its name and changes its source; `at` is the
+ * instant of the last move, as Muneral reports it.
+ */
 export interface ArchivedItem {
   id: string;
-  subdir: string;
-  mtime: Date;
+  title: string;
+  at: string;
 }

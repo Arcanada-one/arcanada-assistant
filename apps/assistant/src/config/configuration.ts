@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+import { MUNERAL_API_BASE_URL, refineMuneraBaseUrl } from './munera.config.js';
 import { internalHttpOrHttpsUrl } from './url-schemas.js';
 
 const httpsUrl = z
@@ -69,8 +70,16 @@ export const configurationSchema = z.object({
   // ARCA-0009 M5: MuneraAgent — Bearer JWT issued via Munera `POST /api/v1/auth/telegram`
   // (or Auth Arcana OIDC client_credentials after AUTH-* migration). Stored in Vault
   // `secret/munera/assistant-token`. Default flag enabled; tests/dev use stub token.
-  MUNERA_BASE_URL: httpOrHttpsUrl,
-  MUNERA_API_TOKEN: z.string().min(1, 'MUNERA_API_TOKEN required (Vault-managed JWT)'),
+  // A2-313 — the credential is resolved in ONE place, `munera.config.ts`
+  // (`MUNERAL_AGENT_KEY_FILE`, then the deprecated `MUNERA_API_TOKEN`), and a
+  // missing or placeholder credential is refused THERE. Requiring the env token
+  // here as well made the key-file deployment (A2-281 compose, which no longer
+  // passes `MUNERA_API_TOKEN`) fail at boot, and let `changeme` pass.
+  // A2-374 — the same default as `munera.config.ts`. Required here while the
+  // namespace defaulted it meant a deployment that simply omitted the variable
+  // passed the Munera gate and then died in this schema with exit 1.
+  MUNERA_BASE_URL: httpOrHttpsUrl.superRefine(refineMuneraBaseUrl).default(MUNERAL_API_BASE_URL),
+  MUNERA_API_TOKEN: z.string().optional(),
   MUNERA_TIMEOUT_MS: z.coerce.number().int().positive().default(10_000),
   ECOSYSTEM_MUNERA_INTEGRATION: z
     .union([z.literal('true'), z.literal('false')])

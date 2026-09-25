@@ -35,3 +35,4 @@ pnpm-debug.log*
 # Temp
 tmp/
 .tmp/
+__pycache__/

@@ -3,7 +3,6 @@ import type { EcosystemSnapshot, IOpsBotClient } from '@arcanada/core';
 
 import { OPS_BOT_CLIENT } from '../agents/ops-agent/ops-agent.service.js';
 
-import { DatarimReaderService } from './datarim-reader.service.js';
 import { escapeMd, bold } from './markdown-v2.js';
 import type {
   ActiveTask,
@@ -11,11 +10,19 @@ import type {
   ComposedMessage,
   ProactiveConfig,
 } from './proactive.types.js';
+import {
+  WORK_ITEMS_READER,
+  type IWorkItemsReader,
+  type SourceResult,
+} from './work-items.reader.js';
 
 export interface BriefingInput {
   runDate: string;
   config: ProactiveConfig;
 }
+
+/** How many ids a section names before it stops listing and only counts. */
+const MAX_LISTED_IDS = 10;
 
 @Injectable()
 export class BriefingAggregator {
@@ -23,7 +30,7 @@ export class BriefingAggregator {
 
   constructor(
     @Inject(OPS_BOT_CLIENT) private readonly opsBot: IOpsBotClient,
-    private readonly datarim: DatarimReaderService,
+    @Inject(WORK_ITEMS_READER) private readonly workItems: IWorkItemsReader,
   ) {}
 
   async compose(input: BriefingInput): Promise<ComposedMessage> {
@@ -39,25 +46,18 @@ export class BriefingAggregator {
       lines.push(this.renderSnapshot(snap));
     }
 
-    // ARCA-0154: probe datarim source once. When unmounted/ENOENT every
-    // section renders a degraded marker rather than an honest-empty "нет".
-    const datarimAvailable =
-      ch.include_active_tasks || ch.include_backlog_top_n > 0
-        ? await this.datarim.sourceAvailable()
-        : true;
-
     if (ch.include_active_tasks) {
-      const tasks = await this.datarim.readActiveTasks();
+      const active = await this.workItems.readActiveTasks();
       sections.push('active_tasks');
       lines.push('');
-      lines.push(this.renderActiveTasks(tasks, datarimAvailable));
+      lines.push(this.renderActiveTasks(active));
     }
 
     if (ch.include_backlog_top_n > 0) {
-      const top = await this.datarim.readBacklogTopN(ch.include_backlog_top_n);
+      const top = await this.workItems.readBacklogTopN(ch.include_backlog_top_n);
       sections.push('backlog_top_n');
       lines.push('');
-      lines.push(this.renderBacklog(top, ch.include_backlog_top_n, datarimAvailable));
+      lines.push(this.renderBacklog(top, ch.include_backlog_top_n));
     }
 
     return { text: lines.join('\n'), sections };
@@ -80,24 +80,36 @@ export class BriefingAggregator {
     ].join('\n');
   }
 
-  private renderActiveTasks(tasks: readonly ActiveTask[], sourceAvailable: boolean): string {
-    if (!sourceAvailable)
-      return `${bold('Активные задачи:')} ${escapeMd('⚠️ источник недоступен')}`;
-    if (tasks.length === 0) return `${bold('Активные задачи:')} ${escapeMd('нет')}`;
-    const ids = tasks.map((t) => escapeMd(t.id)).join(', ');
-    return `${bold('Активные задачи:')} ${escapeMd(`${tasks.length}`)} \\(${ids}\\)`;
+  private renderActiveTasks(result: SourceResult<ActiveTask>): string {
+    const header = bold('Активные задачи:');
+    if (!result.ok) return `${header} ${degraded(result.reason)}`;
+    if (result.total === 0) return `${header} ${escapeMd('нет')}`;
+    const shown = result.items.slice(0, MAX_LISTED_IDS);
+    const ids = shown.map((t) => escapeMd(t.id)).join(', ');
+    const more =
+      result.total > shown.length ? escapeMd(`, …ещё ${result.total - shown.length}`) : '';
+    return `${header} ${escapeMd(String(result.total))} \\(${ids}${more}\\)`;
   }
 
-  private renderBacklog(
-    items: readonly BacklogItem[],
-    requested: number,
-    sourceAvailable: boolean,
-  ): string {
-    if (!sourceAvailable)
-      return `${bold(`Backlog top-${requested} P0/P1:`)} ${escapeMd('⚠️ источник недоступен')}`;
-    if (items.length === 0)
-      return `${bold(`Backlog top-${requested} P0/P1:`)} ${escapeMd('пусто')}`;
-    const ids = items.map((b) => escapeMd(b.id)).join(', ');
-    return `${bold(`Backlog top-${requested} P0/P1:`)} ${ids}`;
+  private renderBacklog(result: SourceResult<BacklogItem>, requested: number): string {
+    const header = bold(`Backlog top-${requested} P0/P1:`);
+    if (!result.ok) return `${header} ${degraded(result.reason)}`;
+    if (result.items.length === 0) return `${header} ${escapeMd('пусто')}`;
+    const ids = result.items.map((b) => escapeMd(b.id)).join(', ');
+    return `${header} ${ids}${partial(result.truncated)}`;
   }
+}
+
+/**
+ * A2-281 — the degraded marker NAMES THE CAUSE. «⚠️ источник недоступен» was
+ * true and useless: it was printed for 8 days straight without telling anyone
+ * that the directory behind it had been empty since INFRA-0417.
+ */
+export function degraded(reason: string): string {
+  return escapeMd(`⚠️ Muneral недоступен: ${reason}`);
+}
+
+/** Said out loud when a top-N was picked from a page that did not hold everything. */
+export function partial(truncated: boolean): string {
+  return truncated ? ` ${escapeMd('(выборка неполная)')}` : '';
 }

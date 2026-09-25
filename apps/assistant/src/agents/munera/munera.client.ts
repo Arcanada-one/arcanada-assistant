@@ -6,12 +6,21 @@ import {
   MuneraGlobalErrorEnvelopeSchema,
   MuneraJwtUnauthorizedEnvelopeSchema,
   MuneraTaskListSchema,
+  MuneraDigestRefusalEnvelopeSchema,
+  MuneraTaskPageSchema,
+  MuneraTaskQuerySchema,
   MuneraTaskSchema,
   TaskListResultSchema,
+  TaskPageResultSchema,
   TaskResultSchema,
   UpdateTaskStatusRequestSchema,
   type CreateTaskRequest,
+  type MuneraTaskQuery,
   type TaskListResult,
+  DIGEST_GRANT_EXPIRED,
+  DIGEST_GRANT_REQUIRED,
+  type MuneraDigestRefusalEnvelope,
+  type TaskPageResult,
   type TaskResult,
   type UpdateTaskStatusRequest,
 } from './munera.schemas.js';
@@ -44,9 +53,15 @@ export interface MuneraClientOptions {
    */
   baseUrl: string;
   /**
-   * Bearer JWT issued via Munera `POST /api/v1/auth/telegram` (or, post
-   * AUTH-* migration, Auth Arcana OIDC client_credentials). Stored in Vault
-   * `secret/munera/assistant-token` and refreshed by M7 hybrid-auth path.
+   * The credential sent as `Authorization: Bearer <apiToken>`. Muneral accepts
+   * two kinds on the same header and nothing else (`JwtOrApiKeyGuard`): a user
+   * JWT, or an agent key with the `mun_sk_` prefix.
+   *
+   * A2-281 — an unattended process holds the AGENT KEY, read from the file
+   * named by `MUNERAL_AGENT_KEY_FILE`, never a value in the environment. What
+   * the key may reach is narrower than a JWT: `AgentTaskScopeGuard` refuses an
+   * API key on every route not explicitly marked `@AgentScope(...)`. See
+   * `MuneralWorkItemsReader` for the one route this matters on.
    */
   apiToken: string;
   logger?: MuneraLogger;
@@ -55,6 +70,12 @@ export interface MuneraClientOptions {
   retry?: MuneraRetryOptions;
   circuit?: MuneraCircuitOptions;
   serviceName?: string;
+  /**
+   * A2-281 — AGENTS.md § Operating rules requires `aup-orchestrator/1.0` on
+   * every Muneral call, and this client sent no User-Agent at all, so its
+   * traffic was indistinguishable from a stray curl in any access log.
+   */
+  userAgent?: string;
 }
 
 export interface IMuneraClient {
@@ -62,22 +83,46 @@ export interface IMuneraClient {
   updateTaskStatus(taskId: string, req: UpdateTaskStatusRequest): Promise<TaskResult>;
   getTask(taskId: string): Promise<TaskResult>;
   listTasksByProject(projectId: string): Promise<TaskListResult>;
+  queryWorkspaceDigest(query: MuneraTaskQuery): Promise<TaskPageResult>;
   isCircuitOpen(): boolean;
+  /**
+   * A2-313 — what Muneral last said about the credential itself. Optional so a
+   * test double need not model it; a client that does not report it is read as
+   * `unverified`, never as `accepted`.
+   */
+  credentialState?(): MuneraCredentialState;
 }
+
+/**
+ * `unverified` — no answer yet; `accepted` — Muneral authenticated the key
+ * (2xx, or a 403 about WHAT it may read, which is authorisation, not identity);
+ * `rejected` — 401, the key itself is not a credential Muneral knows.
+ */
+export type MuneraCredentialState = 'unverified' | 'accepted' | 'rejected';
 
 export class MuneraClientError extends Error {
   readonly cause?: unknown;
   readonly httpStatus?: number;
   readonly errorCode?: string;
+  /** A2-294 — the parsed digest refusal, when that is what this error is. Kept
+   *  whole so `until` and `decision` reach the operator-facing message without
+   *  being re-parsed out of prose. */
+  readonly digestRefusal?: MuneraDigestRefusalEnvelope;
   constructor(
     message: string,
-    opts?: { cause?: unknown; httpStatus?: number; errorCode?: string },
+    opts?: {
+      cause?: unknown;
+      httpStatus?: number;
+      errorCode?: string;
+      digestRefusal?: MuneraDigestRefusalEnvelope;
+    },
   ) {
     super(message);
     this.name = 'MuneraClientError';
     this.cause = opts?.cause;
     this.httpStatus = opts?.httpStatus;
     this.errorCode = opts?.errorCode;
+    this.digestRefusal = opts?.digestRefusal;
   }
 }
 
@@ -104,6 +149,32 @@ const DEFAULT_RETRY: MuneraRetryOptions = { maxAttempts: 2, baseDelayMs: 200 };
 
 const TASKS_PATH = '/api/v1/tasks';
 
+/**
+ * A2-294 — the digest is its own route, not a filter on `GET /api/v1/tasks`.
+ * That route is unmarked in Muneral and an unmarked route refuses an API key by
+ * default: measured live 2026-09-24, `403 "This route is not available to an
+ * agent API key… (MUN-0043)"`. `GET /tasks/digest` is `@AgentScope('workspace-digest')`
+ * and answers the key's OWN workspace, narrowed in the query itself rather than
+ * conditionally — see `apps/api/docs/agent-workspace-digest.md`.
+ *
+ * The envelope's first four keys and every filter are unchanged, so this is the
+ * whole change on the wire.
+ */
+const WORKSPACE_DIGEST_PATH = '/api/v1/tasks/digest';
+
+/**
+ * A2-281 — the canonical Muneral address in AGENTS.md is
+ * `https://api.muneral.com/api/v1`, but every path in this client already
+ * carries `/api/v1`. Configuring the canonical form therefore produced
+ * `…/api/v1/api/v1/tasks` and a 404 that looks exactly like an empty board.
+ * Both spellings are accepted and normalised to the origin.
+ */
+export function normaliseMuneraBaseUrl(raw: string): string {
+  return raw.replace(/\/+$/, '').replace(/\/api\/v1$/, '');
+}
+
+export const DEFAULT_MUNERA_USER_AGENT = 'aup-orchestrator/1.0';
+
 export class MuneraClient implements IMuneraClient {
   private readonly baseUrl: string;
   private readonly apiToken: string;
@@ -112,16 +183,19 @@ export class MuneraClient implements IMuneraClient {
   private readonly timeoutMs: number;
   private readonly retry: MuneraRetryOptions;
   private readonly serviceName: string;
+  private readonly userAgent: string;
   private readonly breaker: CircuitBreaker<[RequestPlan], HttpResult>;
+  private lastCredentialState: MuneraCredentialState = 'unverified';
 
   constructor(opts: MuneraClientOptions) {
-    this.baseUrl = opts.baseUrl.replace(/\/+$/, '');
+    this.baseUrl = normaliseMuneraBaseUrl(opts.baseUrl);
     this.apiToken = opts.apiToken;
     this.logger = opts.logger;
     this.fetchImpl = opts.fetchImpl ?? globalThis.fetch.bind(globalThis);
     this.timeoutMs = opts.timeoutMs ?? 10_000;
     this.retry = opts.retry ?? DEFAULT_RETRY;
     this.serviceName = opts.serviceName ?? 'arcanada-assistant';
+    this.userAgent = opts.userAgent ?? DEFAULT_MUNERA_USER_AGENT;
     const cb = opts.circuit ?? DEFAULT_CIRCUIT;
     this.breaker = new CircuitBreaker(this.executeRequest.bind(this), {
       timeout: false,
@@ -135,6 +209,17 @@ export class MuneraClient implements IMuneraClient {
 
   isCircuitOpen(): boolean {
     return this.breaker.opened;
+  }
+
+  /**
+   * A2-313 — a 401 is a client fault, so the breaker (rightly) does not count
+   * it and stays closed. That is how production answered `munera: ok` for 36
+   * hours on a placeholder key: the only signal that the key was dead lived in
+   * individual call results. This keeps the last word on the key where
+   * `/health` can read it.
+   */
+  credentialState(): MuneraCredentialState {
+    return this.lastCredentialState;
   }
 
   async createTask(req: CreateTaskRequest): Promise<TaskResult> {
@@ -199,6 +284,63 @@ export class MuneraClient implements IMuneraClient {
     }
   }
 
+  /**
+   * A2-294 — `GET /api/v1/tasks/digest`: what moved in the key's own workspace.
+   *
+   * A2-281 pointed this at `GET /api/v1/tasks` and measured the answer: `403
+   * "This route is not available to an agent API key… (MUN-0043)"` every time.
+   * The two alternatives were measured and rejected then and are unchanged now
+   * — `GET /tasks/project/:id` answers an agent key the tasks it is ASSIGNED
+   * to, so for this key it is `200 []` on a board of 880+ rows (a well-formed,
+   * authorised, completely false "nothing happened today"), and
+   * `GET /tasks/project/:id/index` answers a sha256 of each title and no titles.
+   *
+   * Returns `unavailable` with the HTTP status for anything that is not a
+   * well-formed 2xx page. It never degrades to an empty list: a 403 and "no
+   * work items matched" are different answers and the caller renders them
+   * differently. The two grant refusals arrive with an `errorCode` of ours —
+   * `DIGEST_GRANT_REQUIRED` / `DIGEST_GRANT_EXPIRED` — so the caller branches on
+   * a value rather than on Muneral's prose.
+   */
+  async queryWorkspaceDigest(query: MuneraTaskQuery): Promise<TaskPageResult> {
+    const parsed = MuneraTaskQuerySchema.safeParse(query);
+    if (!parsed.success) {
+      throw new MuneraClientError(`Invalid queryWorkspaceDigest request: ${parsed.error.message}`, {
+        cause: parsed.error,
+      });
+    }
+    const search = new URLSearchParams();
+    for (const [key, value] of Object.entries(parsed.data)) {
+      if (value !== undefined) search.set(key, String(value));
+    }
+    const qs = search.toString();
+    try {
+      const result = await this.breaker.fire({
+        url: `${this.baseUrl}${WORKSPACE_DIGEST_PATH}${qs ? `?${qs}` : ''}`,
+        method: 'GET',
+        body: null,
+        retryable: true,
+      });
+      return this.mapPageResponse(result);
+    } catch (err) {
+      return TaskPageResultSchema.parse(this.buildUnavailable(err, 'workspace_digest'));
+    }
+  }
+
+  private mapPageResponse(result: HttpResult): TaskPageResult {
+    if (result.status >= 200 && result.status < 300) {
+      const parsed = MuneraTaskPageSchema.safeParse(result.body);
+      if (!parsed.success) {
+        throw new MuneraClientError(`Invalid Munera task page envelope: ${parsed.error.message}`, {
+          cause: parsed.error,
+          httpStatus: result.status,
+        });
+      }
+      return TaskPageResultSchema.parse({ kind: 'ok', page: parsed.data });
+    }
+    throw this.classifyHttpError(result);
+  }
+
   private async callTaskEndpoint(req: RequestPlan): Promise<TaskResult> {
     try {
       const result = await this.breaker.fire(req);
@@ -216,6 +358,8 @@ export class MuneraClient implements IMuneraClient {
     reason: string;
     statusCode?: number;
     errorCode?: string;
+    grantUntil?: string;
+    grantDecision?: string;
     detail?: string;
   } {
     if (this.breaker.opened) {
@@ -231,6 +375,11 @@ export class MuneraClient implements IMuneraClient {
         reason: classifyReason(err, operationLabel),
         ...(err.httpStatus !== undefined ? { statusCode: err.httpStatus } : {}),
         ...(err.errorCode ? { errorCode: err.errorCode } : {}),
+        // A2-294: `until` is what makes an expired grant actionable rather than
+        // merely reported, so it travels with the refusal instead of being
+        // recovered from the message text.
+        ...(err.digestRefusal?.until ? { grantUntil: err.digestRefusal.until } : {}),
+        ...(err.digestRefusal?.decision ? { grantDecision: err.digestRefusal.decision } : {}),
         detail: err.message,
       };
     }
@@ -279,6 +428,22 @@ export class MuneraClient implements IMuneraClient {
   }
 
   private classifyHttpError(result: HttpResult): MuneraClientError {
+    // A2-294 — FIRST, because the digest's refusal body carries neither `error`
+    // nor `statusCode` and therefore matches none of the envelopes below: before
+    // this, a missing or expired grant arrived as `HTTP 403: <raw body>` with no
+    // `errorCode`, i.e. indistinguishable from any other 403 to the caller that
+    // has to tell the operator which one it was.
+    const digestRefusal = MuneraDigestRefusalEnvelopeSchema.safeParse(result.body);
+    if (digestRefusal.success) {
+      return new MuneraClientError(digestRefusal.data.message, {
+        httpStatus: result.status,
+        errorCode:
+          digestRefusal.data.code === 'GRANT_EXPIRED'
+            ? DIGEST_GRANT_EXPIRED
+            : DIGEST_GRANT_REQUIRED,
+        digestRefusal: digestRefusal.data,
+      });
+    }
     const jwt401 = MuneraJwtUnauthorizedEnvelopeSchema.safeParse(result.body);
     if (jwt401.success) {
       return new MuneraClientError(jwt401.data.message, {
@@ -330,6 +495,7 @@ export class MuneraClient implements IMuneraClient {
     try {
       const headers: Record<string, string> = {
         authorization: `Bearer ${this.apiToken}`,
+        'user-agent': this.userAgent,
       };
       if (req.body !== null) headers['content-type'] = 'application/json';
       const res = await this.fetchImpl(req.url, {
@@ -337,8 +503,25 @@ export class MuneraClient implements IMuneraClient {
         headers,
         body: req.body ?? undefined,
         signal: controller.signal,
+        // A2-360 — the API does not redirect. A redirect means MUNERA_BASE_URL
+        // is not the API (the site answers 302 to its HTML), and following it
+        // turned the site's page into a 2xx that read as an ACCEPTED key.
+        redirect: 'manual',
       });
+      if (res.status >= 300 && res.status < 400) {
+        this.logger?.warn(
+          { status: res.status, method: req.method, url: req.url, service: this.serviceName },
+          'munera redirect — MUNERA_BASE_URL is not the API',
+        );
+        throw new MuneraClientError(
+          `HTTP ${res.status} redirect (${req.method} ${req.url}): MUNERA_BASE_URL is not the Muneral API`,
+          { httpStatus: res.status },
+        );
+      }
       const result = await readJson(res);
+      if (result.status === 401) this.lastCredentialState = 'rejected';
+      else if ((result.status >= 200 && result.status < 300) || result.status === 403)
+        this.lastCredentialState = 'accepted';
       if (result.status >= 500 || result.status === 408 || result.status === 429) {
         this.logger?.warn(
           {
