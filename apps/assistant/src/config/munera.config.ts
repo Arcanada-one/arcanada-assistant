@@ -12,24 +12,69 @@ import { z } from 'zod';
  */
 const MUNERAL_SITE_HOSTS = new Set(['muneral.com', 'www.muneral.com']);
 
-/** True for a URL that is not the Muneral site. Shared by both env schemas. */
-export function isNotMuneralSite(url: string): boolean {
-  return !MUNERAL_SITE_HOSTS.has(new URL(url).hostname.toLowerCase());
+/** The one public host that serves the Muneral API. */
+const MUNERAL_API_HOST = 'api.muneral.com';
+
+/** The canonical Muneral API address (AGENTS.md § Operating rules). */
+export const MUNERAL_API_BASE_URL = 'https://api.muneral.com/api/v1';
+
+/** Hosts on which plaintext `http://` never leaves the machine or the mesh. */
+const LOOPBACK_HOSTS = new Set(['localhost', '127.0.0.1', '::1', '[::1]']);
+
+function isPrivateHttpHost(hostname: string): boolean {
+  if (LOOPBACK_HOSTS.has(hostname)) return true;
+  const m = /^100\.(\d{1,3})\.\d{1,3}\.\d{1,3}$/.exec(hostname);
+  if (m && Number(m[1]) >= 64 && Number(m[1]) <= 127) return true; // Tailscale CGNAT
+  // RFC 6761 special-use names never resolve to a public host. CI's smoke job
+  // runs the real process against `http://stub.invalid:3500` (ci.yml).
+  if (/(^|\.)(invalid|test|localhost)$/.test(hostname)) return true;
+  return hostname.length > 0 && !hostname.includes('.'); // docker service name
 }
 
 export const MUNERAL_SITE_HOST_MESSAGE =
   'points at the Muneral SITE, not its API — use https://api.muneral.com/api/v1';
+
+/**
+ * A2-360 — why this URL cannot be the Muneral API, or `null` when it can.
+ *
+ * The site hosts were the only refusal in A2-313. Measured 2026-09-25 from
+ * arcana-devs, the rest of the `muneral.com` zone is no better:
+ * `https://app.muneral.com/api/v1/tasks/digest` → 502, and
+ * `http://api.muneral.com/…` → 301 to https. The 301 is the worse one: the key
+ * goes out in clear on the first hop, and fetch drops `Authorization` on the
+ * cross-origin redirect, so what comes back is a 401 that reads like a dead key.
+ * Every one of these is a deployment typo; each is refused at boot with the
+ * reason, not discovered as an empty briefing a day later.
+ */
+export function muneraBaseUrlProblem(raw: string): string | null {
+  let url: URL;
+  try {
+    url = new URL(raw);
+  } catch {
+    return 'is not a URL';
+  }
+  const host = url.hostname.toLowerCase();
+  if (MUNERAL_SITE_HOSTS.has(host)) return MUNERAL_SITE_HOST_MESSAGE;
+  if (host.endsWith('.muneral.com') && host !== MUNERAL_API_HOST) {
+    return `host ${host} is not the Muneral API — use https://api.muneral.com/api/v1`;
+  }
+  if (url.protocol === 'https:') return null;
+  if (url.protocol === 'http:' && isPrivateHttpHost(host)) return null;
+  return `must be https:// for a public host (${url.protocol}//${host} would send the agent key in clear)`;
+}
+
+/** Zod refinement that reports the specific reason, shared by both env schemas. */
+export function refineMuneraBaseUrl(value: string, ctx: z.RefinementCtx): void {
+  const problem = muneraBaseUrlProblem(value);
+  if (problem !== null) ctx.addIssue({ code: 'custom', message: problem });
+}
 
 const envSchema = z.object({
   /**
    * Accepts the canonical `https://api.muneral.com/api/v1` from AGENTS.md as
    * well as a bare origin — `normaliseMuneraBaseUrl` strips the duplicate path.
    */
-  MUNERA_BASE_URL: z
-    .string()
-    .url()
-    .refine(isNotMuneralSite, { message: MUNERAL_SITE_HOST_MESSAGE })
-    .default('https://api.muneral.com/api/v1'),
+  MUNERA_BASE_URL: z.string().url().superRefine(refineMuneraBaseUrl).default(MUNERAL_API_BASE_URL),
   /**
    * A2-281 — path to a file holding the agent key (`mun_sk_…`), mounted
    * read-only into the container. A KEY IS NOT AN ENVIRONMENT VARIABLE: env is
@@ -122,6 +167,24 @@ export function resolveMuneraCredential(
 }
 
 /**
+ * A2-374 — why the process refused to boot, as a stable code an operator can
+ * grep for. Every boot refusal here is OUR configuration: nothing in this file
+ * touches the network, so "Muneral is down" can never produce one (A2-360 §3).
+ */
+export type MuneraBootCode =
+  'MUNERA_CREDENTIAL_MISSING' | 'MUNERA_BASE_URL_INVALID' | 'MUNERA_CONFIG_INVALID';
+
+export class MuneraBootRefusal extends Error {
+  constructor(
+    readonly code: MuneraBootCode,
+    message: string,
+  ) {
+    super(message);
+    this.name = 'MuneraBootRefusal';
+  }
+}
+
+/**
  * A2-313 — with the integration ON, no usable credential is a refusal to boot.
  *
  * Production ran 36 hours `healthy` on `MUNERA_API_TOKEN=changeme`: every call
@@ -140,7 +203,8 @@ export function assertUsableCredential(
   integrationEnabled: boolean,
 ): void {
   if (!integrationEnabled || credential.token !== null) return;
-  throw new Error(
+  throw new MuneraBootRefusal(
+    'MUNERA_CREDENTIAL_MISSING',
     `Invalid Munera configuration: no usable Muneral credential (${credential.detail}). ` +
       'Set MUNERAL_AGENT_KEY_FILE to the agent key file, or ECOSYSTEM_MUNERA_INTEGRATION=false ' +
       'to run without Muneral.',
@@ -159,16 +223,26 @@ export function withoutBlanks(env: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
   return Object.fromEntries(Object.entries(env).filter(([, v]) => v !== ''));
 }
 
-export default registerAs(MUNERA_CONFIG, (): MuneraConfig => {
-  const parsed = envSchema.safeParse(withoutBlanks(process.env));
+/**
+ * The Munera namespace from an environment — what `registerAs` below runs, and
+ * what `munera-boot-gate.ts` runs before Nest is imported. Throws
+ * `MuneraBootRefusal`; never touches the network.
+ */
+export function loadMuneraConfig(
+  env: NodeJS.ProcessEnv,
+  readFile?: (path: string) => string,
+): MuneraConfig {
+  const parsed = envSchema.safeParse(withoutBlanks(env));
   if (!parsed.success) {
-    throw new Error(
+    const onlyBaseUrl = parsed.error.issues.every((i) => i.path[0] === 'MUNERA_BASE_URL');
+    throw new MuneraBootRefusal(
+      onlyBaseUrl ? 'MUNERA_BASE_URL_INVALID' : 'MUNERA_CONFIG_INVALID',
       `Invalid Munera configuration: ${parsed.error.issues
         .map((i) => `${i.path.join('.')}: ${i.message}`)
         .join('; ')}`,
     );
   }
-  const credential = resolveMuneraCredential(parsed.data);
+  const credential = resolveMuneraCredential(parsed.data, readFile);
   assertUsableCredential(credential, parsed.data.ECOSYSTEM_MUNERA_INTEGRATION);
   return {
     baseUrl: parsed.data.MUNERA_BASE_URL,
@@ -177,4 +251,6 @@ export default registerAs(MUNERA_CONFIG, (): MuneraConfig => {
     timeoutMs: parsed.data.MUNERA_TIMEOUT_MS,
     integrationEnabled: parsed.data.ECOSYSTEM_MUNERA_INTEGRATION,
   };
-});
+}
+
+export default registerAs(MUNERA_CONFIG, (): MuneraConfig => loadMuneraConfig(process.env));
