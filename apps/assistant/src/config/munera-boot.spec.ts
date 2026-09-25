@@ -133,4 +133,52 @@ describe('boot with the Muneral environment (A2-313)', () => {
     expect(message).not.toBe('');
     expect(message).not.toContain('mun_sk_');
   });
+
+  // A2-360 — every other address in the muneral.com zone that is not the API,
+  // as measured 2026-09-25 (`out-hosts.txt`): each must refuse at boot and say why.
+  it.each([
+    ['https://muneral.com', /MUNERA_BASE_URL: points at the Muneral SITE/],
+    ['https://www.muneral.com/api/v1', /MUNERA_BASE_URL: points at the Muneral SITE/],
+    [
+      'https://app.muneral.com/api/v1',
+      /MUNERA_BASE_URL: host app\.muneral\.com is not the Muneral API/,
+    ],
+    ['http://api.muneral.com/api/v1', /MUNERA_BASE_URL: must be https:\/\/ for a public host/],
+  ])('refuses MUNERA_BASE_URL=%s with the reason, even with a usable key', (url, reason) => {
+    expect(() => boot({ ...BASE, MUNERA_BASE_URL: url, MUNERAL_AGENT_KEY_FILE: keyFile })).toThrow(
+      reason,
+    );
+  });
+
+  it.each([
+    'https://api.muneral.com/api/v1',
+    'https://api.muneral.com',
+    'http://127.0.0.1:3500/api/v1',
+    'http://muneral-api:3500',
+    'http://100.90.7.20:3500/api/v1',
+  ])('boots MUNERA_BASE_URL=%s (API host, loopback, docker name, mesh)', (url) => {
+    expect(() =>
+      boot({ ...BASE, MUNERA_BASE_URL: url, MUNERAL_AGENT_KEY_FILE: keyFile }),
+    ).not.toThrow();
+  });
+
+  // A2-360 — a refusal to boot must be about OUR configuration, never about
+  // Muneral's reachability. Boot is judged on the environment alone: no request
+  // leaves the process, so an unreachable Muneral cannot stop the container.
+  it('boots with a usable key while Muneral is unreachable — and never touches the network', () => {
+    const fetchSpy = vi.fn(() => Promise.reject(new Error('ECONNREFUSED')));
+    vi.stubGlobal('fetch', fetchSpy);
+    try {
+      expect(() =>
+        boot({
+          ...BASE,
+          MUNERA_BASE_URL: 'http://127.0.0.1:1/api/v1',
+          MUNERAL_AGENT_KEY_FILE: keyFile,
+        }),
+      ).not.toThrow();
+      expect(fetchSpy).not.toHaveBeenCalled();
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
 });

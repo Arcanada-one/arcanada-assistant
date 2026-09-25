@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { isNotMuneralSite, MUNERAL_SITE_HOST_MESSAGE } from './munera.config.js';
+import { refineMuneraBaseUrl } from './munera.config.js';
 import { internalHttpOrHttpsUrl } from './url-schemas.js';
 
 const httpsUrl = z
@@ -75,7 +75,7 @@ export const configurationSchema = z.object({
   // missing or placeholder credential is refused THERE. Requiring the env token
   // here as well made the key-file deployment (A2-281 compose, which no longer
   // passes `MUNERA_API_TOKEN`) fail at boot, and let `changeme` pass.
-  MUNERA_BASE_URL: httpOrHttpsUrl.refine(isNotMuneralSite, { message: MUNERAL_SITE_HOST_MESSAGE }),
+  MUNERA_BASE_URL: httpOrHttpsUrl.superRefine(refineMuneraBaseUrl),
   MUNERA_API_TOKEN: z.string().optional(),
   MUNERA_TIMEOUT_MS: z.coerce.number().int().positive().default(10_000),
   ECOSYSTEM_MUNERA_INTEGRATION: z

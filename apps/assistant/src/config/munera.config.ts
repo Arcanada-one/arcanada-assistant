@@ -12,13 +12,56 @@ import { z } from 'zod';
  */
 const MUNERAL_SITE_HOSTS = new Set(['muneral.com', 'www.muneral.com']);
 
-/** True for a URL that is not the Muneral site. Shared by both env schemas. */
-export function isNotMuneralSite(url: string): boolean {
-  return !MUNERAL_SITE_HOSTS.has(new URL(url).hostname.toLowerCase());
+/** The one public host that serves the Muneral API. */
+const MUNERAL_API_HOST = 'api.muneral.com';
+
+/** Hosts on which plaintext `http://` never leaves the machine or the mesh. */
+const LOOPBACK_HOSTS = new Set(['localhost', '127.0.0.1', '::1', '[::1]']);
+
+function isPrivateHttpHost(hostname: string): boolean {
+  if (LOOPBACK_HOSTS.has(hostname)) return true;
+  const m = /^100\.(\d{1,3})\.\d{1,3}\.\d{1,3}$/.exec(hostname);
+  if (m && Number(m[1]) >= 64 && Number(m[1]) <= 127) return true; // Tailscale CGNAT
+  return hostname.length > 0 && !hostname.includes('.'); // docker service name
 }
 
 export const MUNERAL_SITE_HOST_MESSAGE =
   'points at the Muneral SITE, not its API — use https://api.muneral.com/api/v1';
+
+/**
+ * A2-360 — why this URL cannot be the Muneral API, or `null` when it can.
+ *
+ * The site hosts were the only refusal in A2-313. Measured 2026-09-25 from
+ * arcana-devs, the rest of the `muneral.com` zone is no better:
+ * `https://app.muneral.com/api/v1/tasks/digest` → 502, and
+ * `http://api.muneral.com/…` → 301 to https. The 301 is the worse one: the key
+ * goes out in clear on the first hop, and fetch drops `Authorization` on the
+ * cross-origin redirect, so what comes back is a 401 that reads like a dead key.
+ * Every one of these is a deployment typo; each is refused at boot with the
+ * reason, not discovered as an empty briefing a day later.
+ */
+export function muneraBaseUrlProblem(raw: string): string | null {
+  let url: URL;
+  try {
+    url = new URL(raw);
+  } catch {
+    return 'is not a URL';
+  }
+  const host = url.hostname.toLowerCase();
+  if (MUNERAL_SITE_HOSTS.has(host)) return MUNERAL_SITE_HOST_MESSAGE;
+  if (host.endsWith('.muneral.com') && host !== MUNERAL_API_HOST) {
+    return `host ${host} is not the Muneral API — use https://api.muneral.com/api/v1`;
+  }
+  if (url.protocol === 'https:') return null;
+  if (url.protocol === 'http:' && isPrivateHttpHost(host)) return null;
+  return `must be https:// for a public host (${url.protocol}//${host} would send the agent key in clear)`;
+}
+
+/** Zod refinement that reports the specific reason, shared by both env schemas. */
+export function refineMuneraBaseUrl(value: string, ctx: z.RefinementCtx): void {
+  const problem = muneraBaseUrlProblem(value);
+  if (problem !== null) ctx.addIssue({ code: 'custom', message: problem });
+}
 
 const envSchema = z.object({
   /**
@@ -28,7 +71,7 @@ const envSchema = z.object({
   MUNERA_BASE_URL: z
     .string()
     .url()
-    .refine(isNotMuneralSite, { message: MUNERAL_SITE_HOST_MESSAGE })
+    .superRefine(refineMuneraBaseUrl)
     .default('https://api.muneral.com/api/v1'),
   /**
    * A2-281 — path to a file holding the agent key (`mun_sk_…`), mounted
