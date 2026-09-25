@@ -5,7 +5,7 @@
   "superseded_self_rule": "DEC-AUP-0035: the entity a receipt can never verify is the PREVIOUS VERSION OF ITSELF. When a receipt is re-issued at the same path for the same work item — the ordinary case after a rebase or a second commit on a card — the copy of it standing in the tree is superseded by construction: this run is the measurement that replaces it, so the only verdict it could carry is I14 `not_measured` about a document that no longer exists at that path once the run finishes. It is excluded with the work item and the output path that identify it, both re-derived from Git by impact_pair.receipt_problems, never asserted.",
   "verdict": "paused_safe"
  },
- "captured_at_utc": "2026-09-25T17:58:51Z",
+ "captured_at_utc": "2026-09-25T18:02:44Z",
  "change_set": {
   "base": "acc7d7b789e6d002ba12b95bf2c618a4740c3694",
   "files": [
@@ -59,9 +59,18 @@
     ],
     "path": "apps/assistant/src/config/munera.config.ts",
     "status": "M"
+   },
+   {
+    "kind": "receipt",
+    "node_id": "receipt:receipts/graph/change-admission-a2-360-20260925T175851Z.json",
+    "node_ids": [
+     "receipt:receipts/graph/change-admission-a2-360-20260925T175851Z.json"
+    ],
+    "path": "receipts/graph/change-admission-a2-360-20260925T175851Z.json",
+    "status": "A"
    }
   ],
-  "head": "3e6ea3d1c488f2982eceed8d1b4909b7e5117dcf",
+  "head": "25f1f98d262fc3547b1db484e8feb6040cf91521",
   "mode": "diff"
  },
  "decision_ref": "DEC-AUP-0008",
@@ -76,12 +85,12 @@
  "head_graph": {
   "builder_version": "1.0.1",
   "built_at_utc": "2026-09-05T00:00:00Z",
-  "graph_digest": "sha256:2681786890bc870ca63f0ca863a3d077e42afedd625eca374597922c2b41fc10",
-  "path": "/tmp/arcana-verify/verifier-out/graph-head-3e6ea3d1c488.json",
-  "source_commit": "3e6ea3d1c488f2982eceed8d1b4909b7e5117dcf",
+  "graph_digest": "sha256:e75fb89f571c52f33adb6ecc0c8f35b6cd64d7bf2bff90cb7b00222981f86a02",
+  "path": "/tmp/arcana-verify/verifier-out/graph-head-25f1f98d262f.json",
+  "source_commit": "25f1f98d262fc3547b1db484e8feb6040cf91521",
   "staleness": {
-   "checked_at_utc": "2026-09-25T17:58:52Z",
-   "checked_nodes": 223,
+   "checked_at_utc": "2026-09-25T18:02:46Z",
+   "checked_nodes": 224,
    "method": "manifest.dirty must be false; manifest.source_commit == change_set.head; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at head (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
    "mismatched_nodes": [],
    "verdict": "fresh"
@@ -1680,7 +1689,7 @@
   "tool": "tools/graph/verify.py",
   "version": "1.0.1"
  },
- "receipt_id": "car-verify-20260925T175851Z-3e6ea3d1",
+ "receipt_id": "car-verify-20260925T180244Z-25f1f98d",
  "receipt_path": "receipts/graph/change-admission-a2-360-20260925T175851Z.json",
  "repo": {
   "name": "Arcanada-one/arcanada-assistant",
@@ -1762,14 +1771,15 @@
    "receipt:receipts/graph/change-admission-a2-226-20260923T184840Z.json",
    "receipt:receipts/graph/change-admission-a2-281-20260924T191535Z.json",
    "receipt:receipts/graph/change-admission-a2-294-20260925T003743Z.json",
-   "receipt:receipts/graph/change-admission-a2-313-20260925T082019Z.json"
+   "receipt:receipts/graph/change-admission-a2-313-20260925T082019Z.json",
+   "receipt:receipts/graph/change-admission-a2-360-20260925T175851Z.json"
   ],
   "schema": "RevisionImpactSelection/v1",
   "unmeasured_head_files": []
  },
  "schema": "ChangeAdmissionReceipt/v1",
  "staleness": {
-  "checked_at_utc": "2026-09-25T17:58:52Z",
+  "checked_at_utc": "2026-09-25T18:02:46Z",
   "method": "manifest.dirty must be false; manifest.source_commit == change_set.base; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at base (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
   "mismatched_nodes": [],
   "verdict": "fresh"
@@ -1829,10 +1839,25 @@
    "path": "receipts/graph/change-admission-a2-313-20260925T082019Z.json",
    "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
    "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": null,
+    "head": "sha256:9296cc4fa2be35d00d7465012ab88bac35d68cb7d42afd3edd8a511d34714b81"
+   },
+   "entity": "receipt:receipts/graph/change-admission-a2-360-20260925T175851Z.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-a2-360-20260925T175851Z.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it; superseded by construction — this run re-issues the receipt at receipts/graph/change-admission-a2-360-20260925T175851Z.json for work item A2-360",
+   "rule": "DEC-AUP-0035",
+   "superseded": {
+    "receipt_path": "receipts/graph/change-admission-a2-360-20260925T175851Z.json",
+    "work_item": "A2-360"
+   }
   }
  ],
  "tree": {
-  "commit": "3e6ea3d1c488f2982eceed8d1b4909b7e5117dcf",
+  "commit": "25f1f98d262fc3547b1db484e8feb6040cf91521",
   "dirty": false
  },
  "verdicts": [
@@ -2126,7 +2151,7 @@
  "verifiers": [
   {
    "command": "/home/dev/aup/arc2/runs/A2-360/work/arcanada-assistant/node_modules/.bin/tsc -p /home/dev/aup/arc2/runs/A2-360/work/arcanada-assistant/apps/assistant/tsconfig.json --noEmit --incremental false --listFiles",
-   "duration_s": 2.95,
+   "duration_s": 3.14,
    "entities": [
     "code_unit:apps/assistant/src/agents/munera/munera-agent.module.ts",
     "code_unit:apps/assistant/src/agents/munera/munera-agent.service.spec.ts",
@@ -2185,12 +2210,12 @@
    "id": "v-type-check-apps-assistant-tsconfig",
    "kind": "type_check",
    "output_ref": "/tmp/arcana-verify/verifier-out/v-type-check-apps-assistant-tsconfig.txt",
-   "started_at_utc": "2026-09-25T17:58:53Z",
+   "started_at_utc": "2026-09-25T18:02:47Z",
    "summary": "apps/assistant/tsconfig.json: exit 0, 0 error(s), 1325 files listed"
   },
   {
-   "command": "tools/graph/contract_diff.py.run_diff(base=acc7d7b789e6, head=3e6ea3d1c488, graph=head graph)",
-   "duration_s": 0.98,
+   "command": "tools/graph/contract_diff.py.run_diff(base=acc7d7b789e6, head=25f1f98d262f, graph=head graph)",
+   "duration_s": 1.36,
    "entities": [
     "code_unit:apps/assistant/src/agents/munera/munera.client.ts",
     "code_unit:apps/assistant/src/app.module.ts",
@@ -2221,12 +2246,12 @@
    "id": "v-contract-diff",
    "kind": "contract_diff",
    "output_ref": "/tmp/arcana-verify/verifier-out/v-contract-diff.json",
-   "started_at_utc": "2026-09-25T17:58:57Z",
+   "started_at_utc": "2026-09-25T18:02:50Z",
    "summary": "57→57 contracts, breaking 0, edges {'failed': 20, 'verified': 98}"
   },
   {
    "command": "verify.py fitness_rules FR-01..FR-05 over the head graph + head sources",
-   "duration_s": 0.03,
+   "duration_s": 0.05,
    "entities": [
     "code_unit:apps/assistant/src/agents/munera/munera-agent.module.ts",
     "code_unit:apps/assistant/src/agents/munera/munera-agent.service.spec.ts",
@@ -2285,7 +2310,7 @@
    "id": "v-fitness",
    "kind": "fitness_rules",
    "output_ref": "/tmp/arcana-verify/verifier-out/v-fitness.json",
-   "started_at_utc": "2026-09-25T17:58:58Z",
+   "started_at_utc": "2026-09-25T18:02:52Z",
    "summary": "21 finding(s): 0 new / 21 frozen; 0 entity(ies) failed"
   },
   {
@@ -2301,16 +2326,22 @@
    "id": "v-doc-reference",
    "kind": "doc_reference",
    "output_ref": "/tmp/arcana-verify/verifier-out/v-doc-reference.txt",
-   "started_at_utc": "2026-09-25T17:58:58Z",
+   "started_at_utc": "2026-09-25T18:02:52Z",
    "summary": "1 document(s), 0 failed"
   }
  ],
  "verify": {
   "events": [
    {
+    "code": "SUPERSEDED_SELF_EXCLUSION",
+    "entity": "receipt:receipts/graph/change-admission-a2-360-20260925T175851Z.json",
+    "rule": "DEC-AUP-0035",
+    "text": "the receipt at receipts/graph/change-admission-a2-360-20260925T175851Z.json is the previous version of the one this run is writing, for the same work item A2-360 — superseded by construction, so it owes this change no verdict"
+   },
+   {
     "code": "STRUCTURAL_EXCLUSION",
     "rule": "DEC-AUP-0034",
-    "text": "5 affected entity(ies) owe no verdict (receipt: 5): unchanged at both revisions and given no verifier by the matrix"
+    "text": "6 affected entity(ies) owe no verdict (receipt: 6): unchanged at both revisions and given no verifier by the matrix"
    }
   ],
   "required_by_entity": {
@@ -2444,12 +2475,13 @@
    "receipt:receipts/graph/change-admission-a2-226-20260923T184840Z.json": [],
    "receipt:receipts/graph/change-admission-a2-281-20260924T191535Z.json": [],
    "receipt:receipts/graph/change-admission-a2-294-20260925T003743Z.json": [],
-   "receipt:receipts/graph/change-admission-a2-313-20260925T082019Z.json": []
+   "receipt:receipts/graph/change-admission-a2-313-20260925T082019Z.json": [],
+   "receipt:receipts/graph/change-admission-a2-360-20260925T175851Z.json": []
   },
   "seconds": {
-   "prepare": 0.89,
-   "total": 6.6,
-   "verifiers": 3.96
+   "prepare": 0.96,
+   "total": 7.4,
+   "verifiers": 4.55
   }
  },
  "work_item": "A2-360"
