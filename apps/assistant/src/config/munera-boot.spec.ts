@@ -33,7 +33,8 @@ const BASE = {
   DATABASE_URL: 'postgresql://u:p@localhost:5432/db?schema=public',
   REDIS_URL: 'redis://localhost:6379/0',
   TELEGRAM_BOT_TOKEN: 'token',
-  TELEGRAM_WEBHOOK_SECRET: 'secret-with-enough-entropy-32chars-min',
+  // A placeholder of the required length, not a value: the schema only checks ≥32 chars.
+  TELEGRAM_WEBHOOK_SECRET: 'x'.repeat(32),
   AUTH_ARCANA_BASE_URL: 'https://auth.arcanada.one',
   AUTH_ARCANA_JWKS_URL: 'https://auth.arcanada.one/.well-known/jwks.json',
   AUTH_ARCANA_JWT_ISSUER: 'https://auth.arcanada.one',
