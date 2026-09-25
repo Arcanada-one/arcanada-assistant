@@ -15,6 +15,9 @@ const MUNERAL_SITE_HOSTS = new Set(['muneral.com', 'www.muneral.com']);
 /** The one public host that serves the Muneral API. */
 const MUNERAL_API_HOST = 'api.muneral.com';
 
+/** The canonical Muneral API address (AGENTS.md § Operating rules). */
+export const MUNERAL_API_BASE_URL = 'https://api.muneral.com/api/v1';
+
 /** Hosts on which plaintext `http://` never leaves the machine or the mesh. */
 const LOOPBACK_HOSTS = new Set(['localhost', '127.0.0.1', '::1', '[::1]']);
 
@@ -71,11 +74,7 @@ const envSchema = z.object({
    * Accepts the canonical `https://api.muneral.com/api/v1` from AGENTS.md as
    * well as a bare origin — `normaliseMuneraBaseUrl` strips the duplicate path.
    */
-  MUNERA_BASE_URL: z
-    .string()
-    .url()
-    .superRefine(refineMuneraBaseUrl)
-    .default('https://api.muneral.com/api/v1'),
+  MUNERA_BASE_URL: z.string().url().superRefine(refineMuneraBaseUrl).default(MUNERAL_API_BASE_URL),
   /**
    * A2-281 — path to a file holding the agent key (`mun_sk_…`), mounted
    * read-only into the container. A KEY IS NOT AN ENVIRONMENT VARIABLE: env is
