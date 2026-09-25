@@ -156,7 +156,9 @@ describe('boot with the Muneral environment (A2-313)', () => {
     'http://127.0.0.1:3500/api/v1',
     'http://muneral-api:3500',
     'http://100.90.7.20:3500/api/v1',
-  ])('boots MUNERA_BASE_URL=%s (API host, loopback, docker name, mesh)', (url) => {
+    // the value .github/workflows/ci.yml `smoke` boots the real process with
+    'http://stub.invalid:3500',
+  ])('boots MUNERA_BASE_URL=%s (API host, loopback, docker name, mesh, RFC 6761)', (url) => {
     expect(() =>
       boot({ ...BASE, MUNERA_BASE_URL: url, MUNERAL_AGENT_KEY_FILE: keyFile }),
     ).not.toThrow();

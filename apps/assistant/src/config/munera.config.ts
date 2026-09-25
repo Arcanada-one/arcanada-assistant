@@ -22,6 +22,9 @@ function isPrivateHttpHost(hostname: string): boolean {
   if (LOOPBACK_HOSTS.has(hostname)) return true;
   const m = /^100\.(\d{1,3})\.\d{1,3}\.\d{1,3}$/.exec(hostname);
   if (m && Number(m[1]) >= 64 && Number(m[1]) <= 127) return true; // Tailscale CGNAT
+  // RFC 6761 special-use names never resolve to a public host. CI's smoke job
+  // runs the real process against `http://stub.invalid:3500` (ci.yml).
+  if (/(^|\.)(invalid|test|localhost)$/.test(hostname)) return true;
   return hostname.length > 0 && !hostname.includes('.'); // docker service name
 }
 
