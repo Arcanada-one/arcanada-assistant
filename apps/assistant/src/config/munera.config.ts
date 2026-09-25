@@ -12,19 +12,24 @@ import { z } from 'zod';
  */
 const MUNERAL_SITE_HOSTS = new Set(['muneral.com', 'www.muneral.com']);
 
-/**
- * Accepts the canonical `https://api.muneral.com/api/v1` from AGENTS.md as well
- * as a bare origin — `normaliseMuneraBaseUrl` strips the duplicate path.
- */
-export const muneraBaseUrlSchema = z
-  .string()
-  .url()
-  .refine((u) => !MUNERAL_SITE_HOSTS.has(new URL(u).hostname.toLowerCase()), {
-    message: 'points at the Muneral SITE, not its API — use https://api.muneral.com/api/v1',
-  });
+/** True for a URL that is not the Muneral site. Shared by both env schemas. */
+export function isNotMuneralSite(url: string): boolean {
+  return !MUNERAL_SITE_HOSTS.has(new URL(url).hostname.toLowerCase());
+}
+
+export const MUNERAL_SITE_HOST_MESSAGE =
+  'points at the Muneral SITE, not its API — use https://api.muneral.com/api/v1';
 
 const envSchema = z.object({
-  MUNERA_BASE_URL: muneraBaseUrlSchema.default('https://api.muneral.com/api/v1'),
+  /**
+   * Accepts the canonical `https://api.muneral.com/api/v1` from AGENTS.md as
+   * well as a bare origin — `normaliseMuneraBaseUrl` strips the duplicate path.
+   */
+  MUNERA_BASE_URL: z
+    .string()
+    .url()
+    .refine(isNotMuneralSite, { message: MUNERAL_SITE_HOST_MESSAGE })
+    .default('https://api.muneral.com/api/v1'),
   /**
    * A2-281 — path to a file holding the agent key (`mun_sk_…`), mounted
    * read-only into the container. A KEY IS NOT AN ENVIRONMENT VARIABLE: env is

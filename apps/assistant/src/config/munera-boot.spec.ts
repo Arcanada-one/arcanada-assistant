@@ -93,9 +93,13 @@ describe('boot with the Muneral environment (A2-313)', () => {
   });
 
   it('refuses a key file that is configured but missing', () => {
-    expect(() => boot({ ...BASE, MUNERAL_AGENT_KEY_FILE: join(dir, 'absent') })).toThrow(
-      /MUNERAL_AGENT_KEY_FILE unreadable/,
-    );
+    expect(() =>
+      boot({
+        ...BASE,
+        MUNERA_BASE_URL: 'https://api.muneral.com/api/v1',
+        MUNERAL_AGENT_KEY_FILE: join(dir, 'absent'),
+      }),
+    ).toThrow(/MUNERAL_AGENT_KEY_FILE unreadable/);
   });
 
   it('boots the A2-281 key-file compose, which passes no MUNERA_API_TOKEN', () => {
@@ -109,7 +113,13 @@ describe('boot with the Muneral environment (A2-313)', () => {
   });
 
   it('boots without any credential only when the integration is explicitly off', () => {
-    expect(() => boot({ ...BASE, ECOSYSTEM_MUNERA_INTEGRATION: 'false' })).not.toThrow();
+    expect(() =>
+      boot({
+        ...BASE,
+        MUNERA_BASE_URL: 'https://api.muneral.com/api/v1',
+        ECOSYSTEM_MUNERA_INTEGRATION: 'false',
+      }),
+    ).not.toThrow();
   });
 
   it('never puts the credential into the refusal', () => {
