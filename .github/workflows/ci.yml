@@ -7,8 +7,13 @@ on:
     branches: [main]
 
 concurrency:
-  group: deploy-arcanada-assistant
-  cancel-in-progress: false
+  # main is the deploy lane: one run at a time, never cancelled (`deploy` and `verify` run only on
+  # main). Every other run -- pull requests and pushes to feature/fix/chore branches -- gets its own
+  # group per event and ref. Sharing the deploy group queued PR runs behind main's deploys and let a
+  # newer pending run displace them (#85's first run was cancelled that way, 2026-09-30); now only a
+  # newer run of the same PR or branch cancels an older one.
+  group: ${{ github.ref == 'refs/heads/main' && 'deploy-arcanada-assistant' || format('ci-arcanada-assistant-{0}-{1}', github.event_name, github.ref) }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 env:
   NODE_VERSION: '24'
