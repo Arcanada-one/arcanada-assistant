@@ -16,7 +16,7 @@ env:
 
 jobs:
   lint:
-    runs-on: [self-hosted, Linux, X64]
+    runs-on: [self-hosted, Linux, X64, ci-general]
     steps:
       - uses: actions/checkout@v7
       # `dest` is pinned per job on purpose. Several runners on a host share
@@ -103,7 +103,7 @@ jobs:
   # stays a deploy precondition on purpose — it is the security-policy-mandate CI floor for
   # `typescript_pnpm` — so the fix is to make it answer, not to take it off the path.
   audit:
-    runs-on: [self-hosted, Linux, X64]
+    runs-on: [self-hosted, Linux, X64, ci-general]
     steps:
       - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6
@@ -406,7 +406,7 @@ jobs:
   notify-on-fail:
     needs: [lint, test, audit, smoke, deploy, verify]
     if: failure() && github.ref == 'refs/heads/main'
-    runs-on: [self-hosted, Linux, X64]
+    runs-on: [self-hosted, Linux, X64, ci-general]
     steps:
       - name: Notify Ops Bot
         run: |
