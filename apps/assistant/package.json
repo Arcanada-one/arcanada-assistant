@@ -30,7 +30,7 @@
     "@nestjs/common": "^11.2.1",
     "@nestjs/config": "^4.0.2",
     "@nestjs/core": "^11.2.1",
-    "@nestjs/platform-fastify": "^11.2.1",
+    "@nestjs/platform-fastify": "^11.2.4",
     "@nestjs/swagger": "^11.4.7",
     "@nestjs/terminus": "^11.0.0",
     "@prisma/adapter-pg": "^7.9.1",
