@@ -353,6 +353,11 @@ jobs:
       # from the repository. Without an explicit checkout a self-hosted runner would offer
       # whatever a previous job left in the workspace, at whatever commit that was.
       - uses: actions/checkout@v7
+      - name: Runner broker preflight (A2-457)
+        run: scripts/ci/runner-broker-preflight.sh
+        env:
+          BROKER_PREFLIGHT_BIN: /usr/local/sbin/arcanada-compose-broker
+          BROKER_PREFLIGHT_SERVICE: arcanada-assistant
 
       - name: Wait for /health
         run: |
