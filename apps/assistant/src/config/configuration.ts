@@ -32,12 +32,11 @@ export const configurationSchema = z.object({
   AUTH_ARCANA_JWT_AUDIENCE: z.string().min(1),
 
   MODEL_CONNECTOR_BASE_URL: httpOrHttpsUrl,
-  // Liveness-probe target for the /health aggregation surface. The
-  // functional MODEL_CONNECTOR_BASE_URL points at the mesh `:3900` port which is
-  // not reachable from the assistant container's network; the public nginx
-  // surface (no Authorization needed) is used purely for the GET /health probe.
-  // Decoupled so STT/Claude request paths are untouched. Default = public base.
-  MODEL_CONNECTOR_HEALTH_URL: httpsUrl.default('https://connector.arcanada.one'),
+  // Model Connector shares the assistant Docker network. Probe its service
+  // name on the native port; the functional dotted alias also shadows public
+  // DNS, so the former HTTPS default would reach an internal port without TLS.
+  // Explicit public HTTPS overrides remain supported; public plaintext rejects.
+  MODEL_CONNECTOR_HEALTH_URL: internalHttpOrHttpsUrl.default('http://model-connector:3900'),
   MODEL_CONNECTOR_DEFAULT_MODEL: z.string().min(1),
   MODEL_CONNECTOR_API_KEY: z.string().min(1, 'MODEL_CONNECTOR_API_KEY required for STT'),
   MODEL_CONNECTOR_STT_DEFAULT_MODEL: z.string().min(1).optional(),

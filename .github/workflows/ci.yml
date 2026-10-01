@@ -42,6 +42,7 @@ jobs:
       # A2-371 — the CI scripts that guard the deploy are tested where they are changed.
       - run: bash scripts/ci/retry-network.test.sh
       - run: python3 scripts/ci/test_deploy_lag_watchdog.py
+      - run: bash scripts/ci/connector-health-route.test.sh
 
   test:
     runs-on: [self-hosted, Linux, X64, arcana-ai]
