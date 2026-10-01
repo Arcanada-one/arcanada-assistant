@@ -1,0 +1,21 @@
+{
+  "schema": "VerifyProfile/v1",
+  "note": "Retain production compiler projects and add strict verification projects for test and tooling inputs. Full fallback runs the existing CI test:coverage command; package jobs run their complete existing coverage suites.",
+  "deployables": {
+    ".": {
+      "tsconfig": ["tsconfig.json", "tsconfig.verification.json"],
+      "full_test": ["pnpm", "-r", "test:coverage"],
+      "full_test_timeout_seconds": 900
+    },
+    "apps/assistant": {
+      "tsconfig": ["apps/assistant/tsconfig.json", "apps/assistant/tsconfig.verification.json"],
+      "full_test": ["pnpm", "test:coverage"],
+      "full_test_timeout_seconds": 900
+    },
+    "packages/core": {
+      "tsconfig": ["packages/core/tsconfig.json"],
+      "full_test": ["pnpm", "test:coverage"],
+      "full_test_timeout_seconds": 900
+    }
+  }
+}
