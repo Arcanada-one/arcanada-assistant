@@ -68,9 +68,9 @@ services:
       AUTH_ARCANA_JWT_ISSUER: https://auth.arcanada.one
       AUTH_ARCANA_JWT_AUDIENCE: arcanada-assistant
       MODEL_CONNECTOR_BASE_URL: http://connector.arcanada.one:3900
-      # MC joins this existing network; use its native service name for health.
-      # Public HTTPS overrides are optional, never a plaintext public fallback.
-      MODEL_CONNECTOR_HEALTH_URL: ${MODEL_CONNECTOR_HEALTH_URL:-http://model-connector:3900}
+      # Use the canonical public HTTPS health surface. The execution alias
+      # above resolves inside Docker and does not expose TLS on port 443.
+      MODEL_CONNECTOR_HEALTH_URL: ${MODEL_CONNECTOR_HEALTH_URL:-https://connector.arcanada.ai}
       MODEL_CONNECTOR_DEFAULT_MODEL: anthropic/claude-haiku-4-5
       MODEL_CONNECTOR_API_KEY: ${MODEL_CONNECTOR_API_KEY:-changeme}
       # INFRA-0240: hostname `arcana-db` not resolvable inside docker (no MagicDNS); fall back to Tailscale IP for arcana-db. Override via .env on hosts с разной топологией.

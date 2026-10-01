@@ -32,11 +32,10 @@ export const configurationSchema = z.object({
   AUTH_ARCANA_JWT_AUDIENCE: z.string().min(1),
 
   MODEL_CONNECTOR_BASE_URL: httpOrHttpsUrl,
-  // Model Connector shares the assistant Docker network. Probe its service
-  // name on the native port; the functional dotted alias also shadows public
-  // DNS, so the former HTTPS default would reach an internal port without TLS.
-  // Explicit public HTTPS overrides remain supported; public plaintext rejects.
-  MODEL_CONNECTOR_HEALTH_URL: internalHttpOrHttpsUrl.default('http://model-connector:3900'),
+  // Probe the canonical public HTTPS surface without authentication. The
+  // execution alias resolves inside Docker and has no TLS listener on 443.
+  // Keep the original HTTPS-only contract and the execution route separate.
+  MODEL_CONNECTOR_HEALTH_URL: httpsUrl.default('https://connector.arcanada.ai'),
   MODEL_CONNECTOR_DEFAULT_MODEL: z.string().min(1),
   MODEL_CONNECTOR_API_KEY: z.string().min(1, 'MODEL_CONNECTOR_API_KEY required for STT'),
   MODEL_CONNECTOR_STT_DEFAULT_MODEL: z.string().min(1).optional(),
