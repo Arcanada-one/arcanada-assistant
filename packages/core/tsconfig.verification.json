@@ -1,0 +1,10 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "rootDir": ".",
+    "tsBuildInfoFile": "./dist/.verification.tsbuildinfo"
+  },
+  "include": ["src/**/*", "types/ioredis-mock.d.ts"],
+  "exclude": ["node_modules", "dist", "build", "coverage"]
+}

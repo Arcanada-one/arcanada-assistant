@@ -1,15 +1,17 @@
 import { createServer, type Server } from 'node:http';
 
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { generateKeyPair, exportJWK, SignJWT, type JWK, type KeyLike } from 'jose';
+import { generateKeyPair, exportJWK, SignJWT, type JWK } from 'jose';
 
 import { JwtValidator, RemoteJwksProvider } from './jwt-validator.js';
+
+type TestPrivateKey = Awaited<ReturnType<typeof generateKeyPair>>['privateKey'];
 
 const ISSUER = 'http://127.0.0.1';
 const AUDIENCE = 'arcanada-assistant';
 
 let publicJwk: JWK & { kid: string };
-let privateKey: KeyLike;
+let privateKey: TestPrivateKey;
 let server: Server;
 let baseUrl: string;
 let jwksFailure = false;

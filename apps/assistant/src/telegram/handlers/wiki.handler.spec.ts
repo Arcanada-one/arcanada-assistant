@@ -10,7 +10,18 @@ import { WikiHandler } from './wiki.handler.js';
 function makeDeps(routeImpl: () => Promise<unknown>) {
   const send = vi.fn().mockResolvedValue(undefined);
   const orchestrator = { route: vi.fn(routeImpl) } as unknown as OrchestratorService;
-  const gateway: TelegramGateway = { sendMessage: send };
+  const gateway: TelegramGateway = {
+    sendMessage: send,
+    sendMessageWithKeyboard: vi.fn(async () => {
+      throw new Error('Unexpected fixture call: sendMessageWithKeyboard');
+    }),
+    answerCallbackQuery: vi.fn(async () => {
+      throw new Error('Unexpected fixture call: answerCallbackQuery');
+    }),
+    getFileBuffer: vi.fn(async () => {
+      throw new Error('Unexpected fixture call: getFileBuffer');
+    }),
+  };
   return { send, orchestrator, gateway };
 }
 

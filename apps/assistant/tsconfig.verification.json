@@ -1,8 +1,12 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "noEmit": true
+    "noEmit": true,
+    "rootDir": ".",
+    "tsBuildInfoFile": "./dist/.verification.tsbuildinfo",
+    "allowJs": true,
+    "checkJs": true
   },
-  "include": ["src/config/configuration.spec.ts", "src/config/munera-boot.spec.ts"],
+  "include": ["src/**/*", "../../packages/core/types/ioredis-mock.d.ts", "scripts/**/*.mjs", "prisma.config.ts"],
   "exclude": ["node_modules", "dist", "build", "coverage"]
 }

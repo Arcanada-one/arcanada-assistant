@@ -13,7 +13,7 @@
       "full_test_timeout_seconds": 900
     },
     "packages/core": {
-      "tsconfig": ["packages/core/tsconfig.json"],
+      "tsconfig": ["packages/core/tsconfig.json", "packages/core/tsconfig.verification.json"],
       "full_test": ["pnpm", "test:coverage"],
       "full_test_timeout_seconds": 900
     }

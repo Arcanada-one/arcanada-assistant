@@ -38,9 +38,9 @@ interface VisionStubs {
 
 function makeServices(scrutator: ReturnType<typeof makeScrutatorStub>, stubs: VisionStubs = {}) {
   const dialogContext = new DialogContextService(
-    scrutator as unknown as Parameters<typeof DialogContextService>[0] extends never
+    scrutator as unknown as ConstructorParameters<typeof DialogContextService>[0] extends never
       ? never
-      : Parameters<typeof DialogContextService>[0],
+      : ConstructorParameters<typeof DialogContextService>[0],
     'assistant-test',
   );
   const claudeClient: IClaudeClient = {
