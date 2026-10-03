@@ -74,6 +74,31 @@ describe('configuration', () => {
     ).toThrow(/OPSBOT_BASE_URL/);
   });
 
+  it('defaults health to canonical public HTTPS without changing execution', () => {
+    const cfg = validateConfig(minimalValid);
+    expect(cfg.MODEL_CONNECTOR_HEALTH_URL).toBe('https://connector.arcanada.ai');
+    expect(cfg.MODEL_CONNECTOR_BASE_URL).toBe(minimalValid.MODEL_CONNECTOR_BASE_URL);
+  });
+
+  it('preserves explicit public HTTPS health overrides', () => {
+    const cfg = validateConfig({
+      ...minimalValid,
+      MODEL_CONNECTOR_HEALTH_URL: 'https://health.example.org',
+    });
+    expect(cfg.MODEL_CONNECTOR_HEALTH_URL).toBe('https://health.example.org');
+  });
+
+  it.each([
+    'http://model-connector:3900',
+    'http://connector.arcanada.one:3900',
+    'http://example.org',
+    'ftp://model-connector',
+  ])('rejects unsafe health target %s', (target) => {
+    expect(() => validateConfig({ ...minimalValid, MODEL_CONNECTOR_HEALTH_URL: target })).toThrow(
+      /MODEL_CONNECTOR_HEALTH_URL/,
+    );
+  });
+
   it('exports schema for direct introspection', () => {
     expect(configurationSchema).toBeDefined();
   });

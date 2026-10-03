@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
+import type { PredicateAst } from './predicate-ast.schema.js';
 import { evaluatePredicate, PredicateEvalError } from './predicate-eval.js';
 
 describe('evaluatePredicate', () => {
@@ -12,13 +13,13 @@ describe('evaluatePredicate', () => {
   });
 
   it('reads nested payload variables', () => {
-    const ast = { '==': [{ var: 'payload.where' }, null] };
+    const ast: PredicateAst = { '==': [{ var: 'payload.where' }, null] };
     expect(evaluatePredicate(ast, { payload: { where: null } })).toBe(true);
     expect(evaluatePredicate(ast, { payload: { where: 'narrow' } })).toBe(false);
   });
 
   it('supports and / or / ! composition', () => {
-    const ast = {
+    const ast: PredicateAst = {
       and: [
         { '==': [{ var: 'tool.name' }, 'task_query'] },
         { '!': { '==': [{ var: 'payload.where' }, 'sensitive'] } },
@@ -33,13 +34,13 @@ describe('evaluatePredicate', () => {
   });
 
   it('supports numeric comparisons (< <= > >=)', () => {
-    const ast = { '<': [{ var: 'payload.count' }, 10] };
+    const ast: PredicateAst = { '<': [{ var: 'payload.count' }, 10] };
     expect(evaluatePredicate(ast, { payload: { count: 5 } })).toBe(true);
     expect(evaluatePredicate(ast, { payload: { count: 15 } })).toBe(false);
   });
 
   it('supports the `in` operator', () => {
-    const ast = { in: [{ var: 'tool.name' }, ['task_create', 'task_update']] };
+    const ast: PredicateAst = { in: [{ var: 'tool.name' }, ['task_create', 'task_update']] };
     expect(evaluatePredicate(ast, { tool: { name: 'task_create' } })).toBe(true);
     expect(evaluatePredicate(ast, { tool: { name: 'task_get' } })).toBe(false);
   });

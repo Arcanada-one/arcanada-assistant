@@ -220,7 +220,9 @@ describe('MuneralWorkItemsReader', () => {
   // a well-formed, authorised, completely false "nothing happened today". Every
   // one of these must be distinguishable from `{ok: true, items: []}`.
   describe('the digest grant refusals (A2-294)', () => {
-    const readerOf = (unavailable: Parameters<typeof stubMuneraClient>[0]['unavailable']) =>
+    const readerOf = (
+      unavailable: NonNullable<Parameters<typeof stubMuneraClient>[0]>['unavailable'],
+    ) =>
       new MuneralWorkItemsReader(stubMuneraClient({ unavailable }), {
         timeZone: 'Europe/Istanbul',
       });

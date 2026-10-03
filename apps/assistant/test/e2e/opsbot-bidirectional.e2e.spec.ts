@@ -99,7 +99,9 @@ function makeInMemoryIdempotency(): RedisIdempotencyService {
       if (!row || row.expiresAt < Date.now()) return null;
       return row.value;
     },
-    async claim(uuid, decision, decidedBy, decidedAt): Promise<ClaimOutcome> {
+    async claim(
+      ...[uuid, decision, decidedBy, decidedAt]: Parameters<RedisIdempotencyService['claim']>
+    ): Promise<ClaimOutcome> {
       const env = envelopes.get(uuid);
       if (claims.has(uuid)) return 'already';
       if (!env || env.expiresAt < Date.now()) return 'expired';
@@ -109,9 +111,9 @@ function makeInMemoryIdempotency(): RedisIdempotencyService {
         decided_at: String(decidedAt),
         envelope: env.value,
       });
-      return 'claimed';
+      return 'taken';
     },
-    async readClaim(uuid) {
+    async readClaim(uuid: Parameters<RedisIdempotencyService['readClaim']>[0]) {
       return claims.get(uuid) ?? null;
     },
   } as unknown as RedisIdempotencyService;

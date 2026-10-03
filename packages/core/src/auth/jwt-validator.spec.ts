@@ -1,7 +1,9 @@
 import { describe, it, expect, beforeAll } from 'vitest';
-import { generateKeyPair, SignJWT, exportJWK, type JWK, type KeyLike } from 'jose';
+import { generateKeyPair, SignJWT, exportJWK, type JWK } from 'jose';
 
 import { JwtValidator, type JwksProvider } from './jwt-validator.js';
+
+type TestPrivateKey = Awaited<ReturnType<typeof generateKeyPair>>['privateKey'];
 
 const ISSUER = 'https://auth.arcanada.one';
 const AUDIENCE = 'arcanada-assistant';
@@ -24,7 +26,7 @@ async function makeKeyPair() {
 }
 
 async function signToken(
-  privateKey: KeyLike,
+  privateKey: TestPrivateKey,
   payload: Record<string, unknown>,
   opts: { issuer?: string; audience?: string; expiresIn?: string } = {},
 ): Promise<string> {
@@ -39,7 +41,7 @@ async function signToken(
 
 describe('JwtValidator', () => {
   let publicJwk: JWK & { kid: string };
-  let privateKey: KeyLike;
+  let privateKey: TestPrivateKey;
   let validator: JwtValidator;
 
   beforeAll(async () => {
