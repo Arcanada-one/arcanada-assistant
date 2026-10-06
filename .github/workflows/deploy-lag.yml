@@ -29,7 +29,7 @@ concurrency:
 
 jobs:
   watchdog:
-    runs-on: [self-hosted, Linux, X64]
+    runs-on: [self-hosted, Linux, X64, ci-general]
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7

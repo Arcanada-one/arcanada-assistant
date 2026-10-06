@@ -7,8 +7,13 @@ on:
     branches: [main]
 
 concurrency:
-  group: deploy-arcanada-assistant
-  cancel-in-progress: false
+  # main is the deploy lane: one run at a time, never cancelled (`deploy` and `verify` run only on
+  # main). Every other run -- pull requests and pushes to feature/fix/chore branches -- gets its own
+  # group per event and ref. Sharing the deploy group queued PR runs behind main's deploys and let a
+  # newer pending run displace them (#85's first run was cancelled that way, 2026-09-30); now only a
+  # newer run of the same PR or branch cancels an older one.
+  group: ${{ github.ref == 'refs/heads/main' && 'deploy-arcanada-assistant' || format('ci-arcanada-assistant-{0}-{1}', github.event_name, github.ref) }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 env:
   NODE_VERSION: '24'
@@ -16,7 +21,7 @@ env:
 
 jobs:
   lint:
-    runs-on: [self-hosted, Linux, X64]
+    runs-on: [self-hosted, Linux, X64, ci-general]
     steps:
       - uses: actions/checkout@v7
       # `dest` is pinned per job on purpose. Several runners on a host share
@@ -103,7 +108,7 @@ jobs:
   # stays a deploy precondition on purpose — it is the security-policy-mandate CI floor for
   # `typescript_pnpm` — so the fix is to make it answer, not to take it off the path.
   audit:
-    runs-on: [self-hosted, Linux, X64]
+    runs-on: [self-hosted, Linux, X64, ci-general]
     steps:
       - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6
@@ -118,6 +123,26 @@ jobs:
       # A2-371 — retried ONLY on a network-error signature; a finding fails on the first attempt
       # with pnpm's own exit code, so the security-policy-mandate floor is unchanged.
       - run: bash scripts/ci/retry-network.sh 3 pnpm audit --prod --audit-level=high
+
+  # Dev and test dependencies are audited too, as their own job. `audit` above stays the
+  # security-policy-mandate deploy precondition for production dependencies; this job is NOT in
+  # `deploy.needs`, so a new advisory in a lint/test-only package turns CI red without holding a
+  # production release. 2026-09-30: brace-expansion@1.1.14 (eslint-plugin-import > minimatch@3),
+  # tmp, form-data and vite (vitest) were high-severity and invisible to `--prod`.
+  audit-dev:
+    runs-on: [self-hosted, Linux, X64, ci-general]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+        with:
+          dest: ${{ runner.temp }}/setup-pnpm
+          version: ${{ env.PNPM_VERSION }}
+      - uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+      - run: bash scripts/ci/retry-network.sh 3 pnpm install --frozen-lockfile
+      - run: bash scripts/ci/retry-network.sh 3 pnpm audit --audit-level=high
 
   smoke:
     needs: [lint, test, audit]
@@ -328,6 +353,11 @@ jobs:
       # from the repository. Without an explicit checkout a self-hosted runner would offer
       # whatever a previous job left in the workspace, at whatever commit that was.
       - uses: actions/checkout@v7
+      - name: Runner broker preflight (A2-457)
+        run: scripts/ci/runner-broker-preflight.sh
+        env:
+          BROKER_PREFLIGHT_BIN: /usr/local/sbin/arcanada-compose-broker
+          BROKER_PREFLIGHT_SERVICE: arcanada-assistant
 
       - name: Wait for /health
         run: |
@@ -404,9 +434,9 @@ jobs:
         run: sudo -n /usr/local/sbin/arcanada-compose-broker arcanada-assistant ps
 
   notify-on-fail:
-    needs: [lint, test, audit, smoke, deploy, verify]
+    needs: [lint, test, audit, audit-dev, smoke, deploy, verify]
     if: failure() && github.ref == 'refs/heads/main'
-    runs-on: [self-hosted, Linux, X64]
+    runs-on: [self-hosted, Linux, X64, ci-general]
     steps:
       - name: Notify Ops Bot
         run: |
