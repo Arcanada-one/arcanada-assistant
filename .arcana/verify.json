@@ -2,24 +2,15 @@
   "schema": "VerifyProfile/v1",
   "deployables": {
     ".": {
-      "full_test": [
-        "pnpm",
-        "test"
-      ],
+      "full_test": ["pnpm", "test"],
       "full_test_timeout_seconds": 900
     },
     "apps/assistant": {
-      "full_test": [
-        "pnpm",
-        "test"
-      ],
+      "full_test": ["pnpm", "test"],
       "full_test_timeout_seconds": 900
     },
     "packages/core": {
-      "full_test": [
-        "pnpm",
-        "test"
-      ],
+      "full_test": ["pnpm", "test"],
       "full_test_timeout_seconds": 900
     }
   }
