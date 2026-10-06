@@ -1,0 +1,12 @@
+{
+  "schema": "VerifyProfile/v1",
+  "deployables": {
+    ".": {
+      "full_test": [
+        "pnpm",
+        "test"
+      ],
+      "full_test_timeout_seconds": 900
+    }
+  }
+}
