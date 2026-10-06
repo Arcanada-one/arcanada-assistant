@@ -5,7 +5,7 @@
   "superseded_self_rule": "DEC-AUP-0035: the entity a receipt can never verify is the PREVIOUS VERSION OF ITSELF. When a receipt is re-issued at the same path for the same work item — the ordinary case after a rebase or a second commit on a card — the copy of it standing in the tree is superseded by construction: this run is the measurement that replaces it, so the only verdict it could carry is I14 `not_measured` about a document that no longer exists at that path once the run finishes. It is excluded with the work item and the output path that identify it, both re-derived from Git by impact_pair.receipt_problems, never asserted.",
   "verdict": "paused_safe"
  },
- "captured_at_utc": "2026-10-06T19:37:56Z",
+ "captured_at_utc": "2026-10-06T22:00:52Z",
  "change_set": {
   "base": "8159dfe516e2d406ec7ef2a1c4183a40fbedbfac",
   "files": [
@@ -35,7 +35,7 @@
     "status": "A"
    }
   ],
-  "head": "e3df4c5decac41c6af3c2da93dc664c8029eb395",
+  "head": "7d1bb7a3f3b795269584e59d74722b5d9c2fb8fe",
   "mode": "diff"
  },
  "decision_ref": "DEC-AUP-0008",
@@ -44,26 +44,24 @@
   "builder_version": "1.0.5",
   "built_at_utc": "2026-09-05T00:00:00Z",
   "graph_digest": "sha256:efc918c86c39398186d79598982cd5353855a70fe7417ce4003101ed24a7f589",
-  "path": "/home/dev/aup/security-dependencies-916e-C18-source-20261006/lock-conflict-batch/arcanada-assistant-83-verifier-out/graph-8159dfe516e2.json",
+  "path": "/home/dev/aup/security-dependencies-916e-C18-source-20261006/lock-conflict-batch/assistant-receiving-2201/verifier-out/graph-8159dfe516e2.json",
   "source_commit": "8159dfe516e2d406ec7ef2a1c4183a40fbedbfac"
  },
  "head_graph": {
   "builder_version": "1.0.5",
   "built_at_utc": "2026-09-05T00:00:00Z",
-  "graph_digest": "sha256:d656dac9f946f9e4b7efea0660c59a108b76132bc2e4cea210b02a77159acb48",
-  "path": "/home/dev/aup/security-dependencies-916e-C18-source-20261006/lock-conflict-batch/arcanada-assistant-83-verifier-out/graph-head-e3df4c5decac.json",
-  "source_commit": "e3df4c5decac41c6af3c2da93dc664c8029eb395",
+  "graph_digest": "sha256:73c35308c4d3d7e8113776670bab9005f6831028c43263af59881c2f72f873d6",
+  "path": "/home/dev/aup/security-dependencies-916e-C18-source-20261006/lock-conflict-batch/assistant-receiving-2201/verifier-out/graph-head-7d1bb7a3f3b7.json",
+  "source_commit": "7d1bb7a3f3b795269584e59d74722b5d9c2fb8fe",
   "staleness": {
-   "checked_at_utc": "2026-10-06T19:38:00Z",
+   "checked_at_utc": "2026-10-06T22:00:56Z",
    "checked_nodes": 244,
    "method": "manifest.dirty must be false; manifest.source_commit == change_set.head; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at head (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
    "mismatched_nodes": [],
    "verdict": "fresh"
   }
  },
- "host": "dependency916-owned-local-node22",
- "host_redacted": true,
- "host_sha256": "ef4a1a342f2cd16eb5b2b86d75266ae73e2b1e6eaedc2e2258864c1c22f0de1d",
+ "host": "arcana-devs",
  "impact_set": {
   "deterministic_core": [
    {
@@ -6629,7 +6627,7 @@
   "tool": "tools/graph/verify.py",
   "version": "1.4.1"
  },
- "receipt_id": "car-verify-20261006T193756Z-e3df4c5d",
+ "receipt_id": "car-verify-20261006T220052Z-7d1bb7a3",
  "receipt_path": "receipts/graph/A2-442-override-ceilings.json",
  "repo": {
   "name": "Arcanada-one/arcanada-assistant",
@@ -6684,7 +6682,7 @@
  },
  "schema": "ChangeAdmissionReceipt/v1",
  "staleness": {
-  "checked_at_utc": "2026-10-06T19:38:00Z",
+  "checked_at_utc": "2026-10-06T22:00:56Z",
   "method": "manifest.dirty must be false; manifest.source_commit == change_set.base; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at base (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
   "mismatched_nodes": [],
   "verdict": "fresh"
@@ -6693,7 +6691,7 @@
   {
    "content_hash": {
     "base": null,
-    "head": "sha256:9e7d6870be00240536187c03679375167634a546cf6c7841de611961fd654112"
+    "head": "sha256:3453a028cfddfc8b0e0245f89f60225706055c2cc86cd3bdae7b642f6a3dce0a"
    },
    "entity": "receipt:receipts/graph/A2-442-override-ceilings.json",
    "node_type": "receipt",
@@ -6707,7 +6705,7 @@
   }
  ],
  "tree": {
-  "commit": "e3df4c5decac41c6af3c2da93dc664c8029eb395",
+  "commit": "7d1bb7a3f3b795269584e59d74722b5d9c2fb8fe",
   "dirty": false
  },
  "verdicts": [
@@ -6915,8 +6913,8 @@
  },
  "verifiers": [
   {
-   "command": "/home/dev/aup/security-dependencies-916e-C18-source-20261006/lock-conflict-batch/arcanada-assistant-83-source/node_modules/.bin/tsc -p /home/dev/aup/security-dependencies-916e-C18-source-20261006/lock-conflict-batch/arcanada-assistant-83-source/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /home/dev/aup/security-dependencies-916e-C18-source-20261006/lock-conflict-batch/arcanada-assistant-83-verifier-out/type-check-pmml1ag8/check.tsbuildinfo --listFiles",
-   "duration_s": 0.38,
+   "command": "/home/dev/aup/security-dependencies-916e-C18-source-20261006/lock-conflict-batch/arcanada-assistant-83-source/node_modules/.bin/tsc -p /home/dev/aup/security-dependencies-916e-C18-source-20261006/lock-conflict-batch/arcanada-assistant-83-source/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /home/dev/aup/security-dependencies-916e-C18-source-20261006/lock-conflict-batch/assistant-receiving-2201/verifier-out/type-check-6uq3un_q/check.tsbuildinfo --listFiles",
+   "duration_s": 0.33,
    "entities": [
     "code_unit:eslint.config.mjs",
     "code_unit:vitest.config.ts"
@@ -6928,13 +6926,13 @@
    "exit_code": 0,
    "id": "v-type-check-tsconfig",
    "kind": "type_check",
-   "output_ref": "/home/dev/aup/security-dependencies-916e-C18-source-20261006/lock-conflict-batch/arcanada-assistant-83-verifier-out/v-type-check-tsconfig.txt",
-   "started_at_utc": "2026-10-06T19:38:03Z",
+   "output_ref": "/home/dev/aup/security-dependencies-916e-C18-source-20261006/lock-conflict-batch/assistant-receiving-2201/verifier-out/v-type-check-tsconfig.txt",
+   "started_at_utc": "2026-10-06T22:00:58Z",
    "summary": "tsconfig.json: exit 0, 0 error(s), 0 files listed"
   },
   {
-   "command": "/home/dev/aup/security-dependencies-916e-C18-source-20261006/lock-conflict-batch/arcanada-assistant-83-source/apps/assistant/node_modules/.bin/tsc -p /home/dev/aup/security-dependencies-916e-C18-source-20261006/lock-conflict-batch/arcanada-assistant-83-source/apps/assistant/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /home/dev/aup/security-dependencies-916e-C18-source-20261006/lock-conflict-batch/arcanada-assistant-83-verifier-out/type-check-irtpa_un/check.tsbuildinfo --listFiles",
-   "duration_s": 9.9,
+   "command": "/home/dev/aup/security-dependencies-916e-C18-source-20261006/lock-conflict-batch/arcanada-assistant-83-source/apps/assistant/node_modules/.bin/tsc -p /home/dev/aup/security-dependencies-916e-C18-source-20261006/lock-conflict-batch/arcanada-assistant-83-source/apps/assistant/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /home/dev/aup/security-dependencies-916e-C18-source-20261006/lock-conflict-batch/assistant-receiving-2201/verifier-out/type-check-qc6cojr4/check.tsbuildinfo --listFiles",
+   "duration_s": 7.26,
    "entities": [
     "deployable_unit:apps/assistant"
    ],
@@ -6944,13 +6942,13 @@
    "exit_code": 0,
    "id": "v-type-check-apps-assistant-tsconfig",
    "kind": "type_check",
-   "output_ref": "/home/dev/aup/security-dependencies-916e-C18-source-20261006/lock-conflict-batch/arcanada-assistant-83-verifier-out/v-type-check-apps-assistant-tsconfig.txt",
-   "started_at_utc": "2026-10-06T19:38:03Z",
+   "output_ref": "/home/dev/aup/security-dependencies-916e-C18-source-20261006/lock-conflict-batch/assistant-receiving-2201/verifier-out/v-type-check-apps-assistant-tsconfig.txt",
+   "started_at_utc": "2026-10-06T22:00:58Z",
    "summary": "apps/assistant/tsconfig.json: exit 0, 0 error(s), 1328 files listed"
   },
   {
-   "command": "/home/dev/aup/security-dependencies-916e-C18-source-20261006/lock-conflict-batch/arcanada-assistant-83-source/node_modules/.bin/tsc -p /home/dev/aup/security-dependencies-916e-C18-source-20261006/lock-conflict-batch/arcanada-assistant-83-source/packages/core/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /home/dev/aup/security-dependencies-916e-C18-source-20261006/lock-conflict-batch/arcanada-assistant-83-verifier-out/type-check-5m0lw18c/check.tsbuildinfo --listFiles",
-   "duration_s": 2.71,
+   "command": "/home/dev/aup/security-dependencies-916e-C18-source-20261006/lock-conflict-batch/arcanada-assistant-83-source/node_modules/.bin/tsc -p /home/dev/aup/security-dependencies-916e-C18-source-20261006/lock-conflict-batch/arcanada-assistant-83-source/packages/core/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /home/dev/aup/security-dependencies-916e-C18-source-20261006/lock-conflict-batch/assistant-receiving-2201/verifier-out/type-check-izussdlf/check.tsbuildinfo --listFiles",
+   "duration_s": 2.52,
    "entities": [
     "deployable_unit:packages/core"
    ],
@@ -6960,8 +6958,8 @@
    "exit_code": 0,
    "id": "v-type-check-packages-core-tsconfig",
    "kind": "type_check",
-   "output_ref": "/home/dev/aup/security-dependencies-916e-C18-source-20261006/lock-conflict-batch/arcanada-assistant-83-verifier-out/v-type-check-packages-core-tsconfig.txt",
-   "started_at_utc": "2026-10-06T19:38:13Z",
+   "output_ref": "/home/dev/aup/security-dependencies-916e-C18-source-20261006/lock-conflict-batch/assistant-receiving-2201/verifier-out/v-type-check-packages-core-tsconfig.txt",
+   "started_at_utc": "2026-10-06T22:01:06Z",
    "summary": "packages/core/tsconfig.json: exit 0, 0 error(s), 338 files listed"
   },
   {
@@ -6976,8 +6974,8 @@
    "exit_code": 1,
    "id": "v-workflow-config-b803fcb7f17ed923",
    "kind": "config_schema",
-   "output_ref": "/home/dev/aup/security-dependencies-916e-C18-source-20261006/lock-conflict-batch/arcanada-assistant-83-verifier-out/v-workflow-config-b803fcb7f17ed923.txt",
-   "started_at_utc": "2026-10-06T19:38:16Z",
+   "output_ref": "/home/dev/aup/security-dependencies-916e-C18-source-20261006/lock-conflict-batch/assistant-receiving-2201/verifier-out/v-workflow-config-b803fcb7f17ed923.txt",
+   "started_at_utc": "2026-10-06T22:01:09Z",
    "summary": "workflow shell caller closure not measured: job deploy step 2: line 1: wrapper execution scope/options unresolved; job deploy step 3: line 1: wrapper execution scope/options unresolved; job deploy step 4: line 1: wrapper execution scope/options unresolved; job notify-on-fail step 0: line 13: multiline/opaque shell statement; job notify-on-fail step 0: line 1: multiline/opaque shell statement; job notify-on-fail step 0: line 2: multiline/opaque shell statement; job notify-on-fail step 0: line 3: multiline/opaque shell statement; job notify-on-fail step 0: line 4: multiline/opaque shell statement; job smoke step 0: line 21: dynamic load/substitution; job smoke step 0: line 27: wrapper options/child command unresolved; job smoke step 5: directory transition has unresolved execution cwd; job smoke step 8: directory transition has unresolved execution cwd; job smoke step 9: directory transition has unresolved execution cwd; job smoke step 9: line 10: dynamic load/substitution; job smoke step 9: line 11: dynamic load/substitution; job test step 6: directory transition has unresolved execution cwd; job verify step 2: line 11: dynamic load/substitution; job verify step 2: line 12: dynamic load/substitution; job verify step 2: line 18: dynamic load/substitution; job verify step 2: line 21: wrapper execution scope/options unresolved; job verify step 2: line 32: wrapper execution scope/options unresolved; job verify step 4: line 1: wrapper execution scope/options unresolved"
   },
   {
@@ -6992,8 +6990,8 @@
    "exit_code": 1,
    "id": "v-workflow-config-2fe48d1021006468",
    "kind": "config_schema",
-   "output_ref": "/home/dev/aup/security-dependencies-916e-C18-source-20261006/lock-conflict-batch/arcanada-assistant-83-verifier-out/v-workflow-config-2fe48d1021006468.txt",
-   "started_at_utc": "2026-10-06T19:38:16Z",
+   "output_ref": "/home/dev/aup/security-dependencies-916e-C18-source-20261006/lock-conflict-batch/assistant-receiving-2201/verifier-out/v-workflow-config-2fe48d1021006468.txt",
+   "started_at_utc": "2026-10-06T22:01:09Z",
    "summary": "workflow shell caller closure not measured: job auto-merge step 0: line 10: dynamic load/substitution; job auto-merge step 0: line 11: dynamic load/substitution; job auto-merge step 0: line 12: dynamic load/substitution; job auto-merge step 0: line 13: dynamic load/substitution; job auto-merge step 0: line 3: multiline/opaque shell statement; job auto-merge step 0: line 4: wrapper options/child command unresolved; job auto-merge step 0: line 57: dynamic load/substitution; job auto-merge step 0: line 58: multiline/opaque shell statement; job auto-merge step 0: line 65: multiline/opaque shell statement; job auto-merge step 0: line 66: wrapper options/child command unresolved; job auto-merge step 0: line 67: dynamic load/substitution; job auto-merge step 0: line 68: dynamic load/substitution; job auto-merge step 0: line 69: dynamic load/substitution; job auto-merge step 0: line 82: dynamic command/alias/eval; job auto-merge step 0: line 82: dynamic load/substitution; job auto-merge step 0: line 9: dynamic load/substitution"
   },
   {
@@ -7008,8 +7006,8 @@
    "exit_code": 0,
    "id": "v-workflow-config-98c3ee995796b8c4",
    "kind": "config_schema",
-   "output_ref": "/home/dev/aup/security-dependencies-916e-C18-source-20261006/lock-conflict-batch/arcanada-assistant-83-verifier-out/v-workflow-config-98c3ee995796b8c4.txt",
-   "started_at_utc": "2026-10-06T19:38:16Z",
+   "output_ref": "/home/dev/aup/security-dependencies-916e-C18-source-20261006/lock-conflict-batch/assistant-receiving-2201/verifier-out/v-workflow-config-98c3ee995796b8c4.txt",
+   "started_at_utc": "2026-10-06T22:01:09Z",
    "summary": "bounded workflow configuration shape valid; expressions, shell, actions, callee interface compatibility and hosted execution NOT_MEASURED"
   },
   {
@@ -7024,13 +7022,13 @@
    "exit_code": 0,
    "id": "v-workflow-config-5844296ae241614c",
    "kind": "config_schema",
-   "output_ref": "/home/dev/aup/security-dependencies-916e-C18-source-20261006/lock-conflict-batch/arcanada-assistant-83-verifier-out/v-workflow-config-5844296ae241614c.txt",
-   "started_at_utc": "2026-10-06T19:38:16Z",
+   "output_ref": "/home/dev/aup/security-dependencies-916e-C18-source-20261006/lock-conflict-batch/assistant-receiving-2201/verifier-out/v-workflow-config-5844296ae241614c.txt",
+   "started_at_utc": "2026-10-06T22:01:09Z",
    "summary": "bounded workflow configuration shape valid; expressions, shell, actions, callee interface compatibility and hosted execution NOT_MEASURED"
   },
   {
    "command": "verify.py fitness_rules FR-01..FR-05 over the head graph + head sources",
-   "duration_s": 0.07,
+   "duration_s": 0.09,
    "entities": [
     "code_unit:.github/workflows/ci.yml",
     "code_unit:.github/workflows/dependabot-auto-merge.yml",
@@ -7076,8 +7074,8 @@
    "exit_code": 0,
    "id": "v-fitness",
    "kind": "fitness_rules",
-   "output_ref": "/home/dev/aup/security-dependencies-916e-C18-source-20261006/lock-conflict-batch/arcanada-assistant-83-verifier-out/v-fitness.json",
-   "started_at_utc": "2026-10-06T19:38:16Z",
+   "output_ref": "/home/dev/aup/security-dependencies-916e-C18-source-20261006/lock-conflict-batch/assistant-receiving-2201/verifier-out/v-fitness.json",
+   "started_at_utc": "2026-10-06T22:01:09Z",
    "summary": "21 finding(s): 0 new / 21 frozen; 0 entity(ies) failed"
   },
   {
@@ -7092,9 +7090,9 @@
    "exit_code": 0,
    "id": "v-shell-syntax-c268dc99e1ae5f43",
    "kind": "shell_syntax",
-   "output_ref": "/home/dev/aup/security-dependencies-916e-C18-source-20261006/lock-conflict-batch/arcanada-assistant-83-verifier-out/v-shell-syntax-c268dc99e1ae5f43.txt",
+   "output_ref": "/home/dev/aup/security-dependencies-916e-C18-source-20261006/lock-conflict-batch/assistant-receiving-2201/verifier-out/v-shell-syntax-c268dc99e1ae5f43.txt",
    "scope": "shell_source_validation",
-   "started_at_utc": "2026-10-06T19:38:16Z",
+   "started_at_utc": "2026-10-06T22:01:09Z",
    "summary": "shell syntax/closure: not_measured"
   },
   {
@@ -7109,9 +7107,9 @@
    "exit_code": 0,
    "id": "v-shell-syntax-42bc3ac597fdf697",
    "kind": "shell_syntax",
-   "output_ref": "/home/dev/aup/security-dependencies-916e-C18-source-20261006/lock-conflict-batch/arcanada-assistant-83-verifier-out/v-shell-syntax-42bc3ac597fdf697.txt",
+   "output_ref": "/home/dev/aup/security-dependencies-916e-C18-source-20261006/lock-conflict-batch/assistant-receiving-2201/verifier-out/v-shell-syntax-42bc3ac597fdf697.txt",
    "scope": "shell_source_validation",
-   "started_at_utc": "2026-10-06T19:38:16Z",
+   "started_at_utc": "2026-10-06T22:01:09Z",
    "summary": "shell syntax/closure: not_measured"
   },
   {
@@ -7126,9 +7124,9 @@
    "exit_code": 0,
    "id": "v-shell-syntax-f23c1b7d469ad442",
    "kind": "shell_syntax",
-   "output_ref": "/home/dev/aup/security-dependencies-916e-C18-source-20261006/lock-conflict-batch/arcanada-assistant-83-verifier-out/v-shell-syntax-f23c1b7d469ad442.txt",
+   "output_ref": "/home/dev/aup/security-dependencies-916e-C18-source-20261006/lock-conflict-batch/assistant-receiving-2201/verifier-out/v-shell-syntax-f23c1b7d469ad442.txt",
    "scope": "shell_source_validation",
-   "started_at_utc": "2026-10-06T19:38:16Z",
+   "started_at_utc": "2026-10-06T22:01:09Z",
    "summary": "shell syntax/closure: not_measured"
   },
   {
@@ -7143,9 +7141,9 @@
    "exit_code": 0,
    "id": "v-shell-syntax-3dd523bdaa768ee8",
    "kind": "shell_syntax",
-   "output_ref": "/home/dev/aup/security-dependencies-916e-C18-source-20261006/lock-conflict-batch/arcanada-assistant-83-verifier-out/v-shell-syntax-3dd523bdaa768ee8.txt",
+   "output_ref": "/home/dev/aup/security-dependencies-916e-C18-source-20261006/lock-conflict-batch/assistant-receiving-2201/verifier-out/v-shell-syntax-3dd523bdaa768ee8.txt",
    "scope": "shell_source_validation",
-   "started_at_utc": "2026-10-06T19:38:16Z",
+   "started_at_utc": "2026-10-06T22:01:09Z",
    "summary": "shell syntax/closure: not_measured"
   },
   {
@@ -7160,9 +7158,9 @@
    "exit_code": 0,
    "id": "v-shell-syntax-5e354ec7aeb3853b",
    "kind": "shell_syntax",
-   "output_ref": "/home/dev/aup/security-dependencies-916e-C18-source-20261006/lock-conflict-batch/arcanada-assistant-83-verifier-out/v-shell-syntax-5e354ec7aeb3853b.txt",
+   "output_ref": "/home/dev/aup/security-dependencies-916e-C18-source-20261006/lock-conflict-batch/assistant-receiving-2201/verifier-out/v-shell-syntax-5e354ec7aeb3853b.txt",
    "scope": "shell_source_validation",
-   "started_at_utc": "2026-10-06T19:38:16Z",
+   "started_at_utc": "2026-10-06T22:01:09Z",
    "summary": "shell syntax/closure: not_measured"
   },
   {
@@ -7177,9 +7175,9 @@
    "exit_code": 0,
    "id": "v-shell-syntax-17489cd4cfeb2df6",
    "kind": "shell_syntax",
-   "output_ref": "/home/dev/aup/security-dependencies-916e-C18-source-20261006/lock-conflict-batch/arcanada-assistant-83-verifier-out/v-shell-syntax-17489cd4cfeb2df6.txt",
+   "output_ref": "/home/dev/aup/security-dependencies-916e-C18-source-20261006/lock-conflict-batch/assistant-receiving-2201/verifier-out/v-shell-syntax-17489cd4cfeb2df6.txt",
    "scope": "shell_source_validation",
-   "started_at_utc": "2026-10-06T19:38:16Z",
+   "started_at_utc": "2026-10-06T22:01:09Z",
    "summary": "shell syntax/closure: not_measured"
   },
   {
@@ -7194,9 +7192,9 @@
    "exit_code": 0,
    "id": "v-shell-syntax-4b1446736a74bcbc",
    "kind": "shell_syntax",
-   "output_ref": "/home/dev/aup/security-dependencies-916e-C18-source-20261006/lock-conflict-batch/arcanada-assistant-83-verifier-out/v-shell-syntax-4b1446736a74bcbc.txt",
+   "output_ref": "/home/dev/aup/security-dependencies-916e-C18-source-20261006/lock-conflict-batch/assistant-receiving-2201/verifier-out/v-shell-syntax-4b1446736a74bcbc.txt",
    "scope": "shell_source_validation",
-   "started_at_utc": "2026-10-06T19:38:16Z",
+   "started_at_utc": "2026-10-06T22:01:09Z",
    "summary": "shell syntax/closure: not_measured"
   },
   {
@@ -7211,9 +7209,9 @@
    "exit_code": 0,
    "id": "v-shell-syntax-85b3438308b0c1fe",
    "kind": "shell_syntax",
-   "output_ref": "/home/dev/aup/security-dependencies-916e-C18-source-20261006/lock-conflict-batch/arcanada-assistant-83-verifier-out/v-shell-syntax-85b3438308b0c1fe.txt",
+   "output_ref": "/home/dev/aup/security-dependencies-916e-C18-source-20261006/lock-conflict-batch/assistant-receiving-2201/verifier-out/v-shell-syntax-85b3438308b0c1fe.txt",
    "scope": "shell_source_validation",
-   "started_at_utc": "2026-10-06T19:38:16Z",
+   "started_at_utc": "2026-10-06T22:01:09Z",
    "summary": "shell syntax/closure: not_measured"
   },
   {
@@ -7228,9 +7226,9 @@
    "exit_code": 0,
    "id": "v-shell-behavior-c268dc99e1ae5f43",
    "kind": "shell_behavior",
-   "output_ref": "/home/dev/aup/security-dependencies-916e-C18-source-20261006/lock-conflict-batch/arcanada-assistant-83-verifier-out/v-shell-behavior-c268dc99e1ae5f43.txt",
+   "output_ref": "/home/dev/aup/security-dependencies-916e-C18-source-20261006/lock-conflict-batch/assistant-receiving-2201/verifier-out/v-shell-behavior-c268dc99e1ae5f43.txt",
    "scope": "shell_fixture_behavior",
-   "started_at_utc": "2026-10-06T19:38:16Z",
+   "started_at_utc": "2026-10-06T22:01:09Z",
    "summary": "SHELL_DYNAMIC_CLOSURE_NOT_MEASURED: directory transition has unresolved execution cwd; line 15: wrapper options/child command unresolved; line 16: wrapper options/child command unresolved; line 17: heredoc data/generation closure not measured; line 28: dynamic load/substitution; line 42: dynamic load/substitution; line 52: dynamic load/substitution; line 95: relative execution cwd is not declared; line 99: dynamic load/substitution"
   },
   {
@@ -7245,9 +7243,9 @@
    "exit_code": 0,
    "id": "v-shell-behavior-42bc3ac597fdf697",
    "kind": "shell_behavior",
-   "output_ref": "/home/dev/aup/security-dependencies-916e-C18-source-20261006/lock-conflict-batch/arcanada-assistant-83-verifier-out/v-shell-behavior-42bc3ac597fdf697.txt",
+   "output_ref": "/home/dev/aup/security-dependencies-916e-C18-source-20261006/lock-conflict-batch/assistant-receiving-2201/verifier-out/v-shell-behavior-42bc3ac597fdf697.txt",
    "scope": "shell_fixture_behavior",
-   "started_at_utc": "2026-10-06T19:38:16Z",
+   "started_at_utc": "2026-10-06T22:01:09Z",
    "summary": "SHELL_DYNAMIC_CLOSURE_NOT_MEASURED: directory transition has unresolved execution cwd; line 13: dynamic load/substitution"
   },
   {
@@ -7262,9 +7260,9 @@
    "exit_code": 0,
    "id": "v-shell-behavior-f23c1b7d469ad442",
    "kind": "shell_behavior",
-   "output_ref": "/home/dev/aup/security-dependencies-916e-C18-source-20261006/lock-conflict-batch/arcanada-assistant-83-verifier-out/v-shell-behavior-f23c1b7d469ad442.txt",
+   "output_ref": "/home/dev/aup/security-dependencies-916e-C18-source-20261006/lock-conflict-batch/assistant-receiving-2201/verifier-out/v-shell-behavior-f23c1b7d469ad442.txt",
    "scope": "shell_fixture_behavior",
-   "started_at_utc": "2026-10-06T19:38:16Z",
+   "started_at_utc": "2026-10-06T22:01:09Z",
    "summary": "SHELL_DYNAMIC_CLOSURE_NOT_MEASURED: line 14: dynamic command/alias/eval; line 15: heredoc data/generation closure not measured; line 40: dynamic load/substitution; line 46: dynamic load/substitution; line 49: dynamic load/substitution"
   },
   {
@@ -7279,9 +7277,9 @@
    "exit_code": 0,
    "id": "v-shell-behavior-3dd523bdaa768ee8",
    "kind": "shell_behavior",
-   "output_ref": "/home/dev/aup/security-dependencies-916e-C18-source-20261006/lock-conflict-batch/arcanada-assistant-83-verifier-out/v-shell-behavior-3dd523bdaa768ee8.txt",
+   "output_ref": "/home/dev/aup/security-dependencies-916e-C18-source-20261006/lock-conflict-batch/assistant-receiving-2201/verifier-out/v-shell-behavior-3dd523bdaa768ee8.txt",
    "scope": "shell_fixture_behavior",
-   "started_at_utc": "2026-10-06T19:38:16Z",
+   "started_at_utc": "2026-10-06T22:01:09Z",
    "summary": "SHELL_DYNAMIC_CLOSURE_NOT_MEASURED: line 26: dynamic load/substitution; line 32: dynamic load/substitution"
   },
   {
@@ -7296,9 +7294,9 @@
    "exit_code": 0,
    "id": "v-shell-behavior-5e354ec7aeb3853b",
    "kind": "shell_behavior",
-   "output_ref": "/home/dev/aup/security-dependencies-916e-C18-source-20261006/lock-conflict-batch/arcanada-assistant-83-verifier-out/v-shell-behavior-5e354ec7aeb3853b.txt",
+   "output_ref": "/home/dev/aup/security-dependencies-916e-C18-source-20261006/lock-conflict-batch/assistant-receiving-2201/verifier-out/v-shell-behavior-5e354ec7aeb3853b.txt",
    "scope": "shell_fixture_behavior",
-   "started_at_utc": "2026-10-06T19:38:16Z",
+   "started_at_utc": "2026-10-06T22:01:09Z",
    "summary": "SHELL_DYNAMIC_CLOSURE_NOT_MEASURED: line 37: dynamic command/alias/eval; line 37: dynamic load/substitution; line 42: dynamic command/alias/eval; line 57: dynamic load/substitution; line 58: dynamic load/substitution"
   },
   {
@@ -7313,9 +7311,9 @@
    "exit_code": 0,
    "id": "v-shell-behavior-17489cd4cfeb2df6",
    "kind": "shell_behavior",
-   "output_ref": "/home/dev/aup/security-dependencies-916e-C18-source-20261006/lock-conflict-batch/arcanada-assistant-83-verifier-out/v-shell-behavior-17489cd4cfeb2df6.txt",
+   "output_ref": "/home/dev/aup/security-dependencies-916e-C18-source-20261006/lock-conflict-batch/assistant-receiving-2201/verifier-out/v-shell-behavior-17489cd4cfeb2df6.txt",
    "scope": "shell_fixture_behavior",
-   "started_at_utc": "2026-10-06T19:38:16Z",
+   "started_at_utc": "2026-10-06T22:01:09Z",
    "summary": "SHELL_DYNAMIC_CLOSURE_NOT_MEASURED: directory transition has unresolved execution cwd; line 18: dynamic load/substitution; line 24: heredoc data/generation closure not measured; line 37: dynamic command/alias/eval; line 38: dynamic load/substitution; line 41: multiline/opaque shell statement; line 43: dynamic command/alias/eval; line 44: dynamic load/substitution; line 48: dynamic command/alias/eval; line 49: dynamic load/substitution; line 53: dynamic command/alias/eval; line 54: dynamic load/substitution; line 58: dynamic command/alias/eval; line 59: dynamic load/substitution; line 62: dynamic command/alias/eval; line 6: dynamic load/substitution"
   },
   {
@@ -7330,9 +7328,9 @@
    "exit_code": 0,
    "id": "v-shell-behavior-4b1446736a74bcbc",
    "kind": "shell_behavior",
-   "output_ref": "/home/dev/aup/security-dependencies-916e-C18-source-20261006/lock-conflict-batch/arcanada-assistant-83-verifier-out/v-shell-behavior-4b1446736a74bcbc.txt",
+   "output_ref": "/home/dev/aup/security-dependencies-916e-C18-source-20261006/lock-conflict-batch/assistant-receiving-2201/verifier-out/v-shell-behavior-4b1446736a74bcbc.txt",
    "scope": "shell_fixture_behavior",
-   "started_at_utc": "2026-10-06T19:38:16Z",
+   "started_at_utc": "2026-10-06T22:01:09Z",
    "summary": "SHELL_DYNAMIC_CLOSURE_NOT_MEASURED: line 38: dynamic load/substitution; line 40: dynamic load/substitution; line 51: dynamic command/alias/eval; line 56: multiline/opaque shell statement; line 57: dynamic command/alias/eval; line 64: wrapper execution scope/options unresolved"
   },
   {
@@ -7347,14 +7345,14 @@
    "exit_code": 0,
    "id": "v-shell-behavior-85b3438308b0c1fe",
    "kind": "shell_behavior",
-   "output_ref": "/home/dev/aup/security-dependencies-916e-C18-source-20261006/lock-conflict-batch/arcanada-assistant-83-verifier-out/v-shell-behavior-85b3438308b0c1fe.txt",
+   "output_ref": "/home/dev/aup/security-dependencies-916e-C18-source-20261006/lock-conflict-batch/assistant-receiving-2201/verifier-out/v-shell-behavior-85b3438308b0c1fe.txt",
    "scope": "shell_fixture_behavior",
-   "started_at_utc": "2026-10-06T19:38:16Z",
+   "started_at_utc": "2026-10-06T22:01:09Z",
    "summary": "SHELL_DYNAMIC_CLOSURE_NOT_MEASURED: directory transition has unresolved execution cwd; line 20: dynamic load/substitution; line 36: dynamic command/alias/eval; line 36: dynamic load/substitution; line 37: dynamic command/alias/eval; line 37: dynamic load/substitution; line 42: multiline/opaque shell statement; line 43: multiline/opaque shell statement; line 44: multiline/opaque shell statement; line 45: multiline/opaque shell statement; line 46: multiline/opaque shell statement; line 47: multiline/opaque shell statement; line 48: multiline/opaque shell statement; line 49: dynamic command/alias/eval; line 54: dynamic command/alias/eval; line 64: dynamic command/alias/eval; line 6: dynamic load/substitution; line 88: multiline/opaque shell statement; line 90: multiline/opaque shell statement; line 96: multiline/opaque shell statement"
   },
   {
    "command": "pnpm test",
-   "duration_s": 14.28,
+   "duration_s": 12.45,
    "entities": [
     "code_unit:.github/workflows/ci.yml",
     "code_unit:.github/workflows/dependabot-auto-merge.yml",
@@ -7396,15 +7394,15 @@
    "exit_code": 0,
    "id": "v-global-fallback-test-root",
    "kind": "targeted_test",
-   "output_ref": "/home/dev/aup/security-dependencies-916e-C18-source-20261006/lock-conflict-batch/arcanada-assistant-83-verifier-out/v-global-fallback-test-root.txt",
+   "output_ref": "/home/dev/aup/security-dependencies-916e-C18-source-20261006/lock-conflict-batch/assistant-receiving-2201/verifier-out/v-global-fallback-test-root.txt",
    "scope": "global_fallback_full_suite",
-   "started_at_utc": "2026-10-06T19:38:16Z",
+   "started_at_utc": "2026-10-06T22:01:09Z",
    "summary": "complete fallback suite: verified",
    "timeout_seconds": 900
   },
   {
    "command": "pnpm test",
-   "duration_s": 10.25,
+   "duration_s": 7.48,
    "entities": [
     "deployable_unit:apps/assistant"
    ],
@@ -7414,15 +7412,15 @@
    "exit_code": 0,
    "id": "v-global-fallback-test-apps-assistant",
    "kind": "targeted_test",
-   "output_ref": "/home/dev/aup/security-dependencies-916e-C18-source-20261006/lock-conflict-batch/arcanada-assistant-83-verifier-out/v-global-fallback-test-apps-assistant.txt",
+   "output_ref": "/home/dev/aup/security-dependencies-916e-C18-source-20261006/lock-conflict-batch/assistant-receiving-2201/verifier-out/v-global-fallback-test-apps-assistant.txt",
    "scope": "global_fallback_full_suite",
-   "started_at_utc": "2026-10-06T19:38:31Z",
+   "started_at_utc": "2026-10-06T22:01:22Z",
    "summary": "complete fallback suite: verified",
    "timeout_seconds": 900
   },
   {
    "command": "pnpm test",
-   "duration_s": 3.39,
+   "duration_s": 3.11,
    "entities": [
     "deployable_unit:packages/core"
    ],
@@ -7432,9 +7430,9 @@
    "exit_code": 0,
    "id": "v-global-fallback-test-packages-core",
    "kind": "targeted_test",
-   "output_ref": "/home/dev/aup/security-dependencies-916e-C18-source-20261006/lock-conflict-batch/arcanada-assistant-83-verifier-out/v-global-fallback-test-packages-core.txt",
+   "output_ref": "/home/dev/aup/security-dependencies-916e-C18-source-20261006/lock-conflict-batch/assistant-receiving-2201/verifier-out/v-global-fallback-test-packages-core.txt",
    "scope": "global_fallback_full_suite",
-   "started_at_utc": "2026-10-06T19:38:41Z",
+   "started_at_utc": "2026-10-06T22:01:29Z",
    "summary": "complete fallback suite: verified",
    "timeout_seconds": 900
   }
@@ -7557,9 +7555,9 @@
    "receipt:receipts/graph/A2-442-override-ceilings.json": []
   },
   "seconds": {
-   "prepare": 1.35,
-   "total": 48.83,
-   "verifiers": 40.98
+   "prepare": 1.17,
+   "total": 39.99,
+   "verifiers": 33.24
   }
  },
  "work_item": "A2-442"
