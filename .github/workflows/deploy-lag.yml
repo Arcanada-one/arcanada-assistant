@@ -29,7 +29,8 @@ concurrency:
 
 jobs:
   watchdog:
-    runs-on: [self-hosted, Linux, X64, ci-general]
+    # DEC-AUP-0101 O3: python3 + git + one public HTTPS read, no Docker (measured) -> the docker-free lane.
+    runs-on: ci-nodocker
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
