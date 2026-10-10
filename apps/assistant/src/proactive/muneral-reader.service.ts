@@ -241,7 +241,13 @@ export class MuneralWorkItemsReader implements IWorkItemsReader {
       const safe = {
         ...result,
         reason:
-          result.reason === MUNERA_CREDENTIAL_NOT_CONFIGURED ? result.reason : 'ошибка запроса',
+          result.reason === MUNERA_CREDENTIAL_NOT_CONFIGURED
+            ? result.reason
+            : result.reason === 'network timeout' || result.reason === 'network_timeout'
+              ? 'network timeout'
+              : result.reason === 'munera_circuit_open'
+                ? 'munera_circuit_open'
+                : 'ошибка запроса',
       };
       return { ok: false, reason: describeUnavailable(safe) };
     }
