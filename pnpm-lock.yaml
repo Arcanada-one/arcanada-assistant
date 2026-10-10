@@ -167,6 +167,9 @@ importers:
       '@prisma/config':
         specifier: ^7.8.0
         version: 7.8.0(magicast@0.5.3)
+      '@types/ioredis-mock':
+        specifier: 8.2.7
+        version: 8.2.7(ioredis@5.11.1)
       '@types/js-yaml':
         specifier: ^4.0.9
         version: 4.0.9

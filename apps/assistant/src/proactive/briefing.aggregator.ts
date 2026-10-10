@@ -106,7 +106,16 @@ export class BriefingAggregator {
  * that the directory behind it had been empty since INFRA-0417.
  */
 export function degraded(reason: string): string {
-  return escapeMd(`⚠️ Muneral недоступен: ${reason}`);
+  // A route refusal is distinct from transport/server failure and empty success.
+  const isRefusal =
+    reason.includes('DIGEST_GRANT_REQUIRED') ||
+    reason.includes('GRANT_EXPIRED') ||
+    /\bHTTP 403\b/.test(reason);
+  return escapeMd(
+    isRefusal
+      ? `⚠️ Muneral: доступ отклонён — ${reason}${reason.includes('Это НЕ пустой список') ? '' : ' — Это НЕ пустой список задач'}`
+      : `⚠️ Muneral недоступен: ${reason}`,
+  );
 }
 
 /** Said out loud when a top-N was picked from a page that did not hold everything. */

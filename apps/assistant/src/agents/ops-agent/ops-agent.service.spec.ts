@@ -22,6 +22,7 @@ function mockClient(overrides: Partial<IOpsBotClient> = {}): IOpsBotClient {
     emitEvent: vi.fn(async () => ({ event_id: 'x', status: 'accepted' as const })),
     getEcosystemSnapshot: vi.fn(async () => SNAPSHOT),
     healthReady: vi.fn(async () => true),
+    ping: vi.fn(async () => ({ ok: true, latencyMs: 0 })),
     isCircuitOpen: vi.fn(() => false),
     executeCommand: vi.fn(async () => COMMAND_RESPONSE),
     ...overrides,

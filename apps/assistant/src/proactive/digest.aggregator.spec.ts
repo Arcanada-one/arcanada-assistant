@@ -54,7 +54,9 @@ describe('DigestAggregator', () => {
   it('names the cause when Muneral refuses, instead of «нет»', async () => {
     const agg = new DigestAggregator(fixedReader({ completed: { ok: false, reason: 'HTTP 403' } }));
     const out = await agg.compose({ runDate: RUN_DATE, config: baseProactiveConfig });
-    expect(out.text).toContain('Muneral недоступен');
+    expect(out.text).not.toContain('Muneral недоступен');
+    expect(out.text).toContain('доступ отклонён');
+    expect(out.text).toContain('Это НЕ пустой список');
     expect(out.text).toContain('HTTP 403');
     expect(out.text).not.toMatch(/Завершено сегодня\n— нет/);
   });
@@ -82,4 +84,82 @@ describe('DigestAggregator', () => {
     const out = await new DigestAggregator(liveReader()).compose({ runDate: RUN_DATE, config });
     expect(out.sections).toEqual(['completed_today', 'backlog_tomorrow']);
   });
+});
+
+describe('full aggregate digest-refusal boundary (DEC0049 F1)', () => {
+  const cases = [
+    { name: 'missing grant', errorCode: 'digest_grant_required', code: 'DIGEST_GRANT_REQUIRED' },
+    { name: 'expired grant', errorCode: 'digest_grant_expired', code: 'GRANT_EXPIRED' },
+    { name: 'unclassified refusal', code: 'HTTP 403' },
+    { name: 'bare HTTP 403 response', code: 'HTTP 403', reason: 'HTTP 403' },
+  ] as const;
+
+  for (const refusal of cases) {
+    it(`preserves ${refusal.name} without outage or empty-success wording`, async () => {
+      const reader = new MuneralWorkItemsReader(
+        stubMuneraClient({
+          unavailable: {
+            kind: 'unavailable',
+            reason: 'reason' in refusal ? refusal.reason : 'workspace_digest_forbidden',
+            statusCode: 403,
+            ...('errorCode' in refusal ? { errorCode: refusal.errorCode } : {}),
+            grantUntil: '2099-03-01T00:00:00Z',
+            grantDecision: 'DEC-AUP-9999',
+          },
+        }),
+        { timeZone: 'Europe/Istanbul' },
+      );
+      const out = await new DigestAggregator(reader).compose({
+        runDate: RUN_DATE,
+        config: baseProactiveConfig,
+      });
+      const wireText = out.text.split(String.fromCharCode(92)).join('');
+      expect(wireText).toContain(refusal.code);
+      expect(wireText.split('Это НЕ пустой список').length - 1).toBe(3);
+      expect(wireText.split(refusal.code).length - 1).toBe(3);
+      expect(wireText).not.toContain('недоступен');
+      if (refusal.name === 'expired grant') {
+        expect(wireText).toContain('2099-03-01T00:00:00Z');
+        expect(wireText).toContain('DEC-AUP-9999');
+      }
+      const emptyReader = new MuneralWorkItemsReader(stubMuneraClient({ board: [] }), {
+        timeZone: 'Europe/Istanbul',
+      });
+      const empty = await new DigestAggregator(emptyReader).compose({
+        runDate: RUN_DATE,
+        config: baseProactiveConfig,
+      });
+      expect(out.text).not.toBe(empty.text);
+      expect(empty.text).not.toContain('⚠️');
+    });
+  }
+
+  it('keeps genuine transport failure as unavailable', async () => {
+    const reader = new MuneralWorkItemsReader(
+      stubMuneraClient({ unavailable: { kind: 'unavailable', reason: 'network timeout' } }),
+      { timeZone: 'Europe/Istanbul' },
+    );
+    const out = await new DigestAggregator(reader).compose({
+      runDate: RUN_DATE,
+      config: baseProactiveConfig,
+    });
+    expect(out.text).toContain('Muneral недоступен');
+    expect(out.text).toContain('network timeout');
+  });
+});
+
+// Actual reader-to-compose server outage, independent of the refusal cases above.
+it('keeps HTTP 503 as an outage through the actual reader', async () => {
+  const reader = new MuneralWorkItemsReader(
+    stubMuneraClient({
+      unavailable: { kind: 'unavailable', reason: 'service unavailable', statusCode: 503 },
+    }),
+    { timeZone: 'Europe/Istanbul' },
+  );
+  const out = await new DigestAggregator(reader).compose({
+    runDate: RUN_DATE,
+    config: baseProactiveConfig,
+  });
+  expect(out.text).toContain('Muneral недоступен');
+  expect(out.text).toContain('HTTP 503');
 });
