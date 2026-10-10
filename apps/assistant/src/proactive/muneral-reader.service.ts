@@ -4,6 +4,7 @@ import type { IMuneraClient } from '../agents/munera/munera.client.js';
 import { MUNERA_CREDENTIAL_NOT_CONFIGURED } from '../agents/munera/munera-unconfigured.client.js';
 import {
   EmergencyDigestPageSchema,
+  EmergencyDigestRefusalMetadataSchema,
   DIGEST_GRANT_EXPIRED,
   DIGEST_GRANT_REQUIRED,
 } from '../agents/munera/munera.schemas.js';
@@ -222,12 +223,27 @@ export class MuneralWorkItemsReader implements IWorkItemsReader {
       return { ok: false, reason: 'ошибка запроса' };
     }
     if (result.kind === 'unavailable') {
+      // Validate stub/provider boundaries too, before any logging or rendering.
+      if (
+        result.errorCode === DIGEST_GRANT_EXPIRED &&
+        !EmergencyDigestRefusalMetadataSchema.safeParse({
+          until: result.grantUntil,
+          decision: result.grantDecision,
+        }).success
+      ) {
+        this.logger.warn('muneral digest invalid refusal metadata');
+        return { ok: false, reason: 'DIGEST_METADATA_REFUSED — Это НЕ пустой список задач' };
+      }
       this.logger.warn(
-        `muneral digest unavailable: reason=${result.reason} status=${result.statusCode ?? 'n/a'}` +
-          ` code=${result.errorCode ?? 'n/a'} until=${result.grantUntil ?? 'n/a'}` +
-          ` decision=${result.grantDecision ?? 'n/a'}`,
+        `muneral digest unavailable: status=${Number.isSafeInteger(result.statusCode) ? result.statusCode : 'n/a'}`,
       );
-      return { ok: false, reason: describeUnavailable(result) };
+      // Unknown provider reasons/cause/body are not safe operator-facing text.
+      const safe = {
+        ...result,
+        reason:
+          result.reason === MUNERA_CREDENTIAL_NOT_CONFIGURED ? result.reason : 'ошибка запроса',
+      };
+      return { ok: false, reason: describeUnavailable(safe) };
     }
     const parsed = EmergencyDigestPageSchema.safeParse(result.page);
     if (!parsed.success)

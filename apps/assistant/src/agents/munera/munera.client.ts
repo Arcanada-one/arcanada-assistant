@@ -9,6 +9,7 @@ import {
   MuneraDigestRefusalEnvelopeSchema,
   MuneraTaskPageSchema,
   EmergencyDigestPageSchema,
+  EmergencyDigestRefusalSchema,
   MuneraTaskQuerySchema,
   MuneraTaskSchema,
   TaskListResultSchema,
@@ -128,6 +129,7 @@ export class MuneraClientError extends Error {
 }
 
 interface RequestPlan {
+  emergencyDigest?: true;
   url: string;
   method: 'GET' | 'POST' | 'PATCH' | 'DELETE';
   body: string | null;
@@ -319,12 +321,14 @@ export class MuneraClient implements IMuneraClient {
       const result = await this.breaker.fire({
         url: `${this.baseUrl}${WORKSPACE_DIGEST_PATH}${qs ? `?${qs}` : ''}`,
         method: 'GET',
+        emergencyDigest: true,
         body: null,
         retryable: true,
       });
       return this.mapPageResponse(result, true);
     } catch (err) {
-      return TaskPageResultSchema.parse(this.buildUnavailable(err, 'workspace_digest'));
+      const unavailable = this.buildUnavailable(err, 'workspace_digest');
+      return TaskPageResultSchema.parse({ ...unavailable, detail: 'Digest read unavailable' });
     }
   }
 
@@ -341,7 +345,23 @@ export class MuneraClient implements IMuneraClient {
       }
       return TaskPageResultSchema.parse({ kind: 'ok', page: parsed.data });
     }
-    throw this.classifyHttpError(result);
+    throw emergency ? this.classifyEmergencyDigestError(result) : this.classifyHttpError(result);
+  }
+
+  private classifyEmergencyDigestError(result: HttpResult): MuneraClientError {
+    const parsed = EmergencyDigestRefusalSchema.safeParse(result.body);
+    if (result.status === 403 && parsed.success) {
+      const safe = parsed.data;
+      return new MuneraClientError('Digest access refused', {
+        httpStatus: 403,
+        errorCode: safe.code === 'GRANT_EXPIRED' ? DIGEST_GRANT_EXPIRED : DIGEST_GRANT_REQUIRED,
+        digestRefusal: { ...safe, message: 'Digest access refused' },
+      });
+    }
+    return new MuneraClientError('Digest read unavailable', {
+      httpStatus: result.status,
+      ...(result.status === 403 ? { errorCode: 'forbidden' } : {}),
+    });
   }
 
   private async callTaskEndpoint(req: RequestPlan): Promise<TaskResult> {
@@ -536,7 +556,9 @@ export class MuneraClient implements IMuneraClient {
           'munera non-2xx (breaker-tripping)',
         );
         throw new MuneraClientError(
-          `HTTP ${result.status} (${req.method} ${req.url}): ${truncate(result.body)}`,
+          req.emergencyDigest
+            ? 'Digest read unavailable'
+            : `HTTP ${result.status} (${req.method} ${req.url}): ${truncate(result.body)}`,
           { httpStatus: result.status },
         );
       }

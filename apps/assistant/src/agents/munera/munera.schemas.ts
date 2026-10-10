@@ -289,3 +289,31 @@ export const EmergencyDigestPageSchema = z
       Date.parse(p.grant.until) > Date.now(),
     'Digest metadata refused',
   );
+
+export const EmergencyDigestRefusalMetadataSchema = z
+  .object({
+    until: z.string().datetime({ offset: true }),
+    decision: z.string().regex(/^DEC-AUP-\d{4}$/),
+  })
+  .strict();
+// Only typed safe metadata from an emergency refusal may reach its renderer.
+export const EmergencyDigestRefusalSchema = z.discriminatedUnion('code', [
+  z
+    .object({
+      code: z.literal('GRANT_EXPIRED'),
+      scope: z.literal('workspace-digest'),
+      workspaceId: z.string().uuid(),
+      message: z.string(),
+      until: z.string().datetime({ offset: true }),
+      decision: EmergencyDigestRefusalMetadataSchema.shape.decision,
+    })
+    .strict(),
+  z
+    .object({
+      code: z.literal('DIGEST_GRANT_REQUIRED'),
+      scope: z.literal('workspace-digest'),
+      workspaceId: z.string().uuid(),
+      message: z.string(),
+    })
+    .strict(),
+]);

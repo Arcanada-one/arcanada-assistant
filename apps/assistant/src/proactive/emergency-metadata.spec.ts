@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 
 import {
   EmergencyDigestPageSchema,
@@ -7,6 +7,7 @@ import {
   TaskPageResultSchema,
   type TaskPageResult,
 } from '../agents/munera/munera.schemas.js';
+import { MuneraClient } from '../agents/munera/munera.client.js';
 
 import { stubMuneraClient } from './__fixtures__/muneral-responses.js';
 import { baseProactiveConfig } from './__fixtures__/proactive-config.fixture.js';
@@ -151,4 +152,60 @@ describe('Emergency metadata boundary', () => {
     expect(d.ok).toBe(false);
     expect(h.ok && h.disclosure?.until).toBe('2099-02-01T00:00:00Z');
   });
+  it.each([
+    {
+      status: 403,
+      body: {
+        code: 'GRANT_EXPIRED',
+        scope: 'workspace-digest',
+        workspaceId: '11111111-2222-4333-8444-555555555555',
+        message: 'PRIVATE_ERROR_VALUE',
+        until: 'PRIVATE_ERROR_VALUE',
+        decision: 'DEC-AUP-0049',
+      },
+    },
+    {
+      status: 403,
+      body: {
+        code: 'GRANT_EXPIRED',
+        scope: 'workspace-digest',
+        workspaceId: '11111111-2222-4333-8444-555555555555',
+        message: 'PRIVATE_ERROR_VALUE',
+        until: '2026-10-09T00:00:00Z',
+        decision: 'PRIVATE_ERROR_VALUE',
+      },
+    },
+    { status: 503, body: { message: 'PRIVATE_ERROR_VALUE' } },
+    { status: 401, body: { message: 'PRIVATE_ERROR_VALUE' } },
+  ])(
+    'real emergency client/reader never reflects untrusted error body',
+    async ({ status, body }) => {
+      const logs: unknown[] = [];
+      const logger = {
+        info: (x: unknown) => logs.push(x),
+        warn: (x: unknown) => logs.push(x),
+        error: (x: unknown) => logs.push(x),
+      };
+      const client = new MuneraClient({
+        baseUrl: 'http://127.0.0.1:1/api/v1',
+        apiToken: 'mun_sk_synthetic',
+        retry: { maxAttempts: 0, baseDelayMs: 0 },
+        logger,
+        fetchImpl: vi.fn(
+          async () =>
+            new Response(JSON.stringify(body), {
+              status,
+              headers: { 'content-type': 'application/json' },
+            }),
+        ),
+      });
+      const result = await client.queryWorkspaceDigest({});
+      expect(result.kind).toBe('unavailable');
+      expect(JSON.stringify(result)).not.toContain('PRIVATE_ERROR_VALUE');
+      expect(JSON.stringify(logs)).not.toContain('PRIVATE_ERROR_VALUE');
+      const out = await new MuneralWorkItemsReader(client, { timeZone: 'UTC' }).readActiveTasks();
+      expect(out.ok).toBe(false);
+      expect(JSON.stringify(out)).not.toContain('PRIVATE_ERROR_VALUE');
+    },
+  );
 });
