@@ -86,7 +86,6 @@ describe('DigestAggregator', () => {
   });
 });
 
-
 describe('full aggregate digest-refusal boundary (DEC0049 F1)', () => {
   const cases = [
     { name: 'missing grant', errorCode: 'digest_grant_required', code: 'DIGEST_GRANT_REQUIRED' },
@@ -110,7 +109,10 @@ describe('full aggregate digest-refusal boundary (DEC0049 F1)', () => {
         }),
         { timeZone: 'Europe/Istanbul' },
       );
-      const out = await new DigestAggregator(reader).compose({ runDate: RUN_DATE, config: baseProactiveConfig });
+      const out = await new DigestAggregator(reader).compose({
+        runDate: RUN_DATE,
+        config: baseProactiveConfig,
+      });
       const wireText = out.text.split(String.fromCharCode(92)).join('');
       expect(wireText).toContain(refusal.code);
       expect(wireText.split('Это НЕ пустой список').length - 1).toBe(3);
@@ -123,7 +125,10 @@ describe('full aggregate digest-refusal boundary (DEC0049 F1)', () => {
       const emptyReader = new MuneralWorkItemsReader(stubMuneraClient({ board: [] }), {
         timeZone: 'Europe/Istanbul',
       });
-      const empty = await new DigestAggregator(emptyReader).compose({ runDate: RUN_DATE, config: baseProactiveConfig });
+      const empty = await new DigestAggregator(emptyReader).compose({
+        runDate: RUN_DATE,
+        config: baseProactiveConfig,
+      });
       expect(out.text).not.toBe(empty.text);
       expect(empty.text).not.toContain('⚠️');
     });
@@ -134,7 +139,10 @@ describe('full aggregate digest-refusal boundary (DEC0049 F1)', () => {
       stubMuneraClient({ unavailable: { kind: 'unavailable', reason: 'network timeout' } }),
       { timeZone: 'Europe/Istanbul' },
     );
-    const out = await new DigestAggregator(reader).compose({ runDate: RUN_DATE, config: baseProactiveConfig });
+    const out = await new DigestAggregator(reader).compose({
+      runDate: RUN_DATE,
+      config: baseProactiveConfig,
+    });
     expect(out.text).toContain('Muneral недоступен');
     expect(out.text).toContain('network timeout');
   });
@@ -143,10 +151,15 @@ describe('full aggregate digest-refusal boundary (DEC0049 F1)', () => {
 // Actual reader-to-compose server outage, independent of the refusal cases above.
 it('keeps HTTP 503 as an outage through the actual reader', async () => {
   const reader = new MuneralWorkItemsReader(
-    stubMuneraClient({ unavailable: { kind: 'unavailable', reason: 'service unavailable', statusCode: 503 } }),
+    stubMuneraClient({
+      unavailable: { kind: 'unavailable', reason: 'service unavailable', statusCode: 503 },
+    }),
     { timeZone: 'Europe/Istanbul' },
   );
-  const out = await new DigestAggregator(reader).compose({ runDate: RUN_DATE, config: baseProactiveConfig });
+  const out = await new DigestAggregator(reader).compose({
+    runDate: RUN_DATE,
+    config: baseProactiveConfig,
+  });
   expect(out.text).toContain('Muneral недоступен');
   expect(out.text).toContain('HTTP 503');
 });
