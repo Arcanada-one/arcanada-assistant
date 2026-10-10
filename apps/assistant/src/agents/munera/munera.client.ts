@@ -330,7 +330,9 @@ export class MuneraClient implements IMuneraClient {
 
   private mapPageResponse(result: HttpResult, emergency = false): TaskPageResult {
     if (result.status >= 200 && result.status < 300) {
-      const parsed = (emergency ? EmergencyDigestPageSchema : MuneraTaskPageSchema).safeParse(result.body);
+      const parsed = (emergency ? EmergencyDigestPageSchema : MuneraTaskPageSchema).safeParse(
+        result.body,
+      );
       if (!parsed.success) {
         throw new MuneraClientError('Invalid Munera task page envelope', {
           cause: parsed.error,

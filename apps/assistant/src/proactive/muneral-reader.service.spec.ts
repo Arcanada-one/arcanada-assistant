@@ -30,7 +30,10 @@ describe('MuneralWorkItemsReader', () => {
       const result = await reader().readActiveTasks();
       expect(result.ok).toBe(true);
       if (!result.ok) return;
-      expect(result.items.map((t) => t.id)).toEqual(['0f1c4d8a-1111-4aaa-9bbb-000000000001', '0f1c4d8a-1111-4aaa-9bbb-000000000002']);
+      expect(result.items.map((t) => t.id)).toEqual([
+        '0f1c4d8a-1111-4aaa-9bbb-000000000001',
+        '0f1c4d8a-1111-4aaa-9bbb-000000000002',
+      ]);
       expect(result.total).toBe(2);
       expect(result.truncated).toBe(false);
     });
@@ -48,7 +51,10 @@ describe('MuneralWorkItemsReader', () => {
       expect(result.ok).toBe(true);
       if (!result.ok) return;
       // A2-261 is `critical` (P0), A2-260 is `high` (P1); the `low` row is out.
-      expect(result.items.map((t) => t.id)).toEqual(['0f1c4d8a-1111-4aaa-9bbb-000000000004', '0f1c4d8a-1111-4aaa-9bbb-000000000003']);
+      expect(result.items.map((t) => t.id)).toEqual([
+        '0f1c4d8a-1111-4aaa-9bbb-000000000004',
+        '0f1c4d8a-1111-4aaa-9bbb-000000000003',
+      ]);
       expect(result.items.map((t) => t.priority)).toEqual(['P0', 'P1']);
     });
 
@@ -71,7 +77,10 @@ describe('MuneralWorkItemsReader', () => {
       expect(result.ok).toBe(true);
       if (!result.ok) return;
       // A2-269 moved at 20:00Z on the 23rd — 23:00 local, the PREVIOUS day.
-      expect(result.items.map((t) => t.id)).toEqual(['0f1c4d8a-1111-4aaa-9bbb-000000000006', '0f1c4d8a-1111-4aaa-9bbb-000000000007']);
+      expect(result.items.map((t) => t.id)).toEqual([
+        '0f1c4d8a-1111-4aaa-9bbb-000000000006',
+        '0f1c4d8a-1111-4aaa-9bbb-000000000007',
+      ]);
       expect(result.items.map((t) => t.id)).not.toContain('0f1c4d8a-1111-4aaa-9bbb-000000000008');
     });
 
@@ -101,7 +110,9 @@ describe('MuneralWorkItemsReader', () => {
       expect(result.items.map((t) => t.id)).toContain('0f1c4d8a-1111-4aaa-9bbb-000000000008');
       // …which is exactly what the unmutated reader must not do:
       const honest = await reader().readCompletedToday(RUN_DATE);
-      expect(honest.ok && honest.items.map((t) => t.id)).not.toContain('0f1c4d8a-1111-4aaa-9bbb-000000000008');
+      expect(honest.ok && honest.items.map((t) => t.id)).not.toContain(
+        '0f1c4d8a-1111-4aaa-9bbb-000000000008',
+      );
     });
 
     it('sends the local-day bounds Muneral needs to do the filtering', async () => {

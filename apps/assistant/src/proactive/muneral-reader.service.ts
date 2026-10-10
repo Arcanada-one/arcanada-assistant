@@ -1,9 +1,12 @@
-import { EmergencyDigestPageSchema } from '../agents/munera/munera.schemas.js';
 import { Injectable, Logger } from '@nestjs/common';
 
 import type { IMuneraClient } from '../agents/munera/munera.client.js';
 import { MUNERA_CREDENTIAL_NOT_CONFIGURED } from '../agents/munera/munera-unconfigured.client.js';
-import { DIGEST_GRANT_EXPIRED, DIGEST_GRANT_REQUIRED } from '../agents/munera/munera.schemas.js';
+import {
+  EmergencyDigestPageSchema,
+  DIGEST_GRANT_EXPIRED,
+  DIGEST_GRANT_REQUIRED,
+} from '../agents/munera/munera.schemas.js';
 import type {
   MuneraTask,
   MuneraTaskQuery,
@@ -190,8 +193,13 @@ export class MuneralWorkItemsReader implements IWorkItemsReader {
   ): Promise<SourceResult<T>> {
     const page = await this.fetch(query);
     if (!page.ok) return page;
-    return { ok: true, items: page.items.map(map), total: page.total, truncated: page.truncated,
-      ...(page.disclosure ? { disclosure: page.disclosure } : {}) };
+    return {
+      ok: true,
+      items: page.items.map(map),
+      total: page.total,
+      truncated: page.truncated,
+      ...(page.disclosure ? { disclosure: page.disclosure } : {}),
+    };
   }
 
   private async fetch(
@@ -207,7 +215,7 @@ export class MuneralWorkItemsReader implements IWorkItemsReader {
         ...(this.projectId ? { projectId: this.projectId } : {}),
         limit: MAX_PAGE,
       });
-    } catch (err) {
+    } catch {
       // A malformed request throws rather than resolving `unavailable`. That is
       // our bug, not Muneral's, and it must still not read as an empty board.
       this.logger.error('muneral query threw');
@@ -222,7 +230,8 @@ export class MuneralWorkItemsReader implements IWorkItemsReader {
       return { ok: false, reason: describeUnavailable(result) };
     }
     const parsed = EmergencyDigestPageSchema.safeParse(result.page);
-    if (!parsed.success) return { ok: false, reason: 'DIGEST_METADATA_REFUSED — Это НЕ пустой список задач' };
+    if (!parsed.success)
+      return { ok: false, reason: 'DIGEST_METADATA_REFUSED — Это НЕ пустой список задач' };
     const { items, total, grant } = parsed.data;
     // A2-294 — `grant.renewalDueAt` rides every successful read precisely so a
     // lapse is visible BEFORE it happens: DEC-AUP-0029's first grant expired and
@@ -244,8 +253,13 @@ export class MuneralWorkItemsReader implements IWorkItemsReader {
       // under us, which is worth a line rather than silence.
       this.logger.warn('muneral digest answered 200 with no grant object');
     }
-    return { ok: true, items, total, truncated: total > items.length,
-      disclosure: Object.freeze({ mode: 'metadata_only', until: grant.until }) };
+    return {
+      ok: true,
+      items,
+      total,
+      truncated: total > items.length,
+      disclosure: Object.freeze({ mode: 'metadata_only', until: grant.until }),
+    };
   }
 
   /**
@@ -270,7 +284,9 @@ export class MuneralWorkItemsReader implements IWorkItemsReader {
  */
 export function referenceOf(task: Pick<MuneraTask, 'id' | 'title'>): string {
   const m = /^\s*([A-Z][A-Z0-9]*-\d+)\b/.exec(task.title);
-  return task.title === '[Title withheld: emergency metadata-only digest]' ? task.id : m?.[1] ?? task.id.slice(0, 8);
+  return task.title === '[Title withheld: emergency metadata-only digest]'
+    ? task.id
+    : (m?.[1] ?? task.id.slice(0, 8));
 }
 
 function priorityLabel(priority: string | null | undefined): string {

@@ -127,7 +127,12 @@ export function partial(truncated: boolean): string {
 /** Per-section disclosure includes successful empty pages, never a refused read. */
 export function metadataDisclosure<T>(result: SourceResult<T>): string {
   if (!result.ok || !result.disclosure) return '';
-  return '\n' + escapeMd('[Title withheld: emergency metadata-only digest]') + '\n' +
-    escapeMd('Task text withheld. This is a metadata-only digest, not a complete task briefing.') + '\n' +
-    escapeMd(`Emergency scope expires at ${result.disclosure.until}`);
+  return (
+    '\n' +
+    escapeMd('[Title withheld: emergency metadata-only digest]') +
+    '\n' +
+    escapeMd('Task text withheld. This is a metadata-only digest, not a complete task briefing.') +
+    '\n' +
+    escapeMd(`Emergency scope expires at ${result.disclosure.until}`)
+  );
 }
