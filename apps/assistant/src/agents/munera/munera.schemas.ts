@@ -241,3 +241,19 @@ export const MuneraTaskQuerySchema = z
   })
   .strict();
 export type MuneraTaskQuery = z.infer<typeof MuneraTaskQuerySchema>;
+
+// Emergency digest is a distinct strict read contract; generic task reads stay unchanged.
+export const EMERGENCY_DIGEST_TITLE = '[Title withheld: emergency metadata-only digest]';
+export const EMERGENCY_DIGEST_NOTICE = 'Task text withheld. This is a metadata-only digest, not a complete task briefing.';
+export const EmergencyDigestPageSchema = z.object({
+  items: z.array(z.object({
+    id: z.string().uuid(), projectId: z.string().uuid(), title: z.literal(EMERGENCY_DIGEST_TITLE),
+    status: z.enum(MUNERA_TASK_STATUSES_READ), priority: z.enum(MUNERA_TASK_PRIORITIES),
+    createdAt: z.string().datetime({ offset: true }), updatedAt: z.string().datetime({ offset: true }),
+  }).strict()),
+  total: z.number().int().min(0).max(Number.MAX_SAFE_INTEGER),
+  limit: z.number().int().min(1).max(200), offset: z.number().int().min(0).max(Number.MAX_SAFE_INTEGER),
+  disclosure: z.object({mode: z.literal('metadata_only'), withheld: z.tuple([z.literal('title'), z.literal('description')]), notice: z.literal(EMERGENCY_DIGEST_NOTICE)}).strict(),
+  grant: z.object({decision: z.string().regex(/^[-A-Za-z0-9_.]+$/), until: z.string().datetime({ offset: true }), renewalDueAt: z.string().datetime({ offset: true }).optional()}).strict(),
+  counted: z.string(), generatedAt: z.string().datetime({ offset: true }), auditEventId: z.string().uuid(),
+}).strict().refine(p => p.items.length === Math.min(p.limit, Math.max(0, p.total-p.offset)) && Date.parse(p.grant.until) > Date.now(), 'Digest metadata refused');

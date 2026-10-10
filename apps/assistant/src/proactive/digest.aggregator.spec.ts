@@ -25,22 +25,22 @@ function liveReader(): IWorkItemsReader {
 }
 
 describe('DigestAggregator', () => {
-  it('reports what reached done inside the local day, with titles', async () => {
+  it('reports safe IDs inside the local day, with task text withheld', async () => {
     const agg = new DigestAggregator(liveReader());
     const out = await agg.compose({ runDate: RUN_DATE, config: baseProactiveConfig });
 
     expect(out.sections).toEqual(['completed_today', 'archived_today', 'backlog_tomorrow']);
-    expect(out.text).toContain('A2\\-276');
-    expect(out.text).toContain('ARAS читает расписки');
+    expect(out.text).toContain('0f1c4d8a\\-1111\\-4aaa\\-9bbb\\-000000000006');
+    expect(out.text).not.toContain('ARAS читает расписки');
     // Finished at 23:00 local on the 23rd — yesterday's work, not today's.
-    expect(out.text).not.toContain('A2\\-269');
+    expect(out.text).not.toContain('0f1c4d8a\\-1111\\-4aaa\\-9bbb\\-000000000008');
   });
 
   it('renders the archive section from Muneral status archived', async () => {
     const agg = new DigestAggregator(liveReader());
     const out = await agg.compose({ runDate: RUN_DATE, config: baseProactiveConfig });
     expect(out.text).toContain('Архив сегодня');
-    expect(out.text).toContain('A2\\-240');
+    expect(out.text).toContain('0f1c4d8a\\-1111\\-4aaa\\-9bbb\\-000000000009');
   });
 
   it('says «нет» only when Muneral answered and nothing finished', async () => {

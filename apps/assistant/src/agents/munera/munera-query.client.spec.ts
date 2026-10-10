@@ -8,7 +8,7 @@ import {
 
 import { MuneraClient, normaliseMuneraBaseUrl } from './munera.client.js';
 import { UnconfiguredMuneraClient } from './munera-unconfigured.client.js';
-import { DIGEST_GRANT_EXPIRED, DIGEST_GRANT_REQUIRED } from './munera.schemas.js';
+import { EMERGENCY_DIGEST_TITLE, EMERGENCY_DIGEST_NOTICE, DIGEST_GRANT_EXPIRED, DIGEST_GRANT_REQUIRED } from './munera.schemas.js';
 
 function jsonResponse(status: number, body: unknown): Response {
   return new Response(JSON.stringify(body), {
@@ -17,11 +17,22 @@ function jsonResponse(status: number, body: unknown): Response {
   });
 }
 
+function emergencyPage(page: Record<string, unknown>) {
+  return {counted:"every task of the key's own workspace matching the filters, before paging",
+    generatedAt:'2026-10-10T19:00:00.000Z', auditEventId:'11111111-2222-4333-8444-555555555555',
+    grant:{decision:'DEC-AUP-9999', until:'2099-03-01T00:00:00.000Z'},
+    ...page,
+    items: ((page.items ?? []) as Record<string,unknown>[]).map(t=>({
+      id:t.id, projectId:t.projectId, title:EMERGENCY_DIGEST_TITLE, status:t.status,
+      priority:t.priority ?? 'medium', createdAt:t.createdAt, updatedAt:t.updatedAt})),
+    disclosure:{mode:'metadata_only', withheld:['title','description'], notice:EMERGENCY_DIGEST_NOTICE},
+  };
+}
 describe('MuneraClient.queryWorkspaceDigest (A2-281, A2-294)', () => {
   it('calls GET /api/v1/tasks/digest with the filters and the required User-Agent', async () => {
     const fetchImpl = vi
       .fn()
-      .mockResolvedValue(jsonResponse(200, { items: [], total: 0, limit: 200, offset: 0 }));
+      .mockResolvedValue(jsonResponse(200, emergencyPage({ items: [], total: 0, limit: 200, offset: 0 })));
     const client = new MuneraClient({
       baseUrl: 'https://api.muneral.com/api/v1',
       apiToken: 'mun_sk_test',
@@ -68,7 +79,7 @@ describe('MuneraClient.queryWorkspaceDigest (A2-281, A2-294)', () => {
       apiToken: 'mun_sk_test',
       // A bare array is what `GET /tasks/project/:id` answers — a consumer that
       // accepted it here would silently lose `total`.
-      fetchImpl: vi.fn().mockResolvedValue(jsonResponse(200, [])) as unknown as typeof fetch,
+      fetchImpl: vi.fn().mockResolvedValue(jsonResponse(200, emergencyPage([]))) as unknown as typeof fetch,
     });
     const result = await client.queryWorkspaceDigest({});
     expect(result.kind).toBe('unavailable');
@@ -79,7 +90,7 @@ describe('MuneraClient.queryWorkspaceDigest (A2-281, A2-294)', () => {
       baseUrl: 'https://api.muneral.com',
       apiToken: 'mun_sk_test',
       fetchImpl: vi.fn().mockResolvedValue(
-        jsonResponse(200, {
+        jsonResponse(200, emergencyPage({
           items: [
             {
               id: '0f1c4d8a-1111-4aaa-9bbb-000000000009',
@@ -94,7 +105,7 @@ describe('MuneraClient.queryWorkspaceDigest (A2-281, A2-294)', () => {
           total: 1,
           limit: 200,
           offset: 0,
-        }),
+        })),
       ) as unknown as typeof fetch,
     });
     const result = await client.queryWorkspaceDigest({ status: 'archived' });
@@ -186,20 +197,20 @@ describe('UnconfiguredMuneraClient', () => {
 
   it('parses the four additive keys of a 200 digest page, including `grant`', async () => {
     const fetchImpl = vi.fn().mockResolvedValue(
-      jsonResponse(200, {
+      jsonResponse(200, emergencyPage({
         items: [],
         total: 0,
         limit: 50,
         offset: 0,
         counted: "every task of the key's own workspace matching the filters, before paging",
         generatedAt: '2026-09-25T06:00:00.000Z',
-        auditEventId: '11111111-2222-3333-4444-555555555555',
+        auditEventId: '11111111-2222-4333-8444-555555555555',
         grant: {
           decision: 'DEC-AUP-9999',
           until: '2099-03-01T00:00:00.000Z',
           renewalDueAt: '2099-02-22T00:00:00.000Z',
         },
-      }),
+      })),
     );
     const client = new MuneraClient({
       baseUrl: 'https://api.muneral.com/api/v1',
@@ -213,7 +224,7 @@ describe('UnconfiguredMuneraClient', () => {
       kind: 'ok',
       page: {
         total: 0,
-        auditEventId: '11111111-2222-3333-4444-555555555555',
+        auditEventId: '11111111-2222-4333-8444-555555555555',
         grant: { decision: 'DEC-AUP-9999', renewalDueAt: '2099-02-22T00:00:00.000Z' },
       },
     });

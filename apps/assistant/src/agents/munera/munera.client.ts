@@ -8,6 +8,7 @@ import {
   MuneraTaskListSchema,
   MuneraDigestRefusalEnvelopeSchema,
   MuneraTaskPageSchema,
+  EmergencyDigestPageSchema,
   MuneraTaskQuerySchema,
   MuneraTaskSchema,
   TaskListResultSchema,
@@ -321,17 +322,17 @@ export class MuneraClient implements IMuneraClient {
         body: null,
         retryable: true,
       });
-      return this.mapPageResponse(result);
+      return this.mapPageResponse(result, true);
     } catch (err) {
       return TaskPageResultSchema.parse(this.buildUnavailable(err, 'workspace_digest'));
     }
   }
 
-  private mapPageResponse(result: HttpResult): TaskPageResult {
+  private mapPageResponse(result: HttpResult, emergency = false): TaskPageResult {
     if (result.status >= 200 && result.status < 300) {
-      const parsed = MuneraTaskPageSchema.safeParse(result.body);
+      const parsed = (emergency ? EmergencyDigestPageSchema : MuneraTaskPageSchema).safeParse(result.body);
       if (!parsed.success) {
-        throw new MuneraClientError(`Invalid Munera task page envelope: ${parsed.error.message}`, {
+        throw new MuneraClientError('Invalid Munera task page envelope', {
           cause: parsed.error,
           httpStatus: result.status,
         });

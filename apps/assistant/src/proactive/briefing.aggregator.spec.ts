@@ -60,8 +60,8 @@ describe('BriefingAggregator', () => {
     expect(out.sections).toEqual(['ecosystem_snapshot', 'active_tasks', 'backlog_top_n']);
     expect(out.text).toContain('Утренний брифинг');
     expect(out.text).toContain('8 агентов');
-    expect(out.text).toContain('A2\\-281');
-    expect(out.text).toContain('A2\\-261');
+    expect(out.text).toContain('0f1c4d8a\\-1111\\-4aaa\\-9bbb\\-000000000001');
+    expect(out.text).toContain('0f1c4d8a\\-1111\\-4aaa\\-9bbb\\-000000000004');
     expect(out.text).not.toContain('источник недоступен');
   });
 
@@ -138,7 +138,7 @@ describe('BriefingAggregator', () => {
     const agg = new BriefingAggregator(stubOps(new Error('boom')), liveReader());
     const out = await agg.compose({ runDate: RUN_DATE, config: baseProactiveConfig });
     expect(out.text).toContain('snapshot недоступен');
-    expect(out.text).toContain('A2\\-281');
+    expect(out.text).toContain('0f1c4d8a\\-1111\\-4aaa\\-9bbb\\-000000000001');
   });
 
   it('omits the sections the config switches off', async () => {

@@ -1,3 +1,4 @@
+import { EMERGENCY_DIGEST_TITLE, EMERGENCY_DIGEST_NOTICE } from '../../agents/munera/munera.schemas.js';
 import type { IMuneraClient } from '../../agents/munera/munera.client.js';
 import type {
   MuneraTask,
@@ -230,7 +231,10 @@ export function stubMuneraClient(opts: StubOptions = {}): IMuneraClient {
       return Promise.resolve({
         kind: 'ok',
         page: {
-          items: matched.slice(offset, offset + limit),
+          items: matched.slice(offset, offset + limit).map(t => ({id:t.id, projectId:t.projectId,
+            title:EMERGENCY_DIGEST_TITLE, status:t.status, priority:t.priority,
+            createdAt:t.createdAt, updatedAt:t.updatedAt})),
+          disclosure: {mode:'metadata_only', withheld:['title','description'], notice:EMERGENCY_DIGEST_NOTICE},
           total: matched.length,
           limit,
           offset,
@@ -239,7 +243,7 @@ export function stubMuneraClient(opts: StubOptions = {}): IMuneraClient {
           // fails a test here rather than in production on day 23.
           counted: "every task of the key's own workspace matching the filters, before paging",
           generatedAt: '2026-09-25T06:00:00.000Z',
-          auditEventId: '11111111-2222-3333-4444-555555555555',
+          auditEventId: '11111111-2222-4333-8444-555555555555',
           grant: opts.grant ?? {
             decision: 'DEC-AUP-9999',
             until: '2099-03-01T00:00:00.000Z',

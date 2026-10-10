@@ -30,6 +30,8 @@ export interface SourceOk<T> {
   total: number;
   /** True when `total` exceeds what this page could carry, so `items` is a prefix. */
   truncated: boolean;
+  /** Validated disclosure of THIS read; never shared mutable reader state. */
+  disclosure?: Readonly<{ mode: 'metadata_only'; until: string }>;
 }
 
 export interface SourceUnavailable {
