@@ -27,8 +27,8 @@ function page() {
       withheld: ['title', 'description'],
       notice: EMERGENCY_DIGEST_NOTICE,
     },
-    grant: { decision: 'SYNTHETIC', until },
-    counted: 'synthetic',
+    grant: { decision: 'DEC-AUP-0049', until },
+    counted: "every task of the key's own workspace matching the filters, before paging",
     generatedAt: '2026-10-10T19:00:00Z',
     auditEventId: '11111111-2222-4333-8444-555555555555',
   };
@@ -93,7 +93,7 @@ describe('Emergency metadata boundary', () => {
       (
         await reader({
           kind: 'ok',
-          page: { ...page(), grant: { decision: 'SYNTHETIC', until: '2026-10-09T00:00:00Z' } },
+          page: { ...page(), grant: { decision: 'DEC-AUP-0049', until: '2026-10-09T00:00:00Z' } },
         }).readActiveTasks()
       ).ok,
     ).toBe(false);
@@ -144,7 +144,7 @@ describe('Emergency metadata boundary', () => {
     pending[1]!({ kind: 'unavailable', reason: 'refused', statusCode: 403 });
     pending[2]!({
       kind: 'ok',
-      page: { ...page(), grant: { decision: 'SYNTHETIC', until: '2099-02-01T00:00:00Z' } },
+      page: { ...page(), grant: { decision: 'DEC-AUP-0049', until: '2099-02-01T00:00:00Z' } },
     });
     pending[0]!({ kind: 'ok', page: page() });
     const [a, d, h] = await Promise.all([active, done, archive]);
@@ -208,4 +208,18 @@ describe('Emergency metadata boundary', () => {
       expect(JSON.stringify(out)).not.toContain('PRIVATE_ERROR_VALUE');
     },
   );
+  it.each([
+    { grant: { ...page().grant, decision: 'SYNTHETIC_PRIVATE_MARKER' } },
+    { counted: 'SYNTHETIC_PRIVATE_MARKER' },
+  ])('refuses unsafe success policy/count text before reader logging', async (mutation) => {
+    const r = reader({ kind: 'ok', page: { ...page(), ...mutation } });
+    const loggerSpy = vi.spyOn(
+      (r as unknown as { logger: { warn: () => void; log: () => void } }).logger,
+      'log',
+    );
+    const out = await r.readActiveTasks();
+    expect(out.ok).toBe(false);
+    expect(JSON.stringify(out)).not.toContain('SYNTHETIC_PRIVATE_MARKER');
+    expect(loggerSpy).not.toHaveBeenCalled();
+  });
 });

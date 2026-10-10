@@ -273,12 +273,12 @@ export const EmergencyDigestPageSchema = z
       .strict(),
     grant: z
       .object({
-        decision: z.string().regex(/^[-A-Za-z0-9_.]+$/),
+        decision: z.literal('DEC-AUP-0049'),
         until: z.string().datetime({ offset: true }),
         renewalDueAt: z.string().datetime({ offset: true }).optional(),
       })
       .strict(),
-    counted: z.string(),
+    counted: z.literal("every task of the key's own workspace matching the filters, before paging"),
     generatedAt: z.string().datetime({ offset: true }),
     auditEventId: z.string().uuid(),
   })

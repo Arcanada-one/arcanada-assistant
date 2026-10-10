@@ -27,7 +27,7 @@ function emergencyPage(page: Record<string, unknown>) {
     counted: "every task of the key's own workspace matching the filters, before paging",
     generatedAt: '2026-10-10T19:00:00.000Z',
     auditEventId: '11111111-2222-4333-8444-555555555555',
-    grant: { decision: 'DEC-AUP-9999', until: '2099-03-01T00:00:00.000Z' },
+    grant: { decision: 'DEC-AUP-0049', until: '2099-03-01T00:00:00.000Z' },
     ...page,
     items: ((page.items ?? []) as Record<string, unknown>[]).map((t) => ({
       id: t.id,
@@ -230,7 +230,7 @@ describe('UnconfiguredMuneraClient', () => {
           generatedAt: '2026-09-25T06:00:00.000Z',
           auditEventId: '11111111-2222-4333-8444-555555555555',
           grant: {
-            decision: 'DEC-AUP-9999',
+            decision: 'DEC-AUP-0049',
             until: '2099-03-01T00:00:00.000Z',
             renewalDueAt: '2099-02-22T00:00:00.000Z',
           },
@@ -250,7 +250,7 @@ describe('UnconfiguredMuneraClient', () => {
       page: {
         total: 0,
         auditEventId: '11111111-2222-4333-8444-555555555555',
-        grant: { decision: 'DEC-AUP-9999', renewalDueAt: '2099-02-22T00:00:00.000Z' },
+        grant: { decision: 'DEC-AUP-0049', renewalDueAt: '2099-02-22T00:00:00.000Z' },
       },
     });
   });

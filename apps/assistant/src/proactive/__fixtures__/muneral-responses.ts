@@ -234,17 +234,15 @@ export function stubMuneraClient(opts: StubOptions = {}): IMuneraClient {
       return Promise.resolve({
         kind: 'ok',
         page: {
-          items: matched
-            .slice(offset, offset + limit)
-            .map((t) => ({
-              id: t.id,
-              projectId: t.projectId,
-              title: EMERGENCY_DIGEST_TITLE,
-              status: t.status,
-              priority: t.priority,
-              createdAt: t.createdAt,
-              updatedAt: t.updatedAt,
-            })),
+          items: matched.slice(offset, offset + limit).map((t) => ({
+            id: t.id,
+            projectId: t.projectId,
+            title: EMERGENCY_DIGEST_TITLE,
+            status: t.status,
+            priority: t.priority,
+            createdAt: t.createdAt,
+            updatedAt: t.updatedAt,
+          })),
           disclosure: {
             mode: 'metadata_only',
             withheld: ['title', 'description'],
@@ -260,7 +258,7 @@ export function stubMuneraClient(opts: StubOptions = {}): IMuneraClient {
           generatedAt: '2026-09-25T06:00:00.000Z',
           auditEventId: '11111111-2222-4333-8444-555555555555',
           grant: opts.grant ?? {
-            decision: 'DEC-AUP-9999',
+            decision: 'DEC-AUP-0049',
             until: '2099-03-01T00:00:00.000Z',
             renewalDueAt: '2099-02-22T00:00:00.000Z',
           },
