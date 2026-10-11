@@ -223,6 +223,13 @@ export class MuneralWorkItemsReader implements IWorkItemsReader {
       return { ok: false, reason: 'ошибка запроса' };
     }
     if (result.kind === 'unavailable') {
+      // The real client preserves HTTP200 when its strict emergency parser
+      // rejects the body. That is a refused metadata read, not valid task data.
+      const status = result.statusCode;
+      if (typeof status === 'number' && Number.isInteger(status) && status >= 200 && status < 300) {
+        this.logger.warn('muneral digest invalid successful response metadata');
+        return { ok: false, reason: 'DIGEST_METADATA_REFUSED — Это НЕ пустой список задач' };
+      }
       // Validate stub/provider boundaries too, before any logging or rendering.
       if (
         result.errorCode === DIGEST_GRANT_EXPIRED &&
