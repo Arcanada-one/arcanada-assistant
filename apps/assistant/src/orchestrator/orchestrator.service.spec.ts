@@ -5,7 +5,11 @@ import { NoopTraceContext } from '../observability/trace-context.js';
 import { AgentRegistry, type IAgent } from './agent.registry.js';
 import { NoAgentForIntentError, OrchestratorService } from './orchestrator.service.js';
 
-function makeAgent(name: string, intents: string[], handler = vi.fn(async () => 'ok')): IAgent {
+function makeAgent(
+  name: string,
+  intents: string[],
+  handler: IAgent['execute'] = vi.fn(async () => 'ok'),
+): IAgent {
   return { name, intents, execute: handler };
 }
 

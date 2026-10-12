@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 
 import { CLAIM_LUA, RedisIdempotencyService } from './redis-idempotency.service.js';
 
-function makeService(): { svc: RedisIdempotencyService; client: IoredisMock } {
+function makeService(): { svc: RedisIdempotencyService; client: InstanceType<typeof IoredisMock> } {
   const client = new IoredisMock();
   if (typeof client.defineCommand === 'function') {
     client.defineCommand('approvalClaim', { numberOfKeys: 2, lua: CLAIM_LUA });

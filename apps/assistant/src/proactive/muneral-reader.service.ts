@@ -2,7 +2,12 @@ import { Injectable, Logger } from '@nestjs/common';
 
 import type { IMuneraClient } from '../agents/munera/munera.client.js';
 import { MUNERA_CREDENTIAL_NOT_CONFIGURED } from '../agents/munera/munera-unconfigured.client.js';
-import { DIGEST_GRANT_EXPIRED, DIGEST_GRANT_REQUIRED } from '../agents/munera/munera.schemas.js';
+import {
+  EmergencyDigestPageSchema,
+  EmergencyDigestRefusalMetadataSchema,
+  DIGEST_GRANT_EXPIRED,
+  DIGEST_GRANT_REQUIRED,
+} from '../agents/munera/munera.schemas.js';
 import type {
   MuneraTask,
   MuneraTaskQuery,
@@ -164,6 +169,7 @@ export class MuneralWorkItemsReader implements IWorkItemsReader {
       })),
       total: matching.length,
       truncated: page.truncated,
+      ...(page.disclosure ? { disclosure: page.disclosure } : {}),
     };
   }
 
@@ -188,7 +194,13 @@ export class MuneralWorkItemsReader implements IWorkItemsReader {
   ): Promise<SourceResult<T>> {
     const page = await this.fetch(query);
     if (!page.ok) return page;
-    return { ok: true, items: page.items.map(map), total: page.total, truncated: page.truncated };
+    return {
+      ok: true,
+      items: page.items.map(map),
+      total: page.total,
+      truncated: page.truncated,
+      ...(page.disclosure ? { disclosure: page.disclosure } : {}),
+    };
   }
 
   private async fetch(
@@ -204,22 +216,52 @@ export class MuneralWorkItemsReader implements IWorkItemsReader {
         ...(this.projectId ? { projectId: this.projectId } : {}),
         limit: MAX_PAGE,
       });
-    } catch (err) {
+    } catch {
       // A malformed request throws rather than resolving `unavailable`. That is
       // our bug, not Muneral's, and it must still not read as an empty board.
-      const message = err instanceof Error ? err.message : String(err);
-      this.logger.error(`muneral query threw: ${message}`);
+      this.logger.error('muneral query threw');
       return { ok: false, reason: 'ошибка запроса' };
     }
     if (result.kind === 'unavailable') {
+      // The real client preserves HTTP200 when its strict emergency parser
+      // rejects the body. That is a refused metadata read, not valid task data.
+      const status = result.statusCode;
+      if (typeof status === 'number' && Number.isInteger(status) && status >= 200 && status < 300) {
+        this.logger.warn('muneral digest invalid successful response metadata');
+        return { ok: false, reason: 'DIGEST_METADATA_REFUSED — Это НЕ пустой список задач' };
+      }
+      // Validate stub/provider boundaries too, before any logging or rendering.
+      if (
+        result.errorCode === DIGEST_GRANT_EXPIRED &&
+        !EmergencyDigestRefusalMetadataSchema.safeParse({
+          until: result.grantUntil,
+          decision: result.grantDecision,
+        }).success
+      ) {
+        this.logger.warn('muneral digest invalid refusal metadata');
+        return { ok: false, reason: 'DIGEST_METADATA_REFUSED — Это НЕ пустой список задач' };
+      }
       this.logger.warn(
-        `muneral digest unavailable: reason=${result.reason} status=${result.statusCode ?? 'n/a'}` +
-          ` code=${result.errorCode ?? 'n/a'} until=${result.grantUntil ?? 'n/a'}` +
-          ` decision=${result.grantDecision ?? 'n/a'}`,
+        `muneral digest unavailable: status=${Number.isSafeInteger(result.statusCode) ? result.statusCode : 'n/a'}`,
       );
-      return { ok: false, reason: describeUnavailable(result) };
+      // Unknown provider reasons/cause/body are not safe operator-facing text.
+      const safe = {
+        ...result,
+        reason:
+          result.reason === MUNERA_CREDENTIAL_NOT_CONFIGURED
+            ? result.reason
+            : result.reason === 'network timeout' || result.reason === 'network_timeout'
+              ? 'network timeout'
+              : result.reason === 'munera_circuit_open'
+                ? 'munera_circuit_open'
+                : 'ошибка запроса',
+      };
+      return { ok: false, reason: describeUnavailable(safe) };
     }
-    const { items, total, grant } = result.page;
+    const parsed = EmergencyDigestPageSchema.safeParse(result.page);
+    if (!parsed.success)
+      return { ok: false, reason: 'DIGEST_METADATA_REFUSED — Это НЕ пустой список задач' };
+    const { items, total, grant } = parsed.data;
     // A2-294 — `grant.renewalDueAt` rides every successful read precisely so a
     // lapse is visible BEFORE it happens: DEC-AUP-0029's first grant expired and
     // the board read simply went quiet for two days. It is a SIGNAL, not a gate
@@ -240,7 +282,13 @@ export class MuneralWorkItemsReader implements IWorkItemsReader {
       // under us, which is worth a line rather than silence.
       this.logger.warn('muneral digest answered 200 with no grant object');
     }
-    return { ok: true, items, total, truncated: total > items.length };
+    return {
+      ok: true,
+      items,
+      total,
+      truncated: total > items.length,
+      disclosure: Object.freeze({ mode: 'metadata_only', until: grant.until }),
+    };
   }
 
   /**
@@ -265,7 +313,9 @@ export class MuneralWorkItemsReader implements IWorkItemsReader {
  */
 export function referenceOf(task: Pick<MuneraTask, 'id' | 'title'>): string {
   const m = /^\s*([A-Z][A-Z0-9]*-\d+)\b/.exec(task.title);
-  return m?.[1] ?? task.id.slice(0, 8);
+  return task.title === '[Title withheld: emergency metadata-only digest]'
+    ? task.id
+    : (m?.[1] ?? task.id.slice(0, 8));
 }
 
 function priorityLabel(priority: string | null | undefined): string {

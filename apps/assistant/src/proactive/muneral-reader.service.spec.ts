@@ -30,7 +30,10 @@ describe('MuneralWorkItemsReader', () => {
       const result = await reader().readActiveTasks();
       expect(result.ok).toBe(true);
       if (!result.ok) return;
-      expect(result.items.map((t) => t.id)).toEqual(['A2-281', 'A2-277']);
+      expect(result.items.map((t) => t.id)).toEqual([
+        '0f1c4d8a-1111-4aaa-9bbb-000000000001',
+        '0f1c4d8a-1111-4aaa-9bbb-000000000002',
+      ]);
       expect(result.total).toBe(2);
       expect(result.truncated).toBe(false);
     });
@@ -48,7 +51,10 @@ describe('MuneralWorkItemsReader', () => {
       expect(result.ok).toBe(true);
       if (!result.ok) return;
       // A2-261 is `critical` (P0), A2-260 is `high` (P1); the `low` row is out.
-      expect(result.items.map((t) => t.id)).toEqual(['A2-261', 'A2-260']);
+      expect(result.items.map((t) => t.id)).toEqual([
+        '0f1c4d8a-1111-4aaa-9bbb-000000000004',
+        '0f1c4d8a-1111-4aaa-9bbb-000000000003',
+      ]);
       expect(result.items.map((t) => t.priority)).toEqual(['P0', 'P1']);
     });
 
@@ -56,12 +62,12 @@ describe('MuneralWorkItemsReader', () => {
       const result = await reader().readBacklogTopN(5, ['P3']);
       expect(result.ok).toBe(true);
       if (!result.ok) return;
-      expect(result.items.map((t) => t.id)).toEqual(['0f1c4d8a']);
+      expect(result.items.map((t) => t.id)).toEqual(['0f1c4d8a-1111-4aaa-9bbb-000000000005']);
     });
 
     it('answers an empty list, not a refusal, when nothing is queued at those priorities', async () => {
       const result = await reader(stubMuneraClient({ board: [] })).readBacklogTopN(3);
-      expect(result).toEqual({ ok: true, items: [], total: 0, truncated: false });
+      expect(result).toMatchObject({ ok: true, items: [], total: 0, truncated: false });
     });
   });
 
@@ -71,8 +77,11 @@ describe('MuneralWorkItemsReader', () => {
       expect(result.ok).toBe(true);
       if (!result.ok) return;
       // A2-269 moved at 20:00Z on the 23rd — 23:00 local, the PREVIOUS day.
-      expect(result.items.map((t) => t.id)).toEqual(['A2-276', 'A2-275']);
-      expect(result.items.map((t) => t.id)).not.toContain('A2-269');
+      expect(result.items.map((t) => t.id)).toEqual([
+        '0f1c4d8a-1111-4aaa-9bbb-000000000006',
+        '0f1c4d8a-1111-4aaa-9bbb-000000000007',
+      ]);
+      expect(result.items.map((t) => t.id)).not.toContain('0f1c4d8a-1111-4aaa-9bbb-000000000008');
     });
 
     /**
@@ -98,10 +107,12 @@ describe('MuneralWorkItemsReader', () => {
       );
       expect(result.ok).toBe(true);
       if (!result.ok) return;
-      expect(result.items.map((t) => t.id)).toContain('A2-269');
+      expect(result.items.map((t) => t.id)).toContain('0f1c4d8a-1111-4aaa-9bbb-000000000008');
       // …which is exactly what the unmutated reader must not do:
       const honest = await reader().readCompletedToday(RUN_DATE);
-      expect(honest.ok && honest.items.map((t) => t.id)).not.toContain('A2-269');
+      expect(honest.ok && honest.items.map((t) => t.id)).not.toContain(
+        '0f1c4d8a-1111-4aaa-9bbb-000000000008',
+      );
     });
 
     it('sends the local-day bounds Muneral needs to do the filtering', async () => {
@@ -117,7 +128,7 @@ describe('MuneralWorkItemsReader', () => {
       const result = await reader().readArchivedToday(RUN_DATE);
       expect(result.ok).toBe(true);
       if (!result.ok) return;
-      expect(result.items.map((t) => t.id)).toEqual(['A2-240']);
+      expect(result.items.map((t) => t.id)).toEqual(['0f1c4d8a-1111-4aaa-9bbb-000000000009']);
       expect(result.items[0]?.at).toBe('2026-09-24T09:00:00.000Z');
     });
   });
@@ -157,7 +168,7 @@ describe('MuneralWorkItemsReader', () => {
       });
       const result = await reader(client).readCompletedToday(RUN_DATE);
       expect(result.ok).toBe(false);
-      expect(result).not.toEqual({ ok: true, items: [], total: 0, truncated: false });
+      expect(result).not.toMatchObject({ ok: true, items: [], total: 0, truncated: false });
       if (result.ok) return;
       expect(result.reason).toBe('HTTP 401');
     });
@@ -220,7 +231,9 @@ describe('MuneralWorkItemsReader', () => {
   // a well-formed, authorised, completely false "nothing happened today". Every
   // one of these must be distinguishable from `{ok: true, items: []}`.
   describe('the digest grant refusals (A2-294)', () => {
-    const readerOf = (unavailable: Parameters<typeof stubMuneraClient>[0]['unavailable']) =>
+    const readerOf = (
+      unavailable: NonNullable<Parameters<typeof stubMuneraClient>[0]>['unavailable'],
+    ) =>
       new MuneralWorkItemsReader(stubMuneraClient({ unavailable }), {
         timeZone: 'Europe/Istanbul',
       });
@@ -294,7 +307,7 @@ describe('MuneralWorkItemsReader', () => {
         timeZone: 'Europe/Istanbul',
       }).readActiveTasks();
 
-      expect(empty).toEqual({ ok: true, items: [], total: 0, truncated: false });
+      expect(empty).toMatchObject({ ok: true, items: [], total: 0, truncated: false });
       expect(refused.ok).toBe(false);
       expect(refused).not.toEqual(empty);
     });

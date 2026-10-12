@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { degraded, partial } from './briefing.aggregator.js';
+import { degraded, partial, metadataDisclosure } from './briefing.aggregator.js';
 import { escapeMd, bold } from './markdown-v2.js';
 import type {
   ArchivedItem,
@@ -43,21 +43,21 @@ export class DigestAggregator {
       const completed = await this.workItems.readCompletedToday(runDate);
       sections.push('completed_today');
       lines.push('');
-      lines.push(this.renderCompleted(completed));
+      lines.push(this.renderCompleted(completed) + metadataDisclosure(completed));
     }
 
     if (ch.include_archived_items) {
       const archived = await this.workItems.readArchivedToday(runDate);
       sections.push('archived_today');
       lines.push('');
-      lines.push(this.renderArchived(archived));
+      lines.push(this.renderArchived(archived) + metadataDisclosure(archived));
     }
 
     {
       const top = await this.workItems.readBacklogTopN(BACKLOG_TOMORROW_N);
       sections.push('backlog_tomorrow');
       lines.push('');
-      lines.push(this.renderBacklog(top));
+      lines.push(this.renderBacklog(top) + metadataDisclosure(top));
     }
 
     return { text: lines.join('\n'), sections };
