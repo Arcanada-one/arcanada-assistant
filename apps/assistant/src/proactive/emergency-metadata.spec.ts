@@ -138,20 +138,43 @@ describe('Emergency metadata boundary', () => {
       apiToken: 'mun_sk_synthetic',
       retry: { maxAttempts: 1, baseDelayMs: 0 },
       logger: { info() {}, warn() {}, error() {} },
-      fetchImpl: vi.fn(async () => new Response(JSON.stringify({
-        ...page(),
-        items: [{ id: '11111111-2222-4333-8444-555555555555',
-          projectId: '11111111-2222-4333-8444-555555555556',
-          title: 'SYNTHETIC_PRIVATE_POISON', status: 'todo', priority: 'high',
-          createdAt: '2026-10-10T19:00:00Z', updatedAt: '2026-10-10T19:00:00Z' }],
-        total: 1,
-      }), { status: 200, headers: { 'content-type': 'application/json' } })),
+      fetchImpl: vi.fn(
+        async () =>
+          new Response(
+            JSON.stringify({
+              ...page(),
+              items: [
+                {
+                  id: '11111111-2222-4333-8444-555555555555',
+                  projectId: '11111111-2222-4333-8444-555555555556',
+                  title: 'SYNTHETIC_PRIVATE_POISON',
+                  status: 'todo',
+                  priority: 'high',
+                  createdAt: '2026-10-10T19:00:00Z',
+                  updatedAt: '2026-10-10T19:00:00Z',
+                },
+              ],
+              total: 1,
+            }),
+            { status: 200, headers: { 'content-type': 'application/json' } },
+          ),
+      ),
     });
     const r = new MuneralWorkItemsReader(client, { timeZone: 'UTC' });
-    const b = plain((await new BriefingAggregator({} as never, r).compose({
-      ...input, config: { ...input.config, channels: { ...input.config.channels,
-        briefing: { ...input.config.channels.briefing, include_ecosystem_snapshot: false } } },
-    })).text);
+    const b = plain(
+      (
+        await new BriefingAggregator({} as never, r).compose({
+          ...input,
+          config: {
+            ...input.config,
+            channels: {
+              ...input.config.channels,
+              briefing: { ...input.config.channels.briefing, include_ecosystem_snapshot: false },
+            },
+          },
+        })
+      ).text,
+    );
     const d = plain((await new DigestAggregator(r).compose(input)).text);
     expect(b.split('DIGEST_METADATA_REFUSED')).toHaveLength(3);
     expect(d.split('DIGEST_METADATA_REFUSED')).toHaveLength(4);
