@@ -57,7 +57,7 @@ describe('MuneralWorkItemsReader', () => {
       const result = await reader().readBacklogTopN(5, ['P3']);
       expect(result.ok).toBe(true);
       if (!result.ok) return;
-      expect(result.items.map((t) => t.id)).toEqual(['0f1c4d8a']);
+      expect(result.items).toEqual([{ title: 'Мелкая правка без префикса', priority: 'P3' }]);
     });
 
     it('answers an empty list, not a refusal, when nothing is queued at those priorities', async () => {
@@ -348,7 +348,7 @@ describe('MuneralWorkItemsReader', () => {
       });
       expect(zonedDayBounds('2026-10-25', 'Europe/Berlin')).toEqual({
         updatedSince: '2026-10-24T22:00:00.000Z',
-        updatedBefore: '2026-10-26T23:00:00.000Z',
+        updatedBefore: '2026-10-25T23:00:00.000Z',
       });
     });
   });
