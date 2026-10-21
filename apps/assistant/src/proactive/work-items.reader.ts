@@ -62,9 +62,9 @@ export interface IWorkItemsReader {
   readActiveTasks(): Promise<SourceResult<ActiveTask>>;
   /** Up to `n` queued (`todo`) items at the given priorities, highest first. */
   readBacklogTopN(n: number, priorities?: readonly string[]): Promise<SourceResult<BacklogItem>>;
-  /** Items whose status is `done` and whose last move falls inside `runDate` (configured timezone). */
+  /** Rows currently `done` whose `updatedAt` falls inside `runDate` (configured timezone). */
   readCompletedToday(runDate: string): Promise<SourceResult<CompletedTask>>;
-  /** Items whose status is `archived` and whose last move falls inside `runDate`. */
+  /** Rows currently `archived` whose `updatedAt` falls inside `runDate` (configured timezone). */
   readArchivedToday(runDate: string): Promise<SourceResult<ArchivedItem>>;
 }
 

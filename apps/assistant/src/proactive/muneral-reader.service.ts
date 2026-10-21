@@ -81,7 +81,7 @@ export interface MuneralReaderOptions {
  *   of the title — no titles — and only to a key named in Muneral's
  *   `project-read-grants.ts`, per project, with a window that lapses.
  *
- * `GET /tasks` is not marked `@AgentScope(...)`, and an unmarked route refuses
+ * `GET /tasks/digest` is not marked `@AgentScope(...)`, and an unmarked route refuses
  * an API key by default. Measured live from arcana-devs on 2026-09-24 with a
  * real `mun_sk_` key: `403 {"message":"This route is not available to an agent
  * API key… ask for the route to be scoped (MUN-0043)"}`. Until Muneral scopes
@@ -325,8 +325,8 @@ export class MuneralWorkItemsReader implements IWorkItemsReader {
  * Muneral has no human key column: a task id is a UUID. Arcanada work items
  * carry their reference in the title (`A2-281 — …`), which is what the operator
  * recognises in a briefing, so it is lifted from there when present. When it is
- * not, the first segment of the UUID is shown — never a blank, and never a
- * guessed prefix.
+ * absent, no reference is returned; callers show the title alone rather than
+ * inventing a prefix or exposing a UUID fragment.
  */
 export function referenceOf(task: Pick<MuneraTask, 'id' | 'title'>): string | undefined {
   const m = /^\s*([A-Z][A-Z0-9]*-\d+)\b/.exec(task.title);

@@ -97,7 +97,7 @@ export interface CompletedTask {
  * such subdirectory: `archived` is a terminal status meaning the card left the
  * board unverified, and MUN-0043 is explicit that it is NOT a synonym for
  * `done`. So the section keeps its name and changes its source; `at` is the
- * instant of the last move, as Muneral reports it.
+ * instant of the last row update, as Muneral reports it (not a transition log).
  */
 export interface ArchivedItem {
   /** A title-carried human reference, when present. Never a UUID fallback. */
