@@ -32,7 +32,7 @@ describe('DigestAggregator', () => {
 
     expect(out.sections).toEqual(['daily_summary', 'completed_today', 'archived_today', 'backlog_tomorrow']);
     expect(out.text).toContain('Сводка Muneral за 2026\\-09\\-24 \\(Europe/Istanbul\\)');
-    expect(out.text).toContain('Collective mailbox opened/done today: NOT_MEASURED');
+    expect(out.text).toContain('Collective mailbox opened/done today: NOT\\_MEASURED');
     expect(out.text).toContain('A2\\-276');
     expect(out.text).toContain('ARAS читает расписки');
     // Finished at 23:00 local on the 23rd — yesterday's work, not today's.
