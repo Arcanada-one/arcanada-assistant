@@ -110,7 +110,9 @@ export class DigestAggregator {
     }
     const rows = result.projects.length
       ? result.projects.map((p) =>
-          escapeMd(`${p.projectId}: done ${p.done}, started (currently in_progress) ${p.inProgress}, review ${p.review}, cancelled ${p.cancelled}, new ${p.created}`),
+          escapeMd(
+            `${p.projectId}: done ${p.done}, started (currently in_progress) ${p.inProgress}, review ${p.review}, cancelled ${p.cancelled}, new ${p.created}`,
+          ),
         )
       : [escapeMd('нет строк')];
     const completeness = result.truncated
@@ -118,10 +120,14 @@ export class DigestAggregator {
       : `Уникальные строки в выборке: ${result.total}.`;
     return [
       header,
-      escapeMd('Семантика: текущий статус уникальных строк, обновлённых за этот день; это не журнал переходов. «new» — createdAt внутри дня среди этих строк.'),
+      escapeMd(
+        'Семантика: текущий статус уникальных строк, обновлённых за этот день; это не журнал переходов. «new» — createdAt внутри дня среди этих строк.',
+      ),
       ...rows,
       escapeMd(completeness),
-      escapeMd('Collective mailbox opened/done today: NOT_MEASURED — нет подтверждённого поддерживаемого зеркала.'),
+      escapeMd(
+        'Collective mailbox opened/done today: NOT_MEASURED — нет подтверждённого поддерживаемого зеркала.',
+      ),
     ].join('\n');
   }
 }

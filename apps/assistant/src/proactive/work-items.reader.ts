@@ -44,7 +44,13 @@ export interface DailyProjectCounters {
 }
 
 export type DailySummaryResult =
-  | { ok: true; projects: readonly DailyProjectCounters[]; total: number; received: number; truncated: boolean }
+  | {
+      ok: true;
+      projects: readonly DailyProjectCounters[];
+      total: number;
+      received: number;
+      truncated: boolean;
+    }
   | SourceUnavailable;
 
 export interface SourceUnavailable {

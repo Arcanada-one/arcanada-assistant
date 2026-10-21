@@ -10,7 +10,12 @@ import type {
 } from '../agents/munera/munera.schemas.js';
 
 import type { ActiveTask, ArchivedItem, BacklogItem, CompletedTask } from './proactive.types.js';
-import type { DailyProjectCounters, DailySummaryResult, IWorkItemsReader, SourceResult } from './work-items.reader.js';
+import type {
+  DailyProjectCounters,
+  DailySummaryResult,
+  IWorkItemsReader,
+  SourceResult,
+} from './work-items.reader.js';
 
 /** Muneral's `QueryTasksDto` caps a page at 200. Asking for more is a 400. */
 const MAX_PAGE = 200;
@@ -121,7 +126,14 @@ export class MuneralWorkItemsReader implements IWorkItemsReader {
     for (const task of result.items) {
       let counters = byProject.get(task.projectId);
       if (!counters) {
-        counters = { projectId: task.projectId, done: 0, inProgress: 0, review: 0, cancelled: 0, created: 0 };
+        counters = {
+          projectId: task.projectId,
+          done: 0,
+          inProgress: 0,
+          review: 0,
+          cancelled: 0,
+          created: 0,
+        };
         byProject.set(task.projectId, counters);
       }
       if (task.status === 'done') counters.done += 1;
@@ -129,7 +141,8 @@ export class MuneralWorkItemsReader implements IWorkItemsReader {
       if (task.status === 'review') counters.review += 1;
       if (task.status === 'cancelled') counters.cancelled += 1;
       const createdAt = Date.parse(task.createdAt);
-      if (createdAt >= Date.parse(updatedSince) && createdAt < Date.parse(updatedBefore)) counters.created += 1;
+      if (createdAt >= Date.parse(updatedSince) && createdAt < Date.parse(updatedBefore))
+        counters.created += 1;
     }
 
     return {
@@ -284,7 +297,12 @@ export class MuneralWorkItemsReader implements IWorkItemsReader {
       return { ok: false, reason: describeUnavailable(result) };
     }
     const { items, total, grant } = result.page;
-    if (!Number.isSafeInteger(total) || total < 0 || !Array.isArray(items) || items.length > total) {
+    if (
+      !Number.isSafeInteger(total) ||
+      total < 0 ||
+      !Array.isArray(items) ||
+      items.length > total
+    ) {
       return { ok: false, reason: 'неполный ответ: отсутствует корректный total' };
     }
     // A2-294 — `grant.renewalDueAt` rides every successful read precisely so a
@@ -402,7 +420,10 @@ export function zonedStartOfDay(runDate: string, timeZone: string): Date {
   return new Date(naive.getTime() - zoneOffsetMs(firstGuess, timeZone));
 }
 
-export function zonedDayBounds(runDate: string, timeZone: string): { updatedSince: string; updatedBefore: string } {
+export function zonedDayBounds(
+  runDate: string,
+  timeZone: string,
+): { updatedSince: string; updatedBefore: string } {
   const date = new Date(`${runDate}T00:00:00.000Z`);
   if (Number.isNaN(date.getTime())) throw new Error(`invalid runDate: ${runDate}`);
   date.setUTCDate(date.getUTCDate() + 1);

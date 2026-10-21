@@ -135,8 +135,22 @@ describe('MuneralWorkItemsReader', () => {
       expect(result).toEqual({
         ok: true,
         projects: [
-          { projectId: base.projectId, done: 1, inProgress: 1, review: 1, cancelled: 1, created: 1 },
-          { projectId: '11111111-1111-4111-8111-111111111111', done: 0, inProgress: 0, review: 0, cancelled: 0, created: 0 },
+          {
+            projectId: base.projectId,
+            done: 1,
+            inProgress: 1,
+            review: 1,
+            cancelled: 1,
+            created: 1,
+          },
+          {
+            projectId: '11111111-1111-4111-8111-111111111111',
+            done: 0,
+            inProgress: 0,
+            review: 0,
+            cancelled: 0,
+            created: 0,
+          },
         ],
         total: 5,
         received: 5,
@@ -192,9 +206,11 @@ describe('MuneralWorkItemsReader', () => {
       const changedClient = stubMuneraClient({ board });
       const changedOriginal = changedClient.queryWorkspaceDigest.bind(changedClient);
       changedClient.queryWorkspaceDigest = (query) =>
-        changedOriginal(query).then((response) => response.kind === 'ok' && (query.offset ?? 0) > 0
-          ? { ...response, page: { ...response.page, total: response.page.total + 1 } }
-          : response);
+        changedOriginal(query).then((response) =>
+          response.kind === 'ok' && (query.offset ?? 0) > 0
+            ? { ...response, page: { ...response.page, total: response.page.total + 1 } }
+            : response,
+        );
       const changed = await reader(changedClient).readDailySummary(RUN_DATE);
       expect(changed.ok && changed.truncated).toBe(true);
       expect(changed.ok && changed.received).toBe(200);
@@ -204,9 +220,14 @@ describe('MuneralWorkItemsReader', () => {
       duplicateClient.queryWorkspaceDigest = (query) =>
         (query.offset ?? 0) === 0
           ? duplicateOriginal(query)
-          : duplicateOriginal({ ...query, offset: 0 }).then((response) => response.kind === 'ok'
-            ? { ...response, page: { ...response.page, items: response.page.items.slice(0, 1) } }
-            : response);
+          : duplicateOriginal({ ...query, offset: 0 }).then((response) =>
+              response.kind === 'ok'
+                ? {
+                    ...response,
+                    page: { ...response.page, items: response.page.items.slice(0, 1) },
+                  }
+                : response,
+            );
       const duplicate = await reader(duplicateClient).readDailySummary(RUN_DATE);
       expect(duplicate.ok && duplicate.truncated).toBe(true);
       expect(duplicate.ok && duplicate.received).toBe(200);
@@ -215,9 +236,12 @@ describe('MuneralWorkItemsReader', () => {
     it('refuses a page whose runtime response has no total', async () => {
       const client = stubMuneraClient({ board: [] });
       const original = client.queryWorkspaceDigest.bind(client);
-      client.queryWorkspaceDigest = (query) => original(query).then((response) => response.kind === 'ok'
-        ? { ...response, page: { ...response.page, total: undefined as unknown as number } }
-        : response);
+      client.queryWorkspaceDigest = (query) =>
+        original(query).then((response) =>
+          response.kind === 'ok'
+            ? { ...response, page: { ...response.page, total: undefined as unknown as number } }
+            : response,
+        );
       expect(await reader(client).readDailySummary(RUN_DATE)).toEqual({
         ok: false,
         reason: 'неполный ответ: отсутствует корректный total',
@@ -320,7 +344,12 @@ describe('MuneralWorkItemsReader', () => {
       expect(result.ok).toBe(true);
       if (!result.ok) return;
       expect(result.items).toEqual([
-        { id: 'CTRL-0091', title: 'title with a repeated key', priority: 'P0', status: 'in_progress' },
+        {
+          id: 'CTRL-0091',
+          title: 'title with a repeated key',
+          priority: 'P0',
+          status: 'in_progress',
+        },
       ]);
     });
 
