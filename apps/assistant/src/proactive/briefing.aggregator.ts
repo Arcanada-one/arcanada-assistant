@@ -85,7 +85,7 @@ export class BriefingAggregator {
     if (!result.ok) return `${header} ${degraded(result.reason)}`;
     if (result.total === 0) return `${header} ${escapeMd('нет')}`;
     const shown = result.items.slice(0, MAX_LISTED_IDS);
-    const ids = shown.map((t) => escapeMd(t.id)).join(', ');
+    const ids = shown.map((t) => formatTask(t.id, t.title)).join(', ');
     const more =
       result.total > shown.length ? escapeMd(`, …ещё ${result.total - shown.length}`) : '';
     return `${header} ${escapeMd(String(result.total))} \\(${ids}${more}\\)`;
@@ -94,10 +94,18 @@ export class BriefingAggregator {
   private renderBacklog(result: SourceResult<BacklogItem>, requested: number): string {
     const header = bold(`Backlog top-${requested} P0/P1:`);
     if (!result.ok) return `${header} ${degraded(result.reason)}`;
-    if (result.items.length === 0) return `${header} ${escapeMd('пусто')}`;
-    const ids = result.items.map((b) => escapeMd(b.id)).join(', ');
-    return `${header} ${ids}${partial(result.truncated)}`;
+    const count = result.truncated
+      ? `показано ${result.items.length}; найдено не менее ${result.total}; todo всего ${result.sourceTotal ?? 'NOT_MEASURED'}`
+      : `показано ${result.items.length} из ${result.total} совпадений; todo всего ${result.sourceTotal ?? result.total}`;
+    const items = result.items.length
+      ? result.items.map((b) => `${escapeMd(b.priority)}: ${formatTask(b.id, b.title)}`).join(', ')
+      : escapeMd('пусто');
+    return `${header} ${escapeMd(count)}; ${items}${partial(result.truncated)}`;
   }
+}
+
+function formatTask(id: string | undefined, title: string): string {
+  return id ? `${escapeMd(id)}: ${escapeMd(title)}` : escapeMd(title);
 }
 
 /**

@@ -65,25 +65,28 @@ export interface ComposedMessage {
 /**
  * A2-281 — `complexity` (the Datarim `L<n>` level) has no counterpart in
  * Muneral and is gone from both work-item shapes rather than filled with a
- * plausible constant. `id` is the human reference: the `ABC-1234` token a
- * Muneral title starts with when it has one, else a short prefix of the row's
- * UUID (Muneral tasks have no human key column — see `MuneralWorkItemsReader`).
+ * plausible constant. `id`, when present, is the human reference carried by
+ * the title. Muneral has no separate human sequence field, so no UUID fallback
+ * is exposed.
  */
 export interface ActiveTask {
-  id: string;
+  /** A title-carried human reference, when present. Never a UUID fallback. */
+  id?: string;
   title: string;
   priority: string;
   status: string;
 }
 
 export interface BacklogItem {
-  id: string;
+  /** A title-carried human reference, when present. Never a UUID fallback. */
+  id?: string;
   title: string;
   priority: string;
 }
 
 export interface CompletedTask {
-  id: string;
+  /** A title-carried human reference, when present. Never a UUID fallback. */
+  id?: string;
   title: string;
 }
 
@@ -94,10 +97,11 @@ export interface CompletedTask {
  * such subdirectory: `archived` is a terminal status meaning the card left the
  * board unverified, and MUN-0043 is explicit that it is NOT a synonym for
  * `done`. So the section keeps its name and changes its source; `at` is the
- * instant of the last move, as Muneral reports it.
+ * instant of the last row update, as Muneral reports it (not a transition log).
  */
 export interface ArchivedItem {
-  id: string;
+  /** A title-carried human reference, when present. Never a UUID fallback. */
+  id?: string;
   title: string;
   at: string;
 }
