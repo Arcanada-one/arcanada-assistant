@@ -31,7 +31,7 @@ describe('DigestAggregator', () => {
     const out = await agg.compose({ runDate: RUN_DATE, config: baseProactiveConfig });
 
     expect(out.sections).toEqual(['daily_summary', 'completed_today', 'archived_today', 'backlog_tomorrow']);
-    expect(out.text).toContain('Сводка Muneral за 2026-09-24 (Europe/Istanbul)');
+    expect(out.text).toContain('Сводка Muneral за 2026\\-09\\-24 \\(Europe/Istanbul\\)');
     expect(out.text).toContain('Collective mailbox opened/done today: NOT_MEASURED');
     expect(out.text).toContain('A2\\-276');
     expect(out.text).toContain('ARAS читает расписки');
@@ -65,7 +65,7 @@ describe('DigestAggregator', () => {
       },
     }));
     const out = await agg.compose({ runDate: RUN_DATE, config: baseProactiveConfig });
-    expect(out.text).toContain('project\\-1: done 2, started \\(currently in_progress\\) 1, review 3, cancelled 0, new 1');
+    expect(out.text).toContain('project\\-1: done 2, started \\(currently in\\_progress\\) 1, review 3, cancelled 0, new 1');
     expect(out.text).toContain('это не журнал переходов');
   });
 
@@ -73,7 +73,7 @@ describe('DigestAggregator', () => {
     const out = await new DigestAggregator(fixedReader({ summary: { ok: false, reason: 'HTTP 403' } }))
       .compose({ runDate: RUN_DATE, config: baseProactiveConfig });
     expect(out.text).toContain('HTTP 403');
-    expect(out.text).toContain('Collective mailbox opened/done today: NOT_MEASURED');
+    expect(out.text).toContain('Collective mailbox opened/done today: NOT\\_MEASURED');
   });
 
   it('states the priority filter and both complete and partial queue totals', async () => {
