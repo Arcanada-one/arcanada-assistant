@@ -40,6 +40,7 @@ function fixedReader(opts: {
 }): IWorkItemsReader {
   const empty = { ok: true as const, items: [], total: 0, truncated: false };
   return {
+    readDailySummary: () => Promise.resolve({ ok: true, projects: [], total: 0, received: 0, truncated: false }),
     readActiveTasks: () => Promise.resolve(opts.active ?? empty),
     readBacklogTopN: () => Promise.resolve(opts.backlog ?? empty),
     readCompletedToday: () => Promise.resolve(empty),

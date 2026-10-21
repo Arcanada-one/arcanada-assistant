@@ -10,7 +10,7 @@ import type {
 } from '../agents/munera/munera.schemas.js';
 
 import type { ActiveTask, ArchivedItem, BacklogItem, CompletedTask } from './proactive.types.js';
-import type { IWorkItemsReader, SourceResult } from './work-items.reader.js';
+import type { DailyProjectCounters, DailySummaryResult, IWorkItemsReader, SourceResult } from './work-items.reader.js';
 
 /** Muneral's `QueryTasksDto` caps a page at 200. Asking for more is a 400. */
 const MAX_PAGE = 200;
@@ -112,10 +112,38 @@ export class MuneralWorkItemsReader implements IWorkItemsReader {
     this.timeZone = options.timeZone ?? 'Europe/Istanbul';
   }
 
+  async readDailySummary(runDate: string): Promise<DailySummaryResult> {
+    const { updatedSince, updatedBefore } = this.dayBounds(runDate);
+    const result = await this.fetchAll({ updatedSince, updatedBefore });
+    if (!result.ok) return result;
+
+    const byProject = new Map<string, DailyProjectCounters>();
+    for (const task of result.items) {
+      let counters = byProject.get(task.projectId);
+      if (!counters) {
+        counters = { projectId: task.projectId, done: 0, inProgress: 0, review: 0, cancelled: 0, created: 0 };
+        byProject.set(task.projectId, counters);
+      }
+      if (task.status === 'done') counters.done += 1;
+      if (task.status === 'in_progress') counters.inProgress += 1;
+      if (task.status === 'review') counters.review += 1;
+      if (task.status === 'cancelled') counters.cancelled += 1;
+      const createdAt = Date.parse(task.createdAt);
+      if (createdAt >= Date.parse(updatedSince) && createdAt < Date.parse(updatedBefore)) counters.created += 1;
+    }
+
+    return {
+      ok: true,
+      projects: [...byProject.values()].sort((a, b) => a.projectId.localeCompare(b.projectId)),
+      total: result.total,
+      received: result.items.length,
+      truncated: result.truncated,
+    };
+  }
+
   async readActiveTasks(): Promise<SourceResult<ActiveTask>> {
     return this.read({ status: 'in_progress' }, (task) => ({
-      id: referenceOf(task),
-      title: task.title,
+      ...displayTitle(task.title),
       priority: priorityLabel(task.priority),
       status: task.status,
     }));
@@ -144,7 +172,7 @@ export class MuneralWorkItemsReader implements IWorkItemsReader {
     // updatedAt. The priority pick therefore happens here, over the page — so
     // `truncated` matters: with more than MAX_PAGE queued items the top-N is a
     // top-N of what the page held, and the renderer says so.
-    const page = await this.fetch({ status: 'todo' });
+    const page = await this.fetchAll({ status: 'todo' });
     if (!page.ok) return page;
 
     const matching = page.items
@@ -158,26 +186,24 @@ export class MuneralWorkItemsReader implements IWorkItemsReader {
     return {
       ok: true,
       items: matching.slice(0, n).map((task) => ({
-        id: referenceOf(task),
-        title: task.title,
+        ...displayTitle(task.title),
         priority: priorityLabel(task.priority),
       })),
       total: matching.length,
       truncated: page.truncated,
+      sourceTotal: page.total,
     };
   }
 
   async readCompletedToday(runDate: string): Promise<SourceResult<CompletedTask>> {
     return this.read({ status: 'done', ...this.dayBounds(runDate) }, (task) => ({
-      id: referenceOf(task),
-      title: task.title,
+      ...displayTitle(task.title),
     }));
   }
 
   async readArchivedToday(runDate: string): Promise<SourceResult<ArchivedItem>> {
     return this.read({ status: 'archived', ...this.dayBounds(runDate) }, (task) => ({
-      id: referenceOf(task),
-      title: task.title,
+      ...displayTitle(task.title),
       at: task.updatedAt,
     }));
   }
@@ -189,6 +215,44 @@ export class MuneralWorkItemsReader implements IWorkItemsReader {
     const page = await this.fetch(query);
     if (!page.ok) return page;
     return { ok: true, items: page.items.map(map), total: page.total, truncated: page.truncated };
+  }
+
+  /**
+   * Fetches offset pages under the existing seven-column workspace-digest grant.
+   * Each page is a separate API read, so changed totals, duplicate rows, or an
+   * empty/non-advancing page are reported as partial instead of being called a
+   * consistent snapshot.
+   */
+  private async fetchAll(
+    query: Omit<MuneraTaskQuery, 'projectId' | 'limit'>,
+  ): Promise<SourceResult<MuneraTask>> {
+    const first = await this.fetch({ ...query, offset: 0 });
+    if (!first.ok) return first;
+    const sourceTotal = first.total;
+    const rows = new Map(first.items.map((task) => [task.id, task]));
+    let partial = rows.size !== first.items.length;
+    let offset = first.items.length;
+
+    while (offset < sourceTotal) {
+      const page = await this.fetch({ ...query, offset });
+      if (!page.ok) return page;
+      if (page.total !== sourceTotal || page.items.length === 0) {
+        partial = true;
+        break;
+      }
+      for (const task of page.items) {
+        if (rows.has(task.id)) partial = true;
+        else rows.set(task.id, task);
+      }
+      offset += page.items.length;
+      if (page.items.length < MAX_PAGE && offset < sourceTotal) {
+        partial = true;
+        break;
+      }
+    }
+
+    if (rows.size !== sourceTotal) partial = true;
+    return { ok: true, items: [...rows.values()], total: sourceTotal, truncated: partial };
   }
 
   private async fetch(
@@ -220,6 +284,9 @@ export class MuneralWorkItemsReader implements IWorkItemsReader {
       return { ok: false, reason: describeUnavailable(result) };
     }
     const { items, total, grant } = result.page;
+    if (!Number.isSafeInteger(total) || total < 0 || !Array.isArray(items) || items.length > total) {
+      return { ok: false, reason: 'неполный ответ: отсутствует корректный total' };
+    }
     // A2-294 — `grant.renewalDueAt` rides every successful read precisely so a
     // lapse is visible BEFORE it happens: DEC-AUP-0029's first grant expired and
     // the board read simply went quiet for two days. It is a SIGNAL, not a gate
@@ -250,9 +317,7 @@ export class MuneralWorkItemsReader implements IWorkItemsReader {
    * by an hour and drop an evening's completions from the digest.
    */
   private dayBounds(runDate: string): { updatedSince: string; updatedBefore: string } {
-    const start = zonedStartOfDay(runDate, this.timeZone);
-    const end = new Date(start.getTime() + 24 * 60 * 60 * 1000);
-    return { updatedSince: start.toISOString(), updatedBefore: end.toISOString() };
+    return zonedDayBounds(runDate, this.timeZone);
   }
 }
 
@@ -263,9 +328,18 @@ export class MuneralWorkItemsReader implements IWorkItemsReader {
  * not, the first segment of the UUID is shown — never a blank, and never a
  * guessed prefix.
  */
-export function referenceOf(task: Pick<MuneraTask, 'id' | 'title'>): string {
+export function referenceOf(task: Pick<MuneraTask, 'id' | 'title'>): string | undefined {
   const m = /^\s*([A-Z][A-Z0-9]*-\d+)\b/.exec(task.title);
-  return m?.[1] ?? task.id.slice(0, 8);
+  return m?.[1];
+}
+
+function displayTitle(title: string): { id?: string; title: string } {
+  const match = /^\s*([A-Z][A-Z0-9]*-\d+)\b\s*(?:(?:[:—–-])\s*)?(.*)$/.exec(title);
+  if (!match) return { title: title.trim() };
+  let rest = match[2]?.trim() ?? '';
+  const repeated = new RegExp(`^${match[1]}\\b\\s*(?:[:—–-]\\s*)?(.*)$`).exec(rest);
+  if (repeated) rest = repeated[1]?.trim() ?? '';
+  return rest ? { id: match[1], title: rest } : { id: match[1], title: '' };
 }
 
 function priorityLabel(priority: string | null | undefined): string {
@@ -326,4 +400,15 @@ export function zonedStartOfDay(runDate: string, timeZone: string): Date {
   // One correction pass: the offset that applies at the corrected instant may
   // differ from the offset at the guess across a DST boundary.
   return new Date(naive.getTime() - zoneOffsetMs(firstGuess, timeZone));
+}
+
+export function zonedDayBounds(runDate: string, timeZone: string): { updatedSince: string; updatedBefore: string } {
+  const date = new Date(`${runDate}T00:00:00.000Z`);
+  if (Number.isNaN(date.getTime())) throw new Error(`invalid runDate: ${runDate}`);
+  date.setUTCDate(date.getUTCDate() + 1);
+  const nextDate = date.toISOString().slice(0, 10);
+  return {
+    updatedSince: zonedStartOfDay(runDate, timeZone).toISOString(),
+    updatedBefore: zonedStartOfDay(nextDate, timeZone).toISOString(),
+  };
 }

@@ -30,7 +30,22 @@ export interface SourceOk<T> {
   total: number;
   /** True when `total` exceeds what this page could carry, so `items` is a prefix. */
   truncated: boolean;
+  /** The API's pre-filter count, useful when a consumer filters a complete page set. */
+  sourceTotal?: number;
 }
+
+export interface DailyProjectCounters {
+  projectId: string;
+  done: number;
+  inProgress: number;
+  review: number;
+  cancelled: number;
+  created: number;
+}
+
+export type DailySummaryResult =
+  | { ok: true; projects: readonly DailyProjectCounters[]; total: number; received: number; truncated: boolean }
+  | SourceUnavailable;
 
 export interface SourceUnavailable {
   ok: false;
@@ -41,6 +56,8 @@ export interface SourceUnavailable {
 export type SourceResult<T> = SourceOk<T> | SourceUnavailable;
 
 export interface IWorkItemsReader {
+  /** Current task-row snapshot for the report-day update window, grouped by authorized projectId. */
+  readDailySummary(runDate: string): Promise<DailySummaryResult>;
   /** Work items currently `in_progress`. */
   readActiveTasks(): Promise<SourceResult<ActiveTask>>;
   /** Up to `n` queued (`todo`) items at the given priorities, highest first. */
