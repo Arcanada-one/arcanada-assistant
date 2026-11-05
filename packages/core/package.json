@@ -37,7 +37,7 @@
   "dependencies": {
     "jose": "^6.2.9",
     "opossum": "^10.0.0",
-    "zod": "^4.4.3"
+    "zod": "^4.6.7"
   },
   "peerDependencies": {
     "@nestjs/common": "^11.0.0",
