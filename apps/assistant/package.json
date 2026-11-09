@@ -54,7 +54,7 @@
     "zod": "^4.6.7"
   },
   "devDependencies": {
-    "@prisma/config": "^7.10.1",
+    "@prisma/config": "^7.8.0",
     "@types/js-yaml": "^4.0.9",
     "@types/json-logic-js": "^2.0.8",
     "@types/node": "^26.6.6",
@@ -63,10 +63,10 @@
     "@vitest/coverage-v8": "^5.0.5",
     "ioredis-mock": "^8.13.1",
     "msw": "^3.0.3",
-    "prisma": "^7.10.1",
+    "prisma": "^7.8.0",
     "supertest": "^7.3.1",
     "tsx": "^4.23.15",
-    "typescript": "^7.0.2",
+    "typescript": "^6.0.3",
     "vitest": "^5.0.5"
   },
   "arcanada": {
