@@ -63,6 +63,6 @@
     "@types/node": "^26.6.6",
     "@types/opossum": "^8.1.9",
     "ioredis-mock": "^8.13.1",
-    "msw": "^3.0.4"
+    "msw": "^3.0.5"
   }
 }
