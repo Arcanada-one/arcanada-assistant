@@ -27,6 +27,8 @@ env:
 
 jobs:
   lint:
+    # Fork deny: refuse untrusted fork PR code on org self-hosted runners.
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
     runs-on: [self-hosted, Linux, X64, ci-general]
     steps:
       - uses: actions/checkout@v7
@@ -50,6 +52,8 @@ jobs:
       - run: python3 scripts/ci/test_deploy_lag_watchdog.py
 
   test:
+    # Fork deny: refuse untrusted fork PR code on org self-hosted runners.
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
     # A2-315: pre-deploy gates run on the dedicated `deploy-gate` lane, not on `arcana-ai` (the same machines as `ci-general`), where
     # KC2 batteries held all five slots for hours (argana 95 min, muneral 150 min in the queue on
     # 2026-09-24/25). The lane's runners carry ONLY that label (--no-default-labels): nothing else lands there.
@@ -117,6 +121,8 @@ jobs:
   # stays a deploy precondition on purpose — it is the security-policy-mandate CI floor for
   # `typescript_pnpm` — so the fix is to make it answer, not to take it off the path.
   audit:
+    # Fork deny: refuse untrusted fork PR code on org self-hosted runners.
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
     runs-on: [self-hosted, Linux, X64, ci-general]
     steps:
       - uses: actions/checkout@v7
@@ -139,6 +145,8 @@ jobs:
   # production release. 2026-09-30: brace-expansion@1.1.14 (eslint-plugin-import > minimatch@3),
   # tmp, form-data and vite (vitest) were high-severity and invisible to `--prod`.
   audit-dev:
+    # Fork deny: refuse untrusted fork PR code on org self-hosted runners.
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
     runs-on: [self-hosted, Linux, X64, ci-general]
     steps:
       - uses: actions/checkout@v7
@@ -155,6 +163,8 @@ jobs:
 
   smoke:
     needs: [lint, test, audit]
+    # Fork deny: refuse untrusted fork PR code on org self-hosted runners.
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
     # A2-315: same lane rule as `test` above.
     runs-on: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/main') && fromJSON('["deploy-gate"]') || fromJSON('["self-hosted","Linux","X64","arcana-ai"]') }}
     # Same rule as `test` above, and for a harder reason than a race: this job
@@ -312,7 +322,7 @@ jobs:
   #     re-installed into the checkout by the broker on every sync.
   deploy:
     needs: [lint, test, audit, smoke]
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
     # No `docker` label: this runner deliberately cannot reach the socket, and
     # a label claiming otherwise would misroute unrelated jobs onto production.
     #
@@ -351,7 +361,7 @@ jobs:
 
   verify:
     needs: [deploy]
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
     # Same host as deploy, and for the same reason: this job curls
     # 127.0.0.1:3800 and asks the broker for logs, both of which are only
     # meaningful on the machine the stack actually runs on. Moved to
@@ -445,7 +455,7 @@ jobs:
 
   notify-on-fail:
     needs: [lint, test, audit, audit-dev, smoke, deploy, verify]
-    if: failure() && github.ref == 'refs/heads/main'
+    if: failure() && github.ref == 'refs/heads/main' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
     runs-on: [self-hosted, Linux, X64, ci-general]
     steps:
       - name: Notify Ops Bot
