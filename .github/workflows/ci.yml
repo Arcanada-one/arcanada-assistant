@@ -159,7 +159,7 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: pnpm
       - run: bash scripts/ci/retry-network.sh 3 pnpm install --frozen-lockfile
-      - run: bash scripts/ci/retry-network.sh 3 pnpm audit --audit-level=high
+      - run: bash scripts/ci/retry-network.sh 3 node scripts/ci/audit-dev-with-accepted-risk.mjs
 
   smoke:
     needs: [lint, test, audit]

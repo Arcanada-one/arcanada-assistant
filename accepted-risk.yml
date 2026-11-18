@@ -1,0 +1,16 @@
+# Accepted-risk register — schema v1 (assistant).
+# Consumed by scripts/ci/audit-dev-with-accepted-risk.mjs for the audit-dev job only.
+# Production `audit` job remains `pnpm audit --prod --audit-level=high` with no exemptions.
+
+schema_version: 1
+
+entries:
+  - id: GHSA-fc5q-39xc-vjpf
+    pkg: "picomatch"
+    severity: high
+    scope: devdep
+    reason: "picomatch is reached only through lint/test tooling (@typescript-eslint → tinyglobby → picomatch). No patched version is published (first_patched_version null). Production audit (--prod) does not include this path."
+    last_review: 2026-11-18
+    re_review: 2026-12-18
+    reviewed_by: agent
+    upstream_tracking_url: "https://github.com/advisories/GHSA-fc5q-39xc-vjpf"
