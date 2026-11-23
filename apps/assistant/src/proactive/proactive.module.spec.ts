@@ -84,12 +84,15 @@ describe('ProactiveModule BullMQ 6 job scheduler integration', () => {
     await reconcile(config(), null);
     queue.upsertJobScheduler.mockClear();
 
-    await reconcile(config({
-      channels: {
-        ...config().channels,
-        briefing: { ...config().channels.briefing, cron: '0 9 * * *' },
-      },
-    }), config());
+    await reconcile(
+      config({
+        channels: {
+          ...config().channels,
+          briefing: { ...config().channels.briefing, cron: '0 9 * * *' },
+        },
+      }),
+      config(),
+    );
 
     expect(queue.upsertJobScheduler).toHaveBeenCalledTimes(1);
     expect(queue.upsertJobScheduler).toHaveBeenCalledWith(
@@ -101,12 +104,15 @@ describe('ProactiveModule BullMQ 6 job scheduler integration', () => {
 
   it('removes disabled schedulers by their stable ids', async () => {
     const { queue, reconcile } = harness();
-    await reconcile(config({
-      channels: {
-        ...config().channels,
-        briefing: { ...config().channels.briefing, enabled: false },
-      },
-    }), null);
+    await reconcile(
+      config({
+        channels: {
+          ...config().channels,
+          briefing: { ...config().channels.briefing, enabled: false },
+        },
+      }),
+      null,
+    );
 
     expect(queue.removeJobScheduler).toHaveBeenCalledWith('proactive:briefing:daily');
     expect(queue.upsertJobScheduler).toHaveBeenCalledTimes(1);
@@ -118,7 +124,10 @@ describe('ProactiveModule BullMQ 6 job scheduler integration', () => {
   });
 
   it('clears existing schedulers when the proactive module is disabled', async () => {
-    const { queue, reconcile } = harness([{ id: 'proactive:briefing:daily' }, { id: 'proactive:digest:daily' }]);
+    const { queue, reconcile } = harness([
+      { id: 'proactive:briefing:daily' },
+      { id: 'proactive:digest:daily' },
+    ]);
 
     await reconcile(config({ enabled: false }), null);
 

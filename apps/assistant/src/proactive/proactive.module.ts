@@ -197,9 +197,7 @@ export class ProactiveModule implements OnApplicationBootstrap, OnModuleDestroy 
     const jobId = kind === 'briefing' ? BRIEFING_JOB_ID : DIGEST_JOB_ID;
     const tracked = kind === 'briefing' ? this.currentBriefingCron : this.currentDigestCron;
     if (!channel.enabled) {
-      await this.queue
-        .removeJobScheduler(jobId)
-        .catch(() => undefined);
+      await this.queue.removeJobScheduler(jobId).catch(() => undefined);
       if (kind === 'briefing') this.currentBriefingCron = null;
       else this.currentDigestCron = null;
       this.logger.log(`channel ${kind} disabled — job scheduler removed`);
