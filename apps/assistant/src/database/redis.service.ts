@@ -15,6 +15,7 @@ export class RedisService implements OnModuleDestroy {
     // redis://localhost:6379 would silently connect a misconfigured process to
     // production instead of failing. requireEnv refuses, naming the variable.
     this.client = new RedisCtor(requireEnv('REDIS_URL'), {
+      protocol: 2,
       lazyConnect: false,
       maxRetriesPerRequest: 2,
       enableReadyCheck: true,

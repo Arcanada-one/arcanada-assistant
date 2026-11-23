@@ -180,8 +180,8 @@ export class ProactiveModule implements OnApplicationBootstrap, OnModuleDestroy 
 
   private async reconcile(next: ProactiveConfig, _prev: ProactiveConfig | null): Promise<void> {
     if (!next.enabled) {
-      this.logger.warn('proactive disabled by config — removing repeatable jobs');
-      await this.removeRepeatables();
+      this.logger.warn('proactive disabled by config — removing job schedulers');
+      await this.removeJobSchedulers();
       return;
     }
     await this.reconcileChannel('briefing', next.channels.briefing, next.timezone);
@@ -198,29 +198,29 @@ export class ProactiveModule implements OnApplicationBootstrap, OnModuleDestroy 
     const tracked = kind === 'briefing' ? this.currentBriefingCron : this.currentDigestCron;
     if (!channel.enabled) {
       await this.queue
-        .removeRepeatableByKey(`${kind}:${tracked ?? channel.cron}::${tz}`)
+        .removeJobScheduler(jobId)
         .catch(() => undefined);
       if (kind === 'briefing') this.currentBriefingCron = null;
       else this.currentDigestCron = null;
-      this.logger.log(`channel ${kind} disabled — repeatable removed`);
+      this.logger.log(`channel ${kind} disabled — job scheduler removed`);
       return;
     }
     if (tracked === channel.cron && this.currentTz === tz) return;
-    if (tracked) {
-      await this.queue
-        .removeRepeatableByKey(`${kind}:${tracked}::${this.currentTz ?? tz}`)
-        .catch(() => undefined);
-    }
-    await this.queue.add(kind, { kind }, { repeat: { pattern: channel.cron, tz }, jobId });
+    await this.queue.upsertJobScheduler(
+      jobId,
+      { pattern: channel.cron, tz },
+      { name: kind, data: { kind } },
+    );
     if (kind === 'briefing') this.currentBriefingCron = channel.cron;
     else this.currentDigestCron = channel.cron;
     this.logger.log(`channel ${kind} scheduled — cron="${channel.cron}" tz="${tz}"`);
   }
 
-  private async removeRepeatables(): Promise<void> {
-    const repeatables = await this.queue.getRepeatableJobs();
-    for (const r of repeatables) {
-      await this.queue.removeRepeatableByKey(r.key).catch(() => undefined);
+  private async removeJobSchedulers(): Promise<void> {
+    const schedulers = await this.queue.getJobSchedulers();
+    for (const scheduler of schedulers) {
+      if (!scheduler.id) continue;
+      await this.queue.removeJobScheduler(scheduler.id).catch(() => undefined);
     }
     this.currentBriefingCron = null;
     this.currentDigestCron = null;
