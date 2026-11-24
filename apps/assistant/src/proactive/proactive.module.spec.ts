@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { describe, expect, it, vi } from 'vitest';
 import type { Queue } from 'bullmq';
 import type { ConfigService } from '@nestjs/config';
@@ -6,6 +7,8 @@ import { ProactiveModule } from './proactive.module.js';
 import type { ProactiveConfigService } from './proactive-config.service.js';
 import type { ProactiveProcessor } from './proactive.processor.js';
 import type { ProactiveConfig } from './proactive.types.js';
+
+const SCHEDULER_IDS = { briefing: 'proactive:briefing:daily', digest: 'proactive:digest:daily' };
 
 function config(overrides: Partial<ProactiveConfig> = {}): ProactiveConfig {
   return {
@@ -42,7 +45,16 @@ function config(overrides: Partial<ProactiveConfig> = {}): ProactiveConfig {
 }
 
 function harness(schedulers: Array<{ id?: string | null }> = []) {
+  const redis = {
+    zrange: vi.fn().mockResolvedValue([] as string[]),
+    hgetall: vi.fn().mockResolvedValue({} as Record<string, string>),
+    zrem: vi.fn().mockResolvedValue(0),
+    del: vi.fn().mockResolvedValue(0),
+  };
   const queue = {
+    backend: { client: Promise.resolve(redis) },
+    toKey: (key: string) => `bull:proactive:${key}`,
+    remove: vi.fn().mockResolvedValue(1),
     upsertJobScheduler: vi.fn().mockResolvedValue(undefined),
     getJobSchedulers: vi.fn().mockResolvedValue(schedulers),
     removeJobScheduler: vi.fn().mockResolvedValue(true),
@@ -56,10 +68,10 @@ function harness(schedulers: Array<{ id?: string | null }> = []) {
   const internals = module as unknown as {
     reconcile(next: ProactiveConfig, previous: ProactiveConfig | null): Promise<void>;
   };
-  return { queue, reconcile: internals.reconcile.bind(module) };
+  return { queue, redis, reconcile: internals.reconcile.bind(module) };
 }
 
-describe('ProactiveModule BullMQ 6 job scheduler integration', () => {
+describe('ProactiveModule BullMQ 6 scheduler reconciliation', () => {
   it('upserts stable schedulers with each configured cron and timezone', async () => {
     const { queue, reconcile } = harness();
 
@@ -131,9 +143,42 @@ describe('ProactiveModule BullMQ 6 job scheduler integration', () => {
 
     await reconcile(config({ enabled: false }), null);
 
-    expect(queue.getJobSchedulers).toHaveBeenCalledOnce();
+    expect(queue.getJobSchedulers).not.toHaveBeenCalled();
     expect(queue.removeJobScheduler).toHaveBeenNthCalledWith(1, 'proactive:briefing:daily');
     expect(queue.removeJobScheduler).toHaveBeenNthCalledWith(2, 'proactive:digest:daily');
     expect(queue.upsertJobScheduler).not.toHaveBeenCalled();
+  });
+
+  it('removes only a matching exact legacy digest key under BullMQ 6', async () => {
+    const legacyKey = createHash('md5')
+      .update('briefing:proactive:briefing:daily::Europe/Istanbul:0 8 * * *')
+      .digest('hex');
+    const unrelatedKey = 'unrelated-repeat-key';
+    const { queue, redis, reconcile } = harness();
+    redis.zrange.mockResolvedValue([legacyKey, '1795543200000', unrelatedKey, '1795543300000']);
+    redis.hgetall.mockImplementation(async (key) => {
+      if (key.endsWith(legacyKey))
+        return {
+          id: SCHEDULER_IDS.briefing,
+          name: 'briefing',
+          pattern: '0 8 * * *',
+          tz: 'Europe/Istanbul',
+          endDate: '',
+        };
+      return {
+        id: 'other:consumer',
+        name: 'briefing',
+        pattern: '0 8 * * *',
+        tz: 'Europe/Istanbul',
+        endDate: '',
+      };
+    });
+
+    await reconcile(config(), null);
+
+    expect(queue.remove).toHaveBeenCalledExactlyOnceWith(`repeat:${legacyKey}:1795543200000`);
+    expect(redis.zrem).toHaveBeenCalledExactlyOnceWith('bull:proactive:repeat', legacyKey);
+    expect(redis.del).toHaveBeenCalledExactlyOnceWith(`bull:proactive:repeat:${legacyKey}`);
+    expect(redis.zrem).not.toHaveBeenCalledWith('bull:proactive:repeat', unrelatedKey);
   });
 });
