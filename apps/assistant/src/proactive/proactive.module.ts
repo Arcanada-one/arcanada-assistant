@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { BullModule, getQueueToken } from '@nestjs/bullmq';
-import { Worker, type Queue, type Job } from 'bullmq';
+import { Worker, type Queue, type Job, type RepeatableJob } from 'bullmq';
 
 import { MuneraAgentModule } from '../agents/munera/munera-agent.module.js';
 import { MUNERA_CLIENT } from '../agents/munera/munera-agent.service.js';
@@ -31,6 +31,10 @@ import { WORK_ITEMS_READER } from './work-items.reader.js';
 const QUEUE_NAME = 'proactive';
 const BRIEFING_JOB_ID = 'proactive:briefing:daily';
 const DIGEST_JOB_ID = 'proactive:digest:daily';
+const JOB_SCHEDULER_IDS: Readonly<Record<ProactiveKind, string>> = {
+  briefing: BRIEFING_JOB_ID,
+  digest: DIGEST_JOB_ID,
+};
 
 function parseRedisUrl(url: string): {
   host: string;
@@ -179,50 +183,81 @@ export class ProactiveModule implements OnApplicationBootstrap, OnModuleDestroy 
   }
 
   private async reconcile(next: ProactiveConfig, _prev: ProactiveConfig | null): Promise<void> {
+    let schedulersUpserted = 0;
+    let schedulersRemoved = 0;
+    let legacyRepeatablesRemoved = 0;
     if (!next.enabled) {
-      this.logger.warn('proactive disabled by config — removing repeatable jobs');
-      await this.removeRepeatables();
-      return;
+      this.logger.warn('proactive disabled by config — removing known schedulers');
+      for (const kind of Object.keys(JOB_SCHEDULER_IDS) as ProactiveKind[]) {
+        const jobId = JOB_SCHEDULER_IDS[kind];
+        if (await this.queue.removeJobScheduler(jobId)) schedulersRemoved += 1;
+        legacyRepeatablesRemoved += await this.removeLegacyRepeatables(kind);
+      }
+      this.currentBriefingCron = null;
+      this.currentDigestCron = null;
+      this.currentTz = null;
+    } else {
+      const briefing = await this.reconcileChannel(
+        'briefing',
+        next.channels.briefing,
+        next.timezone,
+      );
+      const digest = await this.reconcileChannel('digest', next.channels.digest, next.timezone);
+      schedulersUpserted = briefing.upserted + digest.upserted;
+      schedulersRemoved = briefing.removed + digest.removed;
+      legacyRepeatablesRemoved = briefing.legacyRemoved + digest.legacyRemoved;
+      this.currentTz = next.timezone;
     }
-    await this.reconcileChannel('briefing', next.channels.briefing, next.timezone);
-    await this.reconcileChannel('digest', next.channels.digest, next.timezone);
-    this.currentTz = next.timezone;
+
+    this.logger.log(
+      `scheduler reconciliation complete — schedulers_upserted=${schedulersUpserted} schedulers_removed=${schedulersRemoved} legacy_repeatables_removed=${legacyRepeatablesRemoved}`,
+    );
   }
 
   private async reconcileChannel(
     kind: ProactiveKind,
     channel: { enabled: boolean; cron: string },
     tz: string,
-  ): Promise<void> {
-    const jobId = kind === 'briefing' ? BRIEFING_JOB_ID : DIGEST_JOB_ID;
+  ): Promise<{ upserted: number; removed: number; legacyRemoved: number }> {
+    const jobId = JOB_SCHEDULER_IDS[kind];
     const tracked = kind === 'briefing' ? this.currentBriefingCron : this.currentDigestCron;
     if (!channel.enabled) {
-      await this.queue
-        .removeRepeatableByKey(`${kind}:${tracked ?? channel.cron}::${tz}`)
-        .catch(() => undefined);
+      const removed = Number(await this.queue.removeJobScheduler(jobId));
+      const legacyRemoved = await this.removeLegacyRepeatables(kind);
       if (kind === 'briefing') this.currentBriefingCron = null;
       else this.currentDigestCron = null;
-      this.logger.log(`channel ${kind} disabled — repeatable removed`);
-      return;
+      this.logger.log(`channel ${kind} disabled — job scheduler removed=${removed}`);
+      return { upserted: 0, removed, legacyRemoved };
     }
-    if (tracked === channel.cron && this.currentTz === tz) return;
-    if (tracked) {
-      await this.queue
-        .removeRepeatableByKey(`${kind}:${tracked}::${this.currentTz ?? tz}`)
-        .catch(() => undefined);
+    if (tracked === channel.cron && this.currentTz === tz) {
+      return { upserted: 0, removed: 0, legacyRemoved: await this.removeLegacyRepeatables(kind) };
     }
-    await this.queue.add(kind, { kind }, { repeat: { pattern: channel.cron, tz }, jobId });
+    await this.queue.upsertJobScheduler(
+      jobId,
+      { pattern: channel.cron, tz },
+      { name: kind, data: { kind } },
+    );
+    const legacyRemoved = await this.removeLegacyRepeatables(kind);
     if (kind === 'briefing') this.currentBriefingCron = channel.cron;
     else this.currentDigestCron = channel.cron;
     this.logger.log(`channel ${kind} scheduled — cron="${channel.cron}" tz="${tz}"`);
+    return { upserted: 1, removed: 0, legacyRemoved };
   }
 
-  private async removeRepeatables(): Promise<void> {
+  private async removeLegacyRepeatables(kind: ProactiveKind): Promise<number> {
     const repeatables = await this.queue.getRepeatableJobs();
+    let removed = 0;
     for (const r of repeatables) {
-      await this.queue.removeRepeatableByKey(r.key).catch(() => undefined);
+      if (!this.isLegacyRepeatableForKnownJob(r, kind)) continue;
+      if (await this.queue.removeRepeatableByKey(r.key)) removed += 1;
     }
-    this.currentBriefingCron = null;
-    this.currentDigestCron = null;
+    return removed;
+  }
+
+  private isLegacyRepeatableForKnownJob(r: RepeatableJob, kind: ProactiveKind): boolean {
+    const schedule = r.pattern ?? r.every;
+    if (!schedule) return false;
+    const expectedKey = `${kind}:${JOB_SCHEDULER_IDS[kind]}:${r.endDate ?? ''}:${r.tz ?? ''}:${schedule}`;
+    return r.name === kind && r.key === expectedKey;
   }
 }
