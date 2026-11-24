@@ -1,3 +1,6 @@
+import { createHash } from 'node:crypto';
+
+import { BullModule, getQueueToken } from '@nestjs/bullmq';
 import {
   Inject,
   Logger,
@@ -6,7 +9,6 @@ import {
   type OnModuleDestroy,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { BullModule, getQueueToken } from '@nestjs/bullmq';
 import { Worker, type Queue, type Job, type RepeatableJob } from 'bullmq';
 
 import { MuneraAgentModule } from '../agents/munera/munera-agent.module.js';
@@ -257,7 +259,9 @@ export class ProactiveModule implements OnApplicationBootstrap, OnModuleDestroy 
   private isLegacyRepeatableForKnownJob(r: RepeatableJob, kind: ProactiveKind): boolean {
     const schedule = r.pattern ?? r.every;
     if (!schedule) return false;
-    const expectedKey = `${kind}:${JOB_SCHEDULER_IDS[kind]}:${r.endDate ?? ''}:${r.tz ?? ''}:${schedule}`;
+    const endDate = r.endDate ? new Date(r.endDate).getTime() : '';
+    const legacyKey = `${kind}:${JOB_SCHEDULER_IDS[kind]}:${endDate}:${r.tz ?? ''}:${schedule}`;
+    const expectedKey = createHash('md5').update(legacyKey).digest('hex');
     return r.name === kind && r.key === expectedKey;
   }
 }
