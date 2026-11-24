@@ -1,6 +1,8 @@
-import { describe, expect, it, vi } from 'vitest';
-import type { Queue, RepeatableJob } from 'bullmq';
+import { createHash } from 'node:crypto';
+
 import type { ConfigService } from '@nestjs/config';
+import type { Queue, RepeatableJob } from 'bullmq';
+import { describe, expect, it, vi } from 'vitest';
 
 import { ProactiveModule } from './proactive.module.js';
 import type { ProactiveConfigService } from './proactive-config.service.js';
@@ -52,10 +54,11 @@ function legacyRepeatable(
   pattern: string,
   tz = 'Europe/Istanbul',
 ): RepeatableJob {
+  const legacyKey = `${name}:${id}::${tz}:${pattern}`;
   return {
     name,
     id,
-    key: `${name}:${id}::${tz}:${pattern}`,
+    key: createHash('md5').update(legacyKey).digest('hex'),
     endDate: null,
     tz,
     pattern,
