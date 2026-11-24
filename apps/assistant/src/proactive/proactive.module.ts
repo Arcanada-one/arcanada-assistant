@@ -9,7 +9,7 @@ import {
   type OnModuleDestroy,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Worker, type Queue, type Job, type RepeatableJob } from 'bullmq';
+import { Worker, type Queue, type Job } from 'bullmq';
 
 import { MuneraAgentModule } from '../agents/munera/munera-agent.module.js';
 import { MUNERA_CLIENT } from '../agents/munera/munera-agent.service.js';
@@ -247,21 +247,33 @@ export class ProactiveModule implements OnApplicationBootstrap, OnModuleDestroy 
   }
 
   private async removeLegacyRepeatables(kind: ProactiveKind): Promise<number> {
-    const repeatables = await this.queue.getRepeatableJobs();
+    const client = await this.queue.backend.client;
+    const repeatSetKey = this.queue.toKey('repeat');
+    const entries = await client.zrange(repeatSetKey, 0, -1, { WITHSCORES: true });
+    const redis = client as typeof client & {
+      zrem(key: string, ...members: string[]): Promise<number>;
+    };
+    const expectedId = JOB_SCHEDULER_IDS[kind];
     let removed = 0;
-    for (const r of repeatables) {
-      if (!this.isLegacyRepeatableForKnownJob(r, kind)) continue;
-      if (await this.queue.removeRepeatableByKey(r.key)) removed += 1;
+
+    for (let i = 0; i < entries.length; i += 2) {
+      const key = entries[i];
+      const nextMillis = entries[i + 1];
+      const metadataKey = this.queue.toKey(`repeat:${key}`);
+      const metadata = await client.hgetall(metadataKey);
+      if (metadata.name !== kind) continue;
+      const schedule = metadata.pattern || metadata.every;
+      if (!schedule) continue;
+      const endDate = metadata.endDate ? String(Number(metadata.endDate)) : '';
+      const legacyKey = `${kind}:${expectedId}:${endDate}:${metadata.tz || ''}:${schedule}`;
+      const expectedKey = createHash('md5').update(legacyKey).digest('hex');
+      if (key !== expectedKey) continue;
+
+      await this.queue.remove(`repeat:${key}:${nextMillis}`);
+      await redis.zrem(repeatSetKey, key);
+      await client.del(metadataKey);
+      removed += 1;
     }
     return removed;
-  }
-
-  private isLegacyRepeatableForKnownJob(r: RepeatableJob, kind: ProactiveKind): boolean {
-    const schedule = r.pattern ?? r.every;
-    if (!schedule) return false;
-    const endDate = r.endDate ? new Date(r.endDate).getTime() : '';
-    const legacyKey = `${kind}:${JOB_SCHEDULER_IDS[kind]}:${endDate}:${r.tz ?? ''}:${schedule}`;
-    const expectedKey = createHash('md5').update(legacyKey).digest('hex');
-    return r.name === kind && r.key === expectedKey;
   }
 }
