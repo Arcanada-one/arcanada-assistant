@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto';
+
 import { describe, expect, it, vi } from 'vitest';
 import type { Queue } from 'bullmq';
 import type { ConfigService } from '@nestjs/config';
